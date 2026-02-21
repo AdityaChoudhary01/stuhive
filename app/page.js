@@ -5,6 +5,7 @@ import { getHomeData } from "@/actions/home.actions";
 // Components
 import HeroSection from "@/components/home/HeroSection";
 import PaginatedNotesFeed from "@/components/home/PaginatedNotesFeed";
+export const revalidate = 30;
 import NoteCard from "@/components/notes/NoteCard";
 import BlogCard from "@/components/blog/BlogCard"; 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

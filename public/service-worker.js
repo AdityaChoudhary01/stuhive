@@ -39,33 +39,35 @@ self.addEventListener("activate", (event) => {
 });
 
 // 3. FETCH: Stale-While-Revalidate Strategy
-// This is the gold standard for SEO & Performance
 self.addEventListener("fetch", (event) => {
-  // Only handle GET requests
   if (event.request.method !== "GET") return;
 
-  // Skip caching for API calls or Auth routes to prevent stale user data
-  if (event.request.url.includes("/api/") || event.request.url.includes("/login")) {
-    return;
+  const url = new URL(event.request.url);
+
+  // 🚀 THE SW FIX: Completely bypass the cache for API, Auth, and Next.js dynamic data payloads
+  if (
+    url.pathname.startsWith("/api/") || 
+    url.pathname.includes("/login") ||
+    url.pathname.includes(".rsc") || // App Router data payloads
+    url.pathname.startsWith("/_next/data/") // Pages Router data payloads
+  ) {
+    return; // Force these to ALWAYS use the live network
   }
 
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.match(event.request).then((cachedResponse) => {
         const fetchPromise = fetch(event.request).then((networkResponse) => {
-          // Update the cache with the fresh version from the network
           if (networkResponse && networkResponse.status === 200) {
             cache.put(event.request, networkResponse.clone());
           }
           return networkResponse;
         }).catch(() => {
-          // Fallback logic for complete offline state
           if (event.request.mode === 'navigate') {
             return caches.match(OFFLINE_URL);
           }
         });
 
-        // Return cached response immediately if available, otherwise wait for network
         return cachedResponse || fetchPromise;
       });
     })
