@@ -27,7 +27,7 @@ export async function GET() {
     // 1. Static Routes
     const staticRoutes = [
       "", "/about", "/contact", "/blogs", "/search",
-      "login","signup", 
+      "/login","/signup", 
       "/donate", "/supporters", "/terms", "/privacy", "/dmca"
     ].map(route => ({
       url: `${BASE_URL}${route}`,
