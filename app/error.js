@@ -70,7 +70,7 @@ export default function GlobalError({ error, reset }) {
                 An unexpected interruption occurred
             </h2>
             <p className="text-white/40 text-sm sm:text-base max-w-sm mx-auto font-medium leading-relaxed">
-                The PeerNotez core encountered a runtime exception. This usually happens during high-traffic synchronization.
+                The PeerLox core encountered a runtime exception. This usually happens during high-traffic synchronization.
             </p>
         </div>
 

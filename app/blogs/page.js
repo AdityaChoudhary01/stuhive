@@ -6,33 +6,39 @@ import BlogSearchClient from "@/components/blog/BlogSearchClient";
 import { FaPenNib, FaHashtag } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 
-const APP_URL = process.env.NEXTAUTH_URL || "https://peernotez.netlify.app";
+const APP_URL = process.env.NEXTAUTH_URL || "https://peerlox.in";
 
 // ✅ 1. DYNAMIC METADATA (Handles Pagination SEO)
 export async function generateMetadata({ searchParams }) {
-  const page = searchParams.page || 1;
-  const tag = searchParams.tag || "All";
+  // 🚀 FIX: Await searchParams before reading its properties
+  const params = await searchParams; 
+  
+  const page = params.page || 1;
+  const tag = params.tag || "All";
   
   return {
-    title: page > 1 ? `Articles - Page ${page} | PeerNotez` : "Insights & Stories | Academic Blog",
-    description: `Browse ${tag !== "All" ? tag : ""} academic articles, tech journeys, and study tips from the PeerNotez student community. Page ${page}.`,
+    title: page > 1 ? `Articles - Page ${page} | PeerLox` : "Insights & Stories | Academic Blog",
+    description: `Browse ${tag !== "All" ? tag : ""} academic articles, tech journeys, and study tips from the PeerLox student community. Page ${page}.`,
     alternates: {
       canonical: `${APP_URL}/blogs`,
     },
     openGraph: {
-      title: "PeerNotez Insights | The Student Blog",
+      title: "PeerLox Insights | The Student Blog",
       description: "Knowledge sharing and experiences from students worldwide.",
       url: `${APP_URL}/blogs`,
-      siteName: "PeerNotez",
+      siteName: "PeerLox",
       type: "website",
     },
   };
 }
 
 export default async function BlogPage({ searchParams }) {
-  const page = Number(searchParams.page) || 1;
-  const search = searchParams.search || "";
-  const tag = searchParams.tag || "All";
+  // 🚀 FIX: Await searchParams before reading its properties
+  const params = await searchParams;
+
+  const page = Number(params.page) || 1;
+  const search = params.search || "";
+  const tag = params.tag || "All";
 
   // Fetch Data in parallel
   const [blogsData, dynamicTags] = await Promise.all([
@@ -47,7 +53,7 @@ export default async function BlogPage({ searchParams }) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "name": "PeerNotez Academic Blogs",
+    "name": "PeerLox Academic Blogs",
     "description": "A collection of student-written articles about education, technology, and university life.",
     "url": `${APP_URL}/blogs`,
     "mainEntity": {

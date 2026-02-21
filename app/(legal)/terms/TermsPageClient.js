@@ -56,7 +56,7 @@ export default function TermsPageClient() {
                 <div style={{marginBottom: '1rem'}}><span style={styles.badge}>User Agreement</span></div>
                 <h1 style={styles.title}><FaBookReader aria-hidden="true" /> Terms of Power</h1>
                 <p style={{color: 'rgba(255,255,255,0.5)', fontSize: '1.1rem'}}>
-                    Please read carefully. By using PeerNotez, you enter a legal binding contract. <br/>
+                    Please read carefully. By using PeerLox, you enter a legal binding contract. <br/>
                     <span style={{fontSize: '0.9rem', color: '#ffcc00'}}>Revision: Feb 2026</span>
                 </p>
             </header>
@@ -65,7 +65,7 @@ export default function TermsPageClient() {
                 <h2 style={styles.sectionHeading}><FaHandshake style={{color: '#00ffaa'}} aria-hidden="true" /> 1. The Covenant</h2>
                 <div style={styles.text}>
                     <p>
-                        By accessing PeerNotez, you confirm that you are at least 13 years of age (or the minimum age of digital consent in your country). You agree to be bound by these Terms, our <Link href="/privacy" title="Privacy Policy" style={{color: '#00d4ff', fontWeight: 'bold'}}>Privacy Engine</Link>, and our <Link href="/dmca" title="DMCA Policy" style={{color: '#ff00cc', fontWeight: 'bold'}}>Copyright Policy</Link>.
+                        By accessing PeerLox, you confirm that you are at least 13 years of age (or the minimum age of digital consent in your country). You agree to be bound by these Terms, our <Link href="/privacy" title="Privacy Policy" style={{color: '#00d4ff', fontWeight: 'bold'}}>Privacy Engine</Link>, and our <Link href="/dmca" title="DMCA Policy" style={{color: '#ff00cc', fontWeight: 'bold'}}>Copyright Policy</Link>.
                     </p>
                 </div>
             </section>
@@ -73,7 +73,7 @@ export default function TermsPageClient() {
             <section style={styles.sectionCard}>
                 <h2 style={styles.sectionHeading}><FaShieldAlt style={{color: '#ffcc00'}} aria-hidden="true" /> 2. Content Ownership & License</h2>
                 <div style={styles.text}>
-                    <p className="mb-6">You retain all ownership rights to the original academic materials you upload. However, by posting content to PeerNotez, you grant us a worldwide, non-exclusive, royalty-free license to host, store, and display your work.</p>
+                    <p className="mb-6">You retain all ownership rights to the original academic materials you upload. However, by posting content to PeerLox, you grant us a worldwide, non-exclusive, royalty-free license to host, store, and display your work.</p>
                     
                     <h3 style={{color: '#fff', fontSize: '1.2rem', marginBottom: '1rem'}}>Prohibited Content:</h3>
                     <div style={styles.listItem}><strong>Stolen IP:</strong> You must not upload textbooks, paid course materials, or work that is not yours.</div>
@@ -83,7 +83,7 @@ export default function TermsPageClient() {
                     <aside style={styles.warningBox}>
                         <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
                             <FaExclamationCircle size={24} aria-hidden="true" />
-                            <span><strong>Indemnification:</strong> You are legally responsible for your uploads. You agree to protect PeerNotez from any legal fees arising from your breach of copyright.</span>
+                            <span><strong>Indemnification:</strong> You are legally responsible for your uploads. You agree to protect PeerLox from any legal fees arising from your breach of copyright.</span>
                         </div>
                     </aside>
                 </div>
@@ -92,7 +92,7 @@ export default function TermsPageClient() {
             <section style={styles.sectionCard}>
                 <h2 style={styles.sectionHeading}><FaUserCheck style={{color: '#00d4ff'}} aria-hidden="true" /> 3. User Conduct</h2>
                 <div style={styles.text}>
-                    <p>PeerNotez is a sanctuary for learners. We reserve the right to ban any user who engages in:</p>
+                    <p>PeerLox is a sanctuary for learners. We reserve the right to ban any user who engages in:</p>
                     <ul className="mt-4 space-y-3">
                         <li>• Harassment or hate speech in the Blog or Chat sections.</li>
                         <li>• Attempting to circumvent our download or view limits.</li>
@@ -105,7 +105,7 @@ export default function TermsPageClient() {
                 <h2 style={styles.sectionHeading}><FaBan style={{color: '#ff0055'}} aria-hidden="true" /> 4. Termination of Access</h2>
                 <div style={styles.text}>
                     <p>
-                        We may suspend or terminate your access to PeerNotez at any time, without notice, if we believe you have violated these terms. Specifically, any violation of our <strong>Repeat Infringer Policy</strong> (as detailed in our <Link href="/dmca" title="DMCA Policy" style={{color: '#ff00cc'}}>DMCA page</Link>) will result in an immediate and permanent ban.
+                        We may suspend or terminate your access to PeerLox at any time, without notice, if we believe you have violated these terms. Specifically, any violation of our <strong>Repeat Infringer Policy</strong> (as detailed in our <Link href="/dmca" title="DMCA Policy" style={{color: '#ff00cc'}}>DMCA page</Link>) will result in an immediate and permanent ban.
                     </p>
                 </div>
             </section>
@@ -114,7 +114,8 @@ export default function TermsPageClient() {
                 <h2 style={styles.sectionHeading}><FaBalanceScale style={{color: '#00ffaa'}} aria-hidden="true" /> 5. Limitation of Liability</h2>
                 <div style={styles.text}>
                     <p>
-                        PeerNotez provides its service "AS IS." We do not guarantee the accuracy of any user-uploaded notes. Use of materials found on this site for graded assignments is at your own risk. We are not responsible for any academic disciplinary actions taken against you by your institution.
+                        {/* 🚀 FIX: Escaped the quotes around AS IS. */}
+                        PeerLox provides its service &quot;AS IS.&quot; We do not guarantee the accuracy of any user-uploaded notes. Use of materials found on this site for graded assignments is at your own risk. We are not responsible for any academic disciplinary actions taken against you by your institution.
                     </p>
                 </div>
             </section>
@@ -128,12 +129,12 @@ export default function TermsPageClient() {
                     <FaShieldAlt aria-hidden="true" /> IP Protection <FaArrowRight size={12} />
                 </Link>
                 <Link href="/about" style={styles.navLink} title="About Us">
-                    <FaFileAlt aria-hidden="true" /> About PeerNotez <FaArrowRight size={12} />
+                    <FaFileAlt aria-hidden="true" /> About PeerLox <FaArrowRight size={12} />
                 </Link>
             </nav>
 
             <footer style={{textAlign: 'center', marginTop: '4rem', color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem'}}>
-                &copy; 2026 PeerNotez Legal. Build your future, respect the past.
+                &copy; 2026 PeerLox Legal. Build your future, respect the past.
             </footer>
         </article>
     );

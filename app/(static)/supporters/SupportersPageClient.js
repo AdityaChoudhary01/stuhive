@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image'; // 🚀 IMPORTED NEXT/IMAGE
 import { 
     FaUniversity, FaMapMarkerAlt, FaQuoteLeft, FaHandHoldingHeart, 
     FaStar, FaArrowRight, FaLock, FaFileAlt, FaGavel, FaShieldAlt, FaCrown 
@@ -30,7 +31,7 @@ const generateRandomSupporter = (id) => {
         date: getRandomDate(),
         university: ["IIT Delhi", "BITS Pilani", "Delhi University", "VIT", "MIT", "Stanford", "NUS"][Math.floor(Math.random() * 7)],
         city: ["Delhi", "Mumbai", "Bangalore", "Hyderabad", "London", "New York"][Math.floor(Math.random() * 6)],
-        message: ["Fueling open education!", "PeerNotez is a lifesaver.", "Proud to support Aditya's vision.", "Knowledge for all!", "Keep up the great work!"][Math.floor(Math.random() * 5)],
+        message: ["Fueling open education!", "PeerLox is a lifesaver.", "Proud to support Aditya's vision.", "Knowledge for all!", "Keep up the great work!"][Math.floor(Math.random() * 5)],
         avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${name}&backgroundColor=00f2fe,b388ff` 
     };
 };
@@ -39,7 +40,11 @@ export default function SupportersPageClient() {
     const [supporters, setSupporters] = useState([]);
 
     useEffect(() => {
-        setSupporters(Array.from({ length: 40 }, (_, index) => generateRandomSupporter(index)));
+        // 🚀 FIX: Wrapped in setTimeout to make it asynchronous, avoiding the cascading render warning
+        const timer = setTimeout(() => {
+            setSupporters(Array.from({ length: 40 }, (_, index) => generateRandomSupporter(index)));
+        }, 0);
+        return () => clearTimeout(timer);
     }, []);
 
     const styles = {
@@ -68,7 +73,7 @@ export default function SupportersPageClient() {
                     Wall of <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-500">Fame.</span>
                 </h1>
                 <p className="text-xl text-white/50 max-w-2xl mx-auto leading-relaxed">
-                    Celebrating the individuals who keep PeerNotez independent. 
+                    Celebrating the individuals who keep PeerLox independent. 
                     Every contribution directly funds our servers and open-access mission.
                 </p>
                 
@@ -86,8 +91,6 @@ export default function SupportersPageClient() {
                 </section>
             </header>
 
-            
-
             {/* Supporters Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {supporters.map((supporter) => (
@@ -103,13 +106,16 @@ export default function SupportersPageClient() {
 
                         <div className="flex flex-col items-center text-center relative z-10">
                             <div className="relative mb-6">
-                                <img 
+                                {/* 🚀 FIX: Swapped img for Next.js Image component */}
+                                <Image 
                                     src={supporter.avatar} 
-                                    alt={`${supporter.name} - PeerNotez Supporter`} 
+                                    alt={`${supporter.name} - PeerLox Supporter`} 
+                                    width={96}
+                                    height={96}
+                                    unoptimized
                                     className={`w-24 h-24 rounded-3xl object-cover shadow-2xl transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 ${
                                         supporter.isPremium ? 'ring-4 ring-yellow-500/20' : 'ring-4 ring-cyan-500/10'
                                     }`}
-                                    loading="lazy"
                                 />
                                 {supporter.isPremium && (
                                     <div className="absolute -top-3 -right-3 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-black shadow-xl" title="Premium Supporter">
@@ -157,8 +163,8 @@ export default function SupportersPageClient() {
             {/* CALL TO ACTION */}
             <section className="mt-20 text-center">
                 <h2 className="text-2xl font-black text-white mb-6">Want your name on this wall?</h2>
-                <Link href="/donate" title="Support PeerNotez" className="inline-flex items-center px-10 py-4 rounded-full bg-white text-black font-black text-lg hover:scale-105 active:scale-95 transition-all">
-                    Support PeerNotez <FaArrowRight className="ml-3" aria-hidden="true" />
+                <Link href="/donate" title="Support PeerLox" className="inline-flex items-center px-10 py-4 rounded-full bg-white text-black font-black text-lg hover:scale-105 active:scale-95 transition-all">
+                    Support PeerLox <FaArrowRight className="ml-3" aria-hidden="true" />
                 </Link>
             </section>
 
@@ -179,7 +185,7 @@ export default function SupportersPageClient() {
             </nav>
 
             <footer className="text-center mt-12 text-white/10 text-[10px] font-bold uppercase tracking-[0.4em]">
-                Verified PeerNotez Supporters Ecosystem
+                Verified PeerLox Supporters Ecosystem
             </footer>
         </main>
     );

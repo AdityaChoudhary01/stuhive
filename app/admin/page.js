@@ -6,7 +6,7 @@ import StatsCard from "@/components/admin/StatsCards";
 import { FaShieldAlt, FaUsers, FaFileAlt, FaPenNib } from "react-icons/fa";
 
 export const metadata = {
-  title: "Admin Panel | PeerNotez",
+  title: "Admin Panel | PeerLox",
 };
 
 export default async function AdminDashboardPage() {

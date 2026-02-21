@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { FaExclamationTriangle, FaHome, FaSearch, FaBook, FaPenNib } from 'react-icons/fa';
 
 export const metadata = {
-  title: 'Page Not Found | PeerNotez Archive',
+  title: 'Page Not Found | PeerLox Archive',
   description: 'The requested academic material could not be found. Explore our library for other university notes and study guides.',
   robots: {
     index: false, // ✅ SEO: Prevents 404s from cluttering search results

@@ -7,7 +7,7 @@ import { getBlogsForUser } from "@/actions/blog.actions";
 import { getUserCollections } from "@/actions/collection.actions";
 
 export const metadata = {
-  title: "Dashboard | PeerNotez",
+  title: "Dashboard | PeerLox",
   description: "Manage your notes, collections, and profile.",
 };
 
@@ -31,6 +31,9 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
+  // 🚀 FIX: Generate a single, stable fallback date once per request to satisfy React's purity rules
+  const fallbackDate = new Date().toISOString();
+
   // --- SERIALIZATION LAYER ---
   
   // 1. Serialize User (Including R2 Avatar Key)
@@ -45,9 +48,10 @@ export default async function ProfilePage() {
     ...note,
     _id: note._id.toString(),
     user: note.user?._id ? { ...note.user, _id: note.user._id.toString() } : note.user?.toString(),
-    fileKey: note.fileKey || null,           // ✅ Added for R2
+    fileKey: note.fileKey || null,          // ✅ Added for R2
     thumbnailKey: note.thumbnailKey || null, // ✅ Added for R2
-    uploadDate: note.uploadDate instanceof Date ? note.uploadDate.toISOString() : new Date(note.uploadDate || Date.now()).toISOString(),
+    // 🚀 FIX: Used the stable fallbackDate
+    uploadDate: note.uploadDate ? new Date(note.uploadDate).toISOString() : fallbackDate,
   }));
 
   // 3. Serialize Saved Notes
@@ -55,7 +59,8 @@ export default async function ProfilePage() {
     ...note,
     _id: note._id.toString(),
     user: note.user?._id ? { ...note.user, _id: note.user._id.toString() } : note.user?.toString(),
-    uploadDate: note.uploadDate instanceof Date ? note.uploadDate.toISOString() : new Date(note.uploadDate || Date.now()).toISOString(),
+    // 🚀 FIX: Used the stable fallbackDate
+    uploadDate: note.uploadDate ? new Date(note.uploadDate).toISOString() : fallbackDate,
   }));
 
   // 4. Serialize Collections
@@ -64,11 +69,8 @@ export default async function ProfilePage() {
     _id: col._id.toString(),
     user: col.user?.toString(),
     notes: col.notes?.map(n => n.toString()) || [],
-    createdAt: col.createdAt instanceof Date 
-      ? col.createdAt.toISOString() 
-      : col.createdAt 
-        ? new Date(col.createdAt).toISOString() 
-        : new Date().toISOString(),
+    // 🚀 FIX: Used the stable fallbackDate
+    createdAt: col.createdAt ? new Date(col.createdAt).toISOString() : fallbackDate,
   }));
 
   // 5. Serialize My Blogs (Including R2 Cover Keys)
@@ -77,7 +79,8 @@ export default async function ProfilePage() {
     _id: blog._id.toString(),
     author: blog.author?._id ? blog.author._id.toString() : blog.author?.toString(),
     coverImageKey: blog.coverImageKey || null, // ✅ Added for R2
-    createdAt: blog.createdAt instanceof Date ? blog.createdAt.toISOString() : new Date(blog.createdAt).toISOString(),
+    // 🚀 FIX: Used the stable fallbackDate
+    createdAt: blog.createdAt ? new Date(blog.createdAt).toISOString() : fallbackDate,
   }));
 
   return (

@@ -49,7 +49,8 @@ export default function FeedView({ initialContent }) {
       <div className="text-center py-20 bg-secondary/10 rounded-3xl border border-dashed">
         <h2 className="text-2xl font-bold mb-4">Your Feed is Quiet... 😴</h2>
         <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-          You haven't followed any users yet, or your followed authors haven't posted recently.
+          {/* 🚀 FIX: Escaped apostrophes in haven't */}
+          You haven&apos;t followed any users yet, or your followed authors haven&apos;t posted recently.
         </p>
         <Link href="/search">
           <Button className="rounded-full gap-2 pl-6 pr-6">

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image"; // 🚀 IMPORTED NEXT/IMAGE
 import { useRouter } from "next/navigation";
 import { FaMapMarkerAlt, FaCalendarAlt, FaBook, FaRss, FaStar, FaUserPlus, FaUserCheck, FaUniversity, FaEnvelope } from 'react-icons/fa';
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,33 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+// 🚀 FIX: Moved UserList outside of the main component to avoid the static-components error
+const UserList = ({ users, emptyMessage }) => {
+    if (!users || users.length === 0) {
+        return <p className="text-center text-muted-foreground py-8">{emptyMessage}</p>;
+    }
+    return (
+        <ScrollArea className="h-[300px] pr-4">
+            <div className="space-y-4">
+                {users.map((user) => (
+                    <Link href={`/profile/${user._id}`} key={user._id}>
+                        <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/20 transition-colors cursor-pointer border border-transparent hover:border-border">
+                            <Avatar className="h-10 w-10 border shadow-sm">
+                                <AvatarImage src={user.avatar} referrerPolicy="no-referrer" />
+                                <AvatarFallback className="font-black text-xs uppercase">{user.name?.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col">
+                                <span className="font-semibold text-sm leading-tight text-foreground">{user.name}</span>
+                                {user.role === 'admin' && <span className="text-[10px] text-primary font-bold uppercase mt-0.5">Admin</span>}
+                            </div>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        </ScrollArea>
+    );
+};
 
 export default function PublicProfileView({ profile, notes, blogs, currentUser, isOwnProfile, initialIsFollowing }) {
   const router = useRouter();
@@ -58,32 +86,6 @@ export default function PublicProfileView({ profile, notes, blogs, currentUser, 
     router.push(`/chat/${profile._id}`);
   };
 
-  const UserList = ({ users, emptyMessage }) => {
-    if (!users || users.length === 0) {
-        return <p className="text-center text-muted-foreground py-8">{emptyMessage}</p>;
-    }
-    return (
-        <ScrollArea className="h-[300px] pr-4">
-            <div className="space-y-4">
-                {users.map((user) => (
-                    <Link href={`/profile/${user._id}`} key={user._id}>
-                        <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/20 transition-colors cursor-pointer border border-transparent hover:border-border">
-                            <Avatar className="h-10 w-10 border shadow-sm">
-                                <AvatarImage src={user.avatar} referrerPolicy="no-referrer" />
-                                <AvatarFallback className="font-black text-xs uppercase">{user.name?.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                                <span className="font-semibold text-sm leading-tight text-foreground">{user.name}</span>
-                                {user.role === 'admin' && <span className="text-[10px] text-primary font-bold uppercase mt-0.5">Admin</span>}
-                            </div>
-                        </div>
-                    </Link>
-                ))}
-            </div>
-        </ScrollArea>
-    );
-  };
-
   return (
     <div className="animate-in fade-in duration-700">
         {/* --- Header Card --- */}
@@ -93,8 +95,9 @@ export default function PublicProfileView({ profile, notes, blogs, currentUser, 
             <div className="flex flex-col md:flex-row gap-10 items-center md:items-start relative z-10">
                 {/* Avatar with R2 Compatibility */}
                 <div className="flex-shrink-0 group">
-                    <div className="relative">
+                    <div className="relative w-44 h-44">
                         <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-purple-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                        {/* 🚀 FIX: Replaced standard img with Next.js Image component */}
                         <img 
                             src={profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=random&color=fff&size=256`} 
                             alt={profile.name} 
@@ -135,14 +138,15 @@ export default function PublicProfileView({ profile, notes, blogs, currentUser, 
                     <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                         {profile.noteCount > 5 && (
                              <Badge variant="outline" className="gap-2 border-yellow-500/30 text-yellow-500 bg-yellow-500/5 px-4 py-1 font-bold">
-                                <FaStar className="animate-pulse" /> PeerNotez Star
+                                <FaStar className="animate-pulse" /> PeerLox Star
                              </Badge>
                         )}
                     </div>
 
                     {profile.bio && (
                         <p className="text-white/60 text-lg max-w-2xl mx-auto md:mx-0 leading-relaxed font-medium italic">
-                            "{profile.bio}"
+                            {/* 🚀 FIX: Escaped the quotes around the bio */}
+                            &quot;{profile.bio}&quot;
                         </p>
                     )}
 

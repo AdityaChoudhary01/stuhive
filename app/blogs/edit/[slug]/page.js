@@ -27,7 +27,8 @@ export default async function EditBlogPage({ params }) {
             <FaShieldAlt className="w-12 h-12 text-red-500" />
         </div>
         <h1 className="text-3xl font-black text-white tracking-tight mb-2">Access Denied</h1>
-        <p className="text-muted-foreground font-medium">You don't have clearance to edit this secure document.</p>
+        {/* 🚀 FIX: Escaped apostrophe in don't */}
+        <p className="text-muted-foreground font-medium">You don&apos;t have clearance to edit this secure document.</p>
       </div>
     );
   }

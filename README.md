@@ -1,55 +1,93 @@
-# 📑 PeerNotez: The Cinematic Academic Discovery Engine
+# 📑 PeerLox: The Cinematic Academic Discovery Engine
 
-**PeerNotez** is a high-performance, decentralized academic library designed to empower students through seamless knowledge sharing. Built with a focus on **Cinematic UI/UX**, **Technical SEO**, and **Scalable Architecture**, it transforms static study materials into a dynamic discovery experience.
+<div align="center">
+<p><strong>Empowering students through decentralized, open-access knowledge sharing.</strong></p>
+<a href="[https://peerlox.in](https://peerlox.in)">Live Website</a> •
+<a href="[https://peerlox.in/search](https://www.google.com/search?q=https://peerlox.in/search)">Explore Library</a> •
+<a href="[https://peerlox.in/blogs](https://www.google.com/search?q=https://peerlox.in/blogs)">Community Blogs</a>
+</div>
+
+**PeerLox** is a high-performance, decentralized academic library designed to empower students through seamless knowledge sharing. Built with a strict focus on **Cinematic UI/UX**, **Technical SEO**, and **Scalable Next.js 15 Architecture**, it transforms static study materials into a dynamic, real-time discovery experience.
 
 ---
 
-## ⚡ Core Pillars
+## 🗺️ Platform Architecture & Live URLs
+
+Explore the live platform modules:
+
+| Module | Description | Live URL |
+| --- | --- | --- |
+| **Discovery Engine** | Global search, filtering, and pagination for study notes. | [peerlox.in/search](https://www.google.com/search?q=https://peerlox.in/search) |
+| **Global Search** | Cross-platform search for notes, blogs, and users. | [peerlox.in/global-search](https://www.google.com/search?q=https://peerlox.in/global-search) |
+| **Community Blogs** | Student-written articles, tutorials, and experiences. | [peerlox.in/blogs](https://www.google.com/search?q=https://peerlox.in/blogs) |
+| **Real-Time Chat** | Peer-to-peer messaging and presence tracking. | [peerlox.in/chat](https://www.google.com/search?q=https://peerlox.in/chat) |
+| **User Dashboard** | Manage uploads, saved collections, and follower stats. | [peerlox.in/profile](https://www.google.com/search?q=https://peerlox.in/profile) |
+| **Support Platform** | Secure contact terminal routed via Brevo SMTP. | [peerlox.in/contact](https://www.google.com/search?q=https://peerlox.in/contact) |
+| **Wall of Fame** | Real-time tracking of community supporters & donors. | [peerlox.in/supporters](https://www.google.com/search?q=https://peerlox.in/supporters) |
+| **Legal Hub** | Privacy, Terms of Service, and DMCA guidelines. | [peerlox.in/privacy](https://www.google.com/search?q=https://peerlox.in/privacy) |
+
+---
+
+## ✨ Key Features
+
+### 💬 Real-Time Ecosystem
+
+* **Live Peer Messaging:** Powered by **Ably WebSockets**, featuring instant message delivery, unread counts, and active presence (online/offline status).
+* **Smart UI Portals:** New chat dialogues utilize `react-dom` Portals to escape deep DOM hierarchies, ensuring perfect overlay rendering without layout shifts.
+
+### 📚 Academic Vault & Collections
+
+* **Cloudflare R2 Integration:** Decentralized, lightning-fast S3-compatible storage for high-res images, PDF documents, and avatars.
+* **Custom Collections:** Users can create personalized folders to curate and save notes using **Optimistic UI Updates** for instant feedback.
+* **Smart Deletion:** Server Actions automatically trigger cascade deletions, wiping database entries and their associated R2 cloud files simultaneously.
 
 ### 🎨 Cinematic Experience
 
 * **Hardware-Accelerated UI:** Utilizing Tailwind CSS and CSS variables for smooth, 60fps glassmorphism effects.
-* **Adaptive Interactivity:** Smart components like the `NoteCard` and `BlogCard` feature hover-aware gradients and cinematic flares.
-* **Motion-First Design:** Integrated Framer Motion and custom keyframe animations (like the Shimmer and Pulse effects) for a premium feel.
+* **Adaptive Interactivity:** Smart components feature hover-aware gradients, 3D tilt effects, and cinematic flares.
+* **PWA Ready:** Installable as a Progressive Web App on iOS and Android with custom-configured Maskable Splash Screens.
 
 ### 🔍 Discovery Engine (SEO)
 
 * **Schema.org Integration:** Automated JSON-LD injection for `CreativeWork`, `BlogPosting`, and `Person` entities to secure Google Rich Snippets.
 * **Dynamic Metadata:** High-octane `generateMetadata` implementation that scales titles and descriptions based on real-time database counts.
-* **Semantic Navigation:** SEO-friendly pagination with `rel="next/prev"` and a crawler-accessible internal link structure.
-* **Automated Sitemaps:** Real-time XML sitemap generation with `.lean()` query optimization for fast indexing.
-
-### 🛠 Technical Excellence
-
-* **Next.js 15/14 Power:** Fully utilizing the App Router, Server Actions, and Streaming for near-instant transitions.
-* **Cloudflare R2 Storage:** Decentralized S3-compatible storage for high-speed document and image delivery.
-* **PWA Ready:** Custom Service Worker implementation using a **Stale-While-Revalidate** strategy for offline academic access.
-* **Image Optimization:** Leveraging the Next.js `Image` component with AVIF/WebP support to maximize LCP scores.
+* **Automated Sitemaps:** Real-time XML sitemap generation with MongoDB `.lean()` query optimization for fast indexing.
 
 ---
 
-## 🏗 Tech Stack
+## 🏗 Tech Stack & Methodology
 
-| Layer | Technology |
-| --- | --- |
-| **Frontend** | Next.js (App Router), React, Tailwind CSS |
-| **Backend** | Next.js Server Actions, Node.js |
-| **Database** | MongoDB & Mongoose |
-| **Storage** | Cloudflare R2 (S3 Compatible) |
-| **Authentication** | NextAuth.js |
-| **Real-time** | Ably Realtime Sync |
-| **UI Components** | Radix UI / Shadcn UI |
-| **Icons** | Lucide React & FontAwesome |
+| Category | Technology | Implementation Details |
+| --- | --- | --- |
+| **Framework** | **Next.js 15 (App Router)** | Leveraging asynchronous `searchParams`, Server Components, and Streaming. |
+| **Frontend** | **React 19 & Tailwind CSS** | Strict adherence to React purity rules; utilizing Shadcn UI & Lucide Icons. |
+| **Backend** | **Server Actions** | Zero-API-route architecture. Direct, secure database mutations from the client. |
+| **Database** | **MongoDB & Mongoose** | Highly normalized schemas with population mapping. |
+| **Storage** | **Cloudflare R2** | Configured via `@aws-sdk/client-s3` for zero-egress-fee asset hosting. |
+| **Real-Time** | **Ably** | Dynamically imported browser-only clients to keep initial server bundles under 6MB. |
+| **Authentication** | **NextAuth.js** | Secure Google OAuth 2.0 integration with persistent sessions. |
+| **Email API** | **Brevo SMTP** | Beautifully formatted HTML email templates for contact/support routing. |
 
 ---
 
-## 🚀 Getting Started
+## 📉 Performance Optimization Strategies
+
+PeerLox implements a ruthless performance strategy optimized for Vercel deployment:
+
+1. **Strict React Purity:** Eliminated cascading renders and hydration mismatches by pushing non-deterministic state updates (like `Date.now()` or randomized mock data) into asynchronous event loops (`setTimeout`).
+2. **Dynamic Bundle Splitting:** Heavy modules (like the Ably Chat Client and PDF renderers) are wrapped in Next.js `next/dynamic` to ensure they are only downloaded when a user actually opens them.
+3. **Stale-While-Revalidate:** The custom Service Worker serves cached content instantly while fetching updates in the background, allowing the site to function in low-connectivity academic environments.
+4. **Zero Layout Shift (CLS):** Every image (`next/image`) and skeleton state is pre-sized to prevent content jumping.
+
+---
+
+## 🚀 Getting Started (Local Development)
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/AdityaChoudhary01/peernotez.git
-cd peernotez
+git clone https://github.com/AdityaChoudhary01/PeerLox.git
+cd PeerLox
 
 ```
 
@@ -66,11 +104,13 @@ Create a `.env.local` file in the root directory and populate it with your crede
 
 ```env
 # APP
-NEXT_PUBLIC_APP_URL=https://peernotez.netlify.app
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 # AUTH
-NEXTAUTH_URL=https://peernotez.netlify.app
+NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your_random_secret_here
+GOOGLE_CLIENT_ID=your_google_id
+GOOGLE_CLIENT_SECRET=your_google_secret
 
 # DATABASE
 MONGODB_URI=your_mongodb_connection_string
@@ -80,6 +120,11 @@ R2_ACCESS_KEY_ID=your_id
 R2_SECRET_ACCESS_KEY=your_secret
 R2_BUCKET_NAME=your_bucket
 NEXT_PUBLIC_R2_PUBLIC_URL=https://your-pub-id.r2.dev
+
+# APIs
+BREVO_API_KEY=your_brevo_key
+BREVO_VERIFIED_SENDER_EMAIL=your_email@domain.com
+ABLY_API_KEY=your_ably_key
 
 ```
 
@@ -92,47 +137,29 @@ npm run dev
 
 ---
 
-## 📉 Performance & SEO Strategy
-
-PeerNotez implements a "Mobile-First" performance strategy:
-
-1. **Zero Layout Shift (CLS):** Every image and skeleton state is pre-sized to prevent content jumping.
-2. **Stale-While-Revalidate:** The Service Worker serves cached content instantly while fetching updates in the background.
-3. **Code Splitting:** Heavy modules (like PDF.js and Edit Modals) are dynamically imported only when triggered by the user.
-
----
-
-## 📂 Folder Structure
+## 📂 Architecture Structure
 
 ```text
-├── actions/             # Server Actions (Database logic)
+├── actions/             # Next.js Server Actions (Database logic & mutations)
 ├── app/                 # Next.js App Router (Routes & Pages)
-│   ├── api/             # API Route Handlers
-│   ├── (auth)/          # Authentication routes
+│   ├── (auth)/          # Authentication routes (Login/Signup)
+│   ├── (static)/        # Static info pages (Donate, Contact, Supporters)
+│   ├── (legal)/         # Legal pages (Privacy, Terms, DMCA)
+│   ├── chat/            # Real-time Ably messaging routes
 │   ├── search/          # The Discovery Engine
 │   └── sitemap.xml/     # Automated SEO Sitemap
 ├── components/          # Reusable UI Components
-│   ├── notes/           # Note-specific UI
-│   ├── blog/            # Blog-specific UI
-│   └── common/          # Loaders, Pagination, Star Ratings
-├── lib/                 # Shared utilities & Database config
-├── models/              # Mongoose Schema Models
-├── public/              # Service Worker & Static Assets
+│   ├── chat/            # Chat lists, Dialogues, Portals
+│   ├── notes/           # Note cards, Filters, Collection Modals
+│   ├── blog/            # Blog cards, Editors
+│   └── ui/              # Shadcn primitive components (Buttons, Inputs, Dialogs)
+├── hooks/               # Custom React Hooks (useToast, etc)
+├── lib/                 # Shared utilities & Database config (Mongoose connection)
+├── models/              # Mongoose Schema Models (User, Note, Blog, Chat)
+├── public/              # Service Worker, Manifest, Splash Screens & Assets
 └── next.config.js       # High-Octane Build Config
 
 ```
-
----
-
-## 🗺 Roadmap
-
-* [x] High-Octane SEO Overhaul
-* [x] Cinematic Note & Blog Cards
-* [x] Custom Service Worker Integration
-* [x] Dynamic Sitemap Generation
-* [ ] Custom Domain for R2 Assets (CDN)
-* [ ] AI-Powered Note Summarization
-* [ ] Peer-to-Peer Study Groups (Ably)
 
 ---
 
@@ -150,6 +177,4 @@ Contributions are what make the academic community incredible. If you have a sug
 
 ## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
+Distributed under the MIT License. Built for the academic community by Aditya Choudhary.

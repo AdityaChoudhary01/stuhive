@@ -117,7 +117,8 @@ export default function NotePageActions({ note, canEdit, userId }) {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-bold text-red-500">Permanently delete?</AlertDialogTitle>
             <AlertDialogDescription className="text-white/60">
-              This will erase <span className="font-bold text-white">"{note?.title}"</span> and its associated files from Cloudflare R2. This action is irreversible.
+              {/* 🚀 FIX: Escaped the double quotes around the note title */}
+              This will erase <span className="font-bold text-white">&quot;{note?.title}&quot;</span> and its associated files from Cloudflare R2. This action is irreversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

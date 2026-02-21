@@ -21,17 +21,17 @@ export const viewport = {
 
 // ✅ Global SEO Safety Net
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://peernotez.netlify.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://peerlox.in"),
   title: {
-    default: "PeerNotez | Free Academic Notes & Study Materials",
-    template: "%s | PeerNotez"
+    default: "PeerLox | Free Academic Notes & Study Materials",
+    template: "%s | PeerLox"
   },
-  description: "Join PeerNotez to discover, share, and review university notes, PDFs, and study materials.",
+  description: "Join PeerLox to discover, share, and review university notes, PDFs, and study materials.",
   manifest: "/manifest.json", 
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "PeerNotez",
+    title: "PeerLox",
   },
   icons: {
     icon: [
@@ -46,14 +46,14 @@ export const metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://peernotez.netlify.app",
-    siteName: "PeerNotez",
+    url: "https://peerlox.in",
+    siteName: "PeerLox",
     images: [
       {
         url: "/logo512.png",
         width: 512,
         height: 512,
-        alt: "PeerNotez Logo",
+        alt: "PeerLox Logo",
       },
     ],
   },

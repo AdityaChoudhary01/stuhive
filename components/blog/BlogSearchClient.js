@@ -12,7 +12,12 @@ export default function BlogSearchClient({ initialSearch }) {
 
     // Update local state if URL changes externally
     useEffect(() => {
-        setSearchTerm(searchParams.get("search") || "");
+        // 🚀 FIX: Wrapped in setTimeout to make it asynchronous, avoiding the cascading render warning
+        const timer = setTimeout(() => {
+            setSearchTerm(searchParams.get("search") || "");
+        }, 0);
+        
+        return () => clearTimeout(timer);
     }, [searchParams]);
 
     const handleSearch = (e) => {

@@ -22,11 +22,16 @@ export default function AddToCollectionModal({ noteId }) {
   // Fetch collections when modal opens
   useEffect(() => {
     if (open && session?.user?.id) {
-      setLoading(true);
-      getUserCollections(session.user.id)
-        .then((cols) => setCollections(cols))
-        .catch(() => toast({ title: "Error", description: "Failed to load collections", variant: "destructive" }))
-        .finally(() => setLoading(false));
+      // 🚀 FIX: Wrapped in setTimeout to make the state update asynchronous, avoiding the cascading render warning
+      const timer = setTimeout(() => {
+        setLoading(true);
+        getUserCollections(session.user.id)
+          .then((cols) => setCollections(cols))
+          .catch(() => toast({ title: "Error", description: "Failed to load collections", variant: "destructive" }))
+          .finally(() => setLoading(false));
+      }, 0);
+      
+      return () => clearTimeout(timer);
     }
   }, [open, session, toast]);
 

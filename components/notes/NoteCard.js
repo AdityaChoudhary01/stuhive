@@ -51,14 +51,14 @@ export default function NoteCard({ note }) {
     "educationalLevel": note.course,
     "author": {
       "@type": "Person",
-      "name": note.user?.name || "PeerNotez Contributor"
+      "name": note.user?.name || "PeerLox Contributor"
     },
     "datePublished": note.uploadDate,
     "educationalUse": "Study Material",
     "image": thumbnailUrl,
     "provider": {
       "@type": "Organization",
-      "name": "PeerNotez"
+      "name": "PeerLox"
     },
     "interactionStatistic": [
       {

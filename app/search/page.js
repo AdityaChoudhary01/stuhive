@@ -6,7 +6,7 @@ import Pagination from "@/components/common/Pagination";
 import { FaSearch, FaRegFolderOpen, FaArrowLeft, FaFilter } from "react-icons/fa";
 import Link from "next/link";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://peernotez.netlify.app";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://peerlox.in";
 
 // ✅ 1. FIXED & HIGH-OCTANE DYNAMIC METADATA
 export async function generateMetadata({ searchParams }) {
@@ -25,13 +25,13 @@ export async function generateMetadata({ searchParams }) {
   const formattedCount = totalCount?.toLocaleString() || "thousands of";
 
   return {
-    title: `${dynamicTitle} | PeerNotez Library${pageSuffix}`,
+    title: `${dynamicTitle} | PeerLox Library${pageSuffix}`,
     description: `Explore ${formattedCount} verified academic notes, course materials, and exam guides. Filter by university, subject, and course level.`,
     alternates: {
       canonical: `${APP_URL}/search`,
     },
     openGraph: {
-      title: `${dynamicTitle} | PeerNotez Archive`,
+      title: `${dynamicTitle} | PeerLox Archive`,
       description: `Access a library of ${formattedCount} student-led academic resources.`,
       url: `${APP_URL}/search`,
       type: "website",
@@ -149,7 +149,8 @@ export default async function SearchPage({ searchParams }) {
                     </div>
                     <h3 className="text-xl font-black text-white/60 tracking-tight">Archive Empty</h3>
                     <p className="text-xs text-white/30 max-w-[200px] mx-auto mt-2 italic">
-                      The requested materials haven't been indexed yet.
+                      {/* 🚀 FIX: Escaped apostrophe in haven't */}
+                      The requested materials haven&apos;t been indexed yet.
                     </p>
                     <Link href="/search" className="inline-block mt-6 text-[9px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors underline underline-offset-8">
                       Clear all filters

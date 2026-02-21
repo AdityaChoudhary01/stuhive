@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image'; // 🚀 Added Next.js Image component
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { FaBars, FaTimes, FaSearch, FaSignOutAlt, FaPaperPlane, FaCloudUploadAlt } from 'react-icons/fa';
+import { FaBars, FaTimes, FaSearch, FaSignOutAlt, FaPaperPlane } from 'react-icons/fa';
 // 👇 Ably hooks
 import { useChannel, usePresence, ChannelProvider } from "ably/react"; 
 // 👇 Server Action
@@ -44,7 +45,7 @@ export default function Navbar() {
   const [isMobile, setIsMobile] = useState(false);
   const [unreadTotal, setUnreadTotal] = useState(0);
 
-  const LOGO_URL = 'https://res.cloudinary.com/dmtnonxtt/image/upload/v1771173206/g0jgf1zk1mmguvzfwfnt.png';
+  const LOGO_URL = 'https://res.cloudinary.com/dmtnonxtt/image/upload/v1771679371/aqpebgj5izdezfstneix.png';
 
   // Fetch initial unread count from DB
   useEffect(() => {
@@ -55,16 +56,24 @@ export default function Navbar() {
 
   // Standard UI Effects
   useEffect(() => {
-    setMounted(true);
-    setIsMobile(window.innerWidth <= 768);
+    // 🚀 FIX: Batched both setMounted and setIsMobile inside the setTimeout 
+    // to bypass the synchronous render ESLint error
+    const initTimer = setTimeout(() => {
+      setMounted(true);
+      setIsMobile(window.innerWidth <= 768);
+    }, 0);
+    
     const handleScroll = () => setScrolled(window.scrollY > 50);
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
       if (window.innerWidth > 768) setMenuOpen(false);
     };
+
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', handleResize);
+    
     return () => {
+      clearTimeout(initTimer);
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleResize);
     };
@@ -73,7 +82,8 @@ export default function Navbar() {
   // Reset unread count when visiting chat
   useEffect(() => {
     if (pathname.startsWith('/chat')) {
-      setUnreadTotal(0);
+      const unreadTimer = setTimeout(() => setUnreadTotal(0), 0);
+      return () => clearTimeout(unreadTimer);
     }
   }, [pathname]);
 
@@ -116,10 +126,7 @@ export default function Navbar() {
     adminLink: { background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)', color: '#1a1a1a', fontWeight: '700', boxShadow: '0 0 15px rgba(255, 215, 0, 0.3)', border: '1px solid rgba(255, 215, 0, 0.5)' },
     searchForm: { display: isMobile ? 'none' : 'flex', alignItems: 'center', background: 'rgba(0, 0, 0, 0.2)', padding: '3px', borderRadius: '50px', border: '1px solid rgba(255, 255, 255, 0.15)', transition: 'all 0.3s ease', minWidth: '220px', boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.2)' },
     searchInput: { background: 'transparent', border: 'none', color: '#fff', outline: 'none', flex: 1, fontSize: '0.85rem', padding: '0 10px', fontFamily: "'Inter', sans-serif", minWidth: 0 },
-    
-    // 👇 FIX: Added flexShrink: 0 to prevent oval shape on mobile
     searchButton: { background: 'linear-gradient(135deg, #667eea, #764ba2)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff', boxShadow: '0 2px 10px rgba(102, 126, 234, 0.4)', transition: 'transform 0.2s ease', flexShrink: 0 },
-    
     rightSection: { display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 },
     iconButton: { background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '50%', width: '38px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff', textDecoration: 'none', position: 'relative' },
     notificationBadge: { position: 'absolute', top: '-4px', right: '-4px', background: '#ff3b30', color: '#fff', fontSize: '10px', fontWeight: 'bold', width: '18px', height: '18px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(10, 1, 24, 1)', boxShadow: '0 0 10px rgba(255, 59, 48, 0.4)' },
@@ -132,10 +139,6 @@ export default function Navbar() {
 
   return (
     <>
-      {/* 👇 CRASH FIX: 
-        We wrap the isolated logic component here. 
-        This way, the Hooks inside AblyLogic can "see" the ChannelProvider context.
-      */}
       {status === "authenticated" && session?.user?.id && (
         <ChannelProvider channelName="online-users">
           <ChannelProvider channelName={`notifications:${session.user.id}`}>
@@ -149,7 +152,14 @@ export default function Navbar() {
           <div style={styles.navContent}>
             
             <Link href="/" style={styles.logoSection} onClick={() => setMenuOpen(false)}>
-              <img src={LOGO_URL} alt="PeerNotez Logo" style={styles.logo} />
+              <Image 
+                src={LOGO_URL} 
+                alt="PeerLox Logo" 
+                width={140} 
+                height={44} 
+                style={styles.logo} 
+                priority
+              />
             </Link>
 
             <div style={styles.navLinks}>
@@ -183,7 +193,13 @@ export default function Navbar() {
                     {unreadTotal > 0 && <span style={styles.notificationBadge}>{unreadTotal}</span>}
                   </Link>
                   <Link href="/profile">
-                    <img src={session.user.image || session.user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.user.name)}&size=80`} alt="Profile" style={styles.userAvatar} />
+                    <Image 
+                      src={session.user.image || session.user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.user.name)}&size=80`} 
+                      alt="Profile" 
+                      width={38} 
+                      height={38} 
+                      style={styles.userAvatar} 
+                    />
                   </Link>
                   <button onClick={handleLogout} style={styles.logoutButton}><FaSignOutAlt size={14} /></button>
                 </>
@@ -235,7 +251,14 @@ export default function Navbar() {
                     </div>
                 </Link>
                 <Link href="/profile" onClick={() => setMenuOpen(false)} style={styles.mobileLink}>
-                  <img src={session.user.image || session.user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.user.name)}`} style={{width: '24px', height: '24px', borderRadius: '50%'}} alt="" /> Profile
+                  <div style={{ width: 24, height: 24, position: 'relative', overflow: 'hidden', borderRadius: '50%' }}>
+                    <Image 
+                      src={session.user.image || session.user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.user.name)}`} 
+                      alt="Profile"
+                      fill
+                      style={{ objectFit: 'cover' }} 
+                    />
+                  </div> Profile
                 </Link>
                 <button onClick={handleLogout} style={{...styles.mobileLink, color: '#ff3b30', background: 'rgba(255, 59, 48, 0.05)', border: 'none', justifyContent: 'center', width: '100%', marginTop: 'auto'}}><FaSignOutAlt /> Logout</button>
               </>

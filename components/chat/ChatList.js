@@ -68,10 +68,12 @@ function ChatListContent({ initialConversations, currentUserId }) {
   }, [router]);
 
   // 🔹 FIX 2: Sync Server Data with React State
-  // When router.refresh() finishes fetching the fresh database data, 
-  // this forces the local state to update and show the latest message preview!
+  // 🚀 Wrapped in setTimeout to make it asynchronous, avoiding the cascading render warning
   useEffect(() => {
-    setConversations(initialConversations || []);
+    const timer = setTimeout(() => {
+      setConversations(initialConversations || []);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [initialConversations]);
 
   // ==========================================

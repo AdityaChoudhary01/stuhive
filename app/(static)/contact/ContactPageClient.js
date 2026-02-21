@@ -60,7 +60,7 @@ export default function ContactPageClient() {
                     Connect with <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">Us.</span>
                 </h1>
                 <p className="text-xl text-white/50 max-w-2xl mx-auto leading-relaxed">
-                    Whether you have a bug report, a partnership proposal, or just want to discuss the future of PeerNotez, our lines are open.
+                    Whether you have a bug report, a partnership proposal, or just want to discuss the future of PeerLox, our lines are open.
                 </p>
             </header>
 
@@ -91,7 +91,7 @@ export default function ContactPageClient() {
                                     </div>
                                     <div>
                                         <h3 className="text-white font-bold mb-1">Physical Access</h3>
-                                        <p className="text-white/40 leading-relaxed text-sm">PeerNotez HQ, Ghaziabad,<br/>Uttar Pradesh, India - 201009</p>
+                                        <p className="text-white/40 leading-relaxed text-sm">PeerLox HQ, Ghaziabad,<br/>Uttar Pradesh, India - 201009</p>
                                     </div>
                                 </div>
 
@@ -135,7 +135,8 @@ export default function ContactPageClient() {
                                     <FaCheckCircle size={40} aria-hidden="true" />
                                 </div>
                                 <h3 className="text-2xl font-bold text-white">Message Uplinked</h3>
-                                <p className="text-white/50 max-w-xs mx-auto">We've received your request and our team will analyze it shortly.</p>
+                                {/* 🚀 FIX: Escaped quote in We've */}
+                                <p className="text-white/50 max-w-xs mx-auto">We&apos;ve received your request and our team will analyze it shortly.</p>
                                 <Button variant="outline" onClick={() => setIsSubmitted(false)} className="rounded-full border-white/10 hover:bg-white/5">
                                     New Message
                                 </Button>
@@ -188,7 +189,7 @@ export default function ContactPageClient() {
             </nav>
 
             <footer className="text-center mt-12 text-white/10 text-[10px] font-black uppercase tracking-[0.5em]">
-                Encrypted Communication • PeerNotez
+                Encrypted Communication • PeerLox
             </footer>
         </main>
     );

@@ -1,4 +1,4 @@
-const CACHE_NAME = "peernotez-v2"; // Increment version for updates
+const CACHE_NAME = "PeerLox-v2"; // Increment version for updates
 const OFFLINE_URL = "/"; // Fallback page
 
 const ASSETS_TO_CACHE = [

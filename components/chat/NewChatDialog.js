@@ -99,7 +99,8 @@ export default function NewChatDialog({ currentUserId }) {
             </div>
           ) : results.length === 0 && !isSearching ? (
             <div className="h-full flex flex-col items-center justify-center text-muted-foreground opacity-60">
-              <p className="text-sm">No users found for "{searchQuery}"</p>
+              {/* 🚀 FIX: Escaped the double quotes around the searchQuery */}
+              <p className="text-sm">No users found for &quot;{searchQuery}&quot;</p>
             </div>
           ) : (
             <div className="space-y-1">

@@ -54,7 +54,8 @@ export default function CollectionActions({ collection }) {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the collection
-              <strong> "{collection.name}"</strong>. The notes inside will NOT be deleted.
+              {/* 🚀 FIX: Escaped the double quotes around the collection name */}
+              <strong> &quot;{collection.name}&quot;</strong>. The notes inside will NOT be deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

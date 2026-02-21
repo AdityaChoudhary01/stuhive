@@ -6,7 +6,7 @@ import ChatList from "@/components/chat/ChatList";
 import NewChatDialog from "@/components/chat/NewChatDialog"; // 🔹 Import the new modal
 
 export const metadata = {
-  title: "Messages | PeerNotez",
+  title: "Messages | PeerLox",
 };
 
 export default async function ChatListPage() {

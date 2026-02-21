@@ -7,7 +7,10 @@ import Link from "next/link";
 import { FileText, Rss, Users, Search as SearchIcon } from "lucide-react";
 
 export default async function GlobalSearchPage({ searchParams }) {
-  const query = searchParams.q || "";
+  // 🚀 NEXT.JS 15 FIX: Await searchParams before accessing properties to prevent Vercel crashes
+  const resolvedSearchParams = await searchParams;
+  const query = resolvedSearchParams.q || "";
+  
   const { notes, blogs, users } = await performGlobalSearch(query);
 
   const totalResults = notes.length + blogs.length + users.length;
@@ -21,7 +24,8 @@ export default async function GlobalSearchPage({ searchParams }) {
           Search Results
         </h1>
         <p className="text-muted-foreground">
-          Showing {totalResults} results for <span className="text-primary font-bold">"{query}"</span>
+          {/* 🚀 ESLINT FIX: Escaped the double quotes around the query */}
+          Showing {totalResults} results for <span className="text-primary font-bold">&quot;{query}&quot;</span>
         </p>
       </div>
 

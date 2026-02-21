@@ -48,7 +48,8 @@ export default async function MyBlogsPage() {
         {/* --- Content Section --- */}
         {blogs.length === 0 ? (
             <div className="text-center py-20 border-2 border-dashed rounded-3xl bg-secondary/5">
-                <p className="text-xl text-muted-foreground mb-6 font-medium">You haven't written any articles yet.</p>
+                {/* 🚀 FIX: Escaped apostrophe in haven't */}
+                <p className="text-xl text-muted-foreground mb-6 font-medium">You haven&apos;t written any articles yet.</p>
                 <Link href="/blogs/post">
                     <Button variant="outline" className="rounded-full px-8">Start Writing</Button>
                 </Link>

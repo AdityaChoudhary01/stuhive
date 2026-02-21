@@ -62,7 +62,7 @@ export default function Footer() {
           {/* Brand Section */}
           <div className="flex flex-col gap-4 lg:col-span-1">
             <div className="text-3xl font-black bg-gradient-to-r from-cyan-400 to-purple-600 bg-clip-text text-transparent tracking-tighter">
-              PeerNotez
+              PeerLox
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               A collaborative ecosystem for students to share knowledge, discover academic insights, and build the future of learning together.
@@ -166,7 +166,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>© {currentYear} PeerNotez. Made with</span>
+            <span>© {currentYear} PeerLox. Made with</span>
             <FaHeart className="text-pink-500 animate-pulse" />
             <span>by Aditya Choudhary</span>
           </div>

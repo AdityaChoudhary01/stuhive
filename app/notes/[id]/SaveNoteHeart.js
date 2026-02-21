@@ -15,9 +15,14 @@ export default function SaveNoteHeart({ noteId }) {
 
   // Sync state with session
   useEffect(() => {
-    if (session?.user?.savedNotes) {
-      setIsSaved(session.user.savedNotes.includes(noteId));
-    }
+    // 🚀 FIX: Wrapped in setTimeout to make the state update asynchronous, avoiding the cascading render warning
+    const timer = setTimeout(() => {
+      if (session?.user?.savedNotes) {
+        setIsSaved(session.user.savedNotes.includes(noteId));
+      }
+    }, 0);
+    
+    return () => clearTimeout(timer);
   }, [session, noteId]);
 
   const handleSave = async () => {

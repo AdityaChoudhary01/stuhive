@@ -2,7 +2,7 @@
 
 import { 
     FaShieldAlt, FaGavel, FaEnvelope, FaExclamationTriangle, 
-    FaFileContract, FaCheckCircle, FaBalanceScale, FaUserSecret, 
+    FaFileContract, FaCheckCircle, FaUserSecret, 
     FaHistory, FaGlobe, FaArrowRight, FaLock, FaFileAlt 
 } from 'react-icons/fa';
 import Link from 'next/link';
@@ -79,7 +79,7 @@ export default function DMCAPageClient() {
                     <FaShieldAlt aria-hidden="true" /> IP Protection & DMCA
                 </h1>
                 <p style={styles.subtitle}>
-                    PeerNotez is committed to the protection of intellectual property rights. We abide by the Digital Millennium Copyright Act (DMCA), the EU Copyright Directive, and Section 79 of the Indian IT Act (2000).
+                    PeerLox is committed to the protection of intellectual property rights. We abide by the Digital Millennium Copyright Act (DMCA), the EU Copyright Directive, and Section 79 of the Indian IT Act (2000).
                 </p>
             </header>
 
@@ -88,7 +88,7 @@ export default function DMCAPageClient() {
                     <h2 style={styles.sectionHeading}><FaGavel style={{color: '#ffcc00'}} aria-hidden="true" /> Safe Harbor Compliance</h2>
                     <div style={styles.text}>
                         <p>
-                            PeerNotez is an intermediary platform. Under the <strong>"Safe Harbor"</strong> provisions, we are not liable for user-uploaded content, provided we act expeditiously to remove infringing material.
+                            PeerLox is an intermediary platform. Under the <strong>&quot;Safe Harbor&quot;</strong> provisions, we are not liable for user-uploaded content, provided we act expeditiously to remove infringing material.
                         </p>
                     </div>
                 </section>
@@ -111,7 +111,7 @@ export default function DMCAPageClient() {
                         <div style={styles.listItem}><FaCheckCircle style={{color: '#00ffaa'}} aria-hidden="true" /> Identification of the copyrighted work.</div>
                         <div style={styles.listItem}><FaCheckCircle style={{color: '#00ffaa'}} aria-hidden="true" /> Specific URLs of the infringing material.</div>
                         <div style={styles.listItem}><FaCheckCircle style={{color: '#00ffaa'}} aria-hidden="true" /> Your contact info (Phone/Email).</div>
-                        <div style={styles.listItem}><FaCheckCircle style={{color: '#00ffaa'}} aria-hidden="true" /> Statement of "Good Faith Belief".</div>
+                        <div style={styles.listItem}><FaCheckCircle style={{color: '#00ffaa'}} aria-hidden="true" /> Statement of &quot;Good Faith Belief&quot;.</div>
                     </div>
                 </div>
             </section>
@@ -120,7 +120,7 @@ export default function DMCAPageClient() {
                 <FaEnvelope size={40} style={{color: '#00d4ff', marginBottom: '1rem'}} aria-hidden="true" />
                 <h3 style={{color: '#fff', fontSize: '1.8rem', fontWeight: '800', fontStyle: 'normal'}}>Designated Copyright Agent</h3>
                 <p style={{color: 'rgba(255,255,255,0.6)', maxWidth: '500px', margin: '1rem auto', fontStyle: 'normal'}}>
-                    Please email formal legal notices to the address below. Priority is given to emails with the subject line "URGENT: COPYRIGHT TAKEDOWN".
+                    Please email formal legal notices to the address below. Priority is given to emails with the subject line &quot;URGENT: COPYRIGHT TAKEDOWN&quot;.
                 </p>
                 <a href={`mailto:${designatedAgentEmail}`} style={styles.emailLink}>{designatedAgentEmail}</a>
                 <p style={{marginTop: '1.5rem', color: '#ff00cc', fontSize: '0.9rem', fontWeight: '600', fontStyle: 'normal'}}>
@@ -131,7 +131,7 @@ export default function DMCAPageClient() {
             <section style={{...styles.glassSection, borderColor: 'rgba(255, 0, 85, 0.3)', marginTop: '4rem'}}>
                 <h2 style={styles.sectionHeading}><FaExclamationTriangle style={{color: '#ff0055'}} aria-hidden="true" /> Repeat Infringer Policy</h2>
                 <div style={styles.text}>
-                    <p>PeerNotez implements a strict "Three-Strikes" policy regarding copyright infringement.</p>
+                    <p>PeerLox implements a strict &quot;Three-Strikes&quot; policy regarding copyright infringement.</p>
                     <aside style={styles.warningBox}>
                         <div className="flex gap-4 items-center">
                             <FaUserSecret size={40} style={{color: '#ff0055'}} aria-hidden="true" />
@@ -153,7 +153,7 @@ export default function DMCAPageClient() {
                     <FaGavel /> Terms of Service <FaArrowRight size={12} />
                 </Link>
                 <Link href="/about" style={styles.navLink} title="About Us">
-                    <FaFileAlt /> About PeerNotez <FaArrowRight size={12} />
+                    <FaFileAlt /> About PeerLox <FaArrowRight size={12} />
                 </Link>
             </nav>
 

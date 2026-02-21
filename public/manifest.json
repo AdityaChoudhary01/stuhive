@@ -1,6 +1,6 @@
 {
-  "short_name": "PeerNotez",
-  "name": "PeerNotez - Student Learning Platform",
+  "short_name": "PeerLox",
+  "name": "PeerLox - Student Learning Platform",
   "description": "Share and discover academic notes, blogs, and study materials.",
   "icons": [
     {
@@ -10,16 +10,22 @@
       "purpose": "any"
     },
     {
-      "src": "/logo192.png",
+      "src": "/logo-mg-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "maskable"
     },
     {
-      "src": "/logo512.png",
+      "src": "/logo-mg-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
+    },
+    {
+      "src": "/logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
   ],
   "start_url": "/",
@@ -34,13 +40,13 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "PeerNotez Desktop Dashboard"
+      "label": "PeerLox Desktop Dashboard"
     },
     {
       "src": "/screenshot-mobile.png",
       "sizes": "750x1334",
       "type": "image/png",
-      "label": "PeerNotez Mobile View"
+      "label": "PeerLox Mobile View"
     }
   ]
 }

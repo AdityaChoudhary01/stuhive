@@ -26,10 +26,10 @@ export default function BlogCard({ blog }) {
     },
     "publisher": {
       "@type": "Organization",
-      "name": "PeerNotez",
+      "name": "PeerLox",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://peernotez.netlify.app/logo512.png"
+        "url": "https://peerlox.in/logo512.png"
       }
     },
     "description": blog.summary || blog.excerpt || "",

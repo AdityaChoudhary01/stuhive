@@ -10,12 +10,12 @@ import User from '@/lib/models/User';
 export const dynamic = 'force-dynamic';
 
 // ✅ 1. HIGH-OCTANE SEO METADATA & SCHEMA
-const APP_URL = process.env.NEXTAUTH_URL || "https://peernotez.netlify.app";
+const APP_URL = process.env.NEXTAUTH_URL || "https://peerlox.in";
 
 export const metadata = {
-    title: 'About PeerNotez | Mission, Vision, and the Future of Learning',
-    description: 'Discover the story behind PeerNotez. Founded by Aditya Choudhary, we are a global community platform dedicated to making academic resources free and accessible.',
-    keywords: ["About PeerNotez", "Aditya Choudhary Developer", "Academic Community", "Free University Notes", "Mission and Vision"],
+    title: 'About PeerLox | Mission, Vision, and the Future of Learning',
+    description: 'Discover the story behind PeerLox. Founded by Aditya Choudhary, we are a global community platform dedicated to making academic resources free and accessible.',
+    keywords: ["About PeerLox", "Aditya Choudhary Developer", "Academic Community", "Free University Notes", "Mission and Vision"],
     alternates: {
         canonical: `${APP_URL}/about`,
     },
@@ -46,7 +46,7 @@ export default async function AboutPage() {
         "@type": "AboutPage",
         "mainEntity": {
             "@type": "Organization",
-            "name": "PeerNotez",
+            "name": "PeerLox",
             "url": APP_URL,
             "logo": `${APP_URL}/logo192.png`,
             "founder": {
@@ -104,7 +104,7 @@ export default async function AboutPage() {
             <header style={styles.header}>
                 <h1 style={styles.title}>The Future of Learning.</h1>
                 <p className="text-white/60 text-xl max-w-3xl mx-auto leading-relaxed">
-                    PeerNotez is a collaborative ecosystem designed to dismantle the barriers to academic success. One student, one note, and one community at a time.
+                    PeerLox is a collaborative ecosystem designed to dismantle the barriers to academic success. One student, one note, and one community at a time.
                 </p>
             </header>
 
@@ -115,7 +115,7 @@ export default async function AboutPage() {
                         <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full border-2 border-white/20 overflow-hidden bg-black">
                             <img 
                                 src="/images/developer.jpg" 
-                                alt="Aditya Choudhary - Founder of PeerNotez" 
+                                alt="Aditya Choudhary - Founder of PeerLox" 
                                 className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                             />
                         </div>
@@ -126,10 +126,10 @@ export default async function AboutPage() {
                         <h2 className="text-4xl font-black text-white mb-4">Aditya Choudhary</h2>
                         <div className="space-y-4 text-white/70 text-lg leading-relaxed">
                             <p>
-                                PeerNotez was born from a singular vision: <strong>Academic knowledge should be free, accessible, and community-driven.</strong>
+                                PeerLox was born from a singular vision: <strong>Academic knowledge should be free, accessible, and community-driven.</strong>
                             </p>
                             <p>
-                                As a solo developer, I’ve built PeerNotez from the first line of code to the scalable infrastructure it stands on today. This project is more than just a website; it’s a commitment to every student who has ever struggled to find the right resources.
+                                As a solo developer, I’ve built PeerLox from the first line of code to the scalable infrastructure it stands on today. This project is more than just a website; it’s a commitment to every student who has ever struggled to find the right resources.
                             </p>
                         </div>
                     </div>
@@ -155,7 +155,7 @@ export default async function AboutPage() {
                     <FaGlobe size={40} className="text-[#00ffaa] mb-6 mx-auto" aria-hidden="true" />
                     <h3 className="text-xl font-bold text-white text-center mb-4">Global Reach</h3>
                     <p className="text-sm text-center text-white/50 leading-relaxed">
-                        PeerNotez bridges the gap between universities, allowing knowledge to flow across borders and disciplines.
+                        PeerLox bridges the gap between universities, allowing knowledge to flow across borders and disciplines.
                     </p>
                 </div>
             </section>
@@ -188,7 +188,7 @@ export default async function AboutPage() {
                 <div className="relative z-10">
                     <h2 className="text-4xl font-black text-white mb-6">Start Your Journey Today.</h2>
                     <p className="text-white/60 max-w-2xl mx-auto mb-10 text-lg">
-                        The PeerNotez mission is powered by students like you. Upload your first note or discover resources that change your academic path.
+                        The PeerLox mission is powered by students like you. Upload your first note or discover resources that change your academic path.
                     </p>
                     <div className="flex flex-wrap justify-center gap-4">
                         <Link href="/signup" title="Create a Free Account" className="px-10 py-4 rounded-full bg-white text-black font-black text-lg hover:scale-105 transition-transform">
@@ -214,7 +214,7 @@ export default async function AboutPage() {
             </nav>
 
             <footer style={{textAlign: 'center', marginTop: '4rem', color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem'}}>
-                PeerNotez. Built for the students of today, by the student who dared to code.
+                PeerLox. Built for the students of today, by the student who dared to code.
             </footer>
         </main>
     );

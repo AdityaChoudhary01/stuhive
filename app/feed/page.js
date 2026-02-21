@@ -5,7 +5,7 @@ import { getUserFeed } from "@/actions/user.actions";
 import FeedView from "@/components/feed/FeedView"; // Client Component
 
 export const metadata = {
-  title: "My Feed | PeerNotez",
+  title: "My Feed | PeerLox",
 };
 
 export default async function FeedPage() {

@@ -74,7 +74,7 @@ export default function PrivacyPageClient() {
             <section style={styles.sectionCard}>
                 <h2 style={styles.sectionHeading}><FaUserShield style={{color: '#00ffaa'}} aria-hidden="true" /> Data Architecture</h2>
                 <p style={{color: 'rgba(255,255,255,0.7)', fontSize: '1.1rem', marginBottom: '2rem'}}>
-                    We follow the principle of <strong>Data Minimization</strong>. We only collect what is strictly necessary to run the PeerNotez ecosystem.
+                    We follow the principle of <strong>Data Minimization</strong>. We only collect what is strictly necessary to run the PeerLox ecosystem.
                 </p>
                 
                 <h3 style={styles.subHeading}><FaUserSecret aria-hidden="true" /> Information You Provide</h3>
@@ -123,7 +123,8 @@ export default function PrivacyPageClient() {
                     <p>We do not use tracking cookies for advertising. We only use <strong>Essential Cookies</strong> for:</p>
                     <ul className="mt-4 space-y-2">
                         <li>• Maintaining your active login session.</li>
-                        <li>• Remembering your "Dark Mode" preferences.</li>
+                        {/* 🚀 FIX: Escaped the quotes around Dark Mode */}
+                        <li>• Remembering your &quot;Dark Mode&quot; preferences.</li>
                         <li>• Preventing Cross-Site Request Forgery (CSRF).</li>
                     </ul>
                 </div>
@@ -163,12 +164,12 @@ export default function PrivacyPageClient() {
                     <FaShieldAlt aria-hidden="true" /> DMCA Policy <FaArrowRight size={12} />
                 </Link>
                 <Link href="/about" style={styles.navLink} title="About Us">
-                    <FaFileAlt aria-hidden="true" /> About PeerNotez <FaArrowRight size={12} />
+                    <FaFileAlt aria-hidden="true" /> About PeerLox <FaArrowRight size={12} />
                 </Link>
             </nav>
 
             <footer style={{textAlign: 'center', marginTop: '4rem', color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem'}}>
-                &copy; 2026 PeerNotez. Designed for privacy, built for students.
+                &copy; 2026 PeerLox. Designed for privacy, built for students.
             </footer>
         </article>
     );

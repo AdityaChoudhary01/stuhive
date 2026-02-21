@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 
 // Components
-import PDFViewer from "@/components/notes/PDFViewer";
+import ClientPDFLoader from "@/components/notes/ClientPDFLoader"; // 🚀 IMPORT THE NEW CLIENT WRAPPER
 import Reviews from "@/components/notes/Reviews";
 import RelatedNotes from "@/components/notes/RelatedNotes";
 import AuthorInfoBlock from "@/components/common/AuthorInfoBlock";
@@ -25,26 +25,29 @@ import { Download, Calendar, Eye, ShieldCheck, Info } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { generateReadUrl } from "@/lib/r2";
 
-const APP_URL = process.env.NEXTAUTH_URL || "https://peernotez.netlify.app";
+const APP_URL = process.env.NEXTAUTH_URL || "https://peerlox.in";
 
 // ✅ 1. HIGH-OCTANE DYNAMIC SEO METADATA
 export async function generateMetadata({ params }) {
-  const note = await getNoteById(params.id);
+  // 🚀 NEXT.JS 15 FIX: Await params before reading properties
+  const resolvedParams = await params;
+  
+  const note = await getNoteById(resolvedParams.id);
   if (!note) return { title: "Note Not Found" };
 
   const ogImage = note.thumbnailUrl || `${APP_URL}/default-note-og.jpg`;
 
   return {
-    title: `${note.title} - ${note.subject} | PeerNotez`,
+    title: `${note.title} - ${note.subject} | PeerLox`,
     description: `Download ${note.title} for ${note.course} at ${note.university}. ${note.description?.substring(0, 120)}...`,
     keywords: [note.subject, note.course, note.university, "study notes", "academic material", "PDF notes"],
     alternates: {
-        canonical: `${APP_URL}/notes/${params.id}`,
+        canonical: `${APP_URL}/notes/${resolvedParams.id}`,
     },
     openGraph: {
       title: note.title,
       description: `Academic material for ${note.course}`,
-      url: `${APP_URL}/notes/${params.id}`,
+      url: `${APP_URL}/notes/${resolvedParams.id}`,
       type: "article",
       images: [{ url: ogImage }],
     },
@@ -57,8 +60,11 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ViewNotePage({ params }) {
+  // 🚀 NEXT.JS 15 FIX: Await params before reading properties
+  const resolvedParams = await params;
+  
   const session = await getServerSession(authOptions);
-  const note = await getNoteById(params.id);
+  const note = await getNoteById(resolvedParams.id);
   
   if (!note) notFound();
 
@@ -90,7 +96,7 @@ export default async function ViewNotePage({ params }) {
       "courseMode": "online",
       "instructor": {
         "@type": "Person",
-        "name": note.user?.name || "PeerNotez Contributor"
+        "name": note.user?.name || "PeerLox Contributor"
       }
     },
     "educationalLevel": "University",
@@ -177,7 +183,8 @@ export default async function ViewNotePage({ params }) {
              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 opacity-80" />
              
              <div className="min-h-[500px] md:min-h-[700px] bg-black/40">
-               <PDFViewer url={signedUrl} fileType={note.fileType} title={note.title} />
+               {/* 🚀 NOW USING THE DYNAMICALLY IMPORTED CLIENT COMPONENT */}
+               <ClientPDFLoader url={signedUrl} fileType={note.fileType} title={note.title} />
              </div>
              
              <div className="p-4 md:p-6 bg-secondary/30 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-5">
@@ -228,11 +235,11 @@ export default async function ViewNotePage({ params }) {
 
             <section className="rounded-[2rem] bg-gradient-to-br from-cyan-500/10 via-background to-purple-500/10 border border-cyan-500/20 p-8 text-center relative overflow-hidden group shadow-[0_0_30px_-10px_rgba(34,211,238,0.2)]">
                 <div className="absolute inset-0 bg-cyan-400/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none duration-500" />
-                <h4 className="text-lg font-black text-foreground tracking-tight mb-2">KEEP PEERNOTEZ FREE</h4>
+                <h4 className="text-lg font-black text-foreground tracking-tight mb-2">KEEP PeerLox FREE</h4>
                 <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-6 leading-relaxed">
                   Help us maintain high-speed cloud storage for everyone.
                 </p>
-                <Link href="/donate" title="Support PeerNotez">
+                <Link href="/donate" title="Support PeerLox">
                     <Button variant="outline" className="w-full h-12 rounded-xl border-cyan-400/30 bg-cyan-400/10 text-cyan-400 hover:bg-cyan-400 hover:text-black font-black uppercase tracking-widest text-xs transition-all">
                         Support the Platform
                     </Button>

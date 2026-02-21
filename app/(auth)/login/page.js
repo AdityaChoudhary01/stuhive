@@ -6,14 +6,14 @@ import { Loader2 } from "lucide-react";
 // We want this page indexed so users can find the login via Google, 
 // but we use "follow" to ensure the crawler goes back to the homepage/signup.
 export const metadata = {
-  title: "Login", // Becomes "Login | PeerNotez" via your layout template
-  description: "Securely sign in to your PeerNotez account to access your notes, study materials, and academic collections.",
+  title: "Login", // Becomes "Login | PeerLox" via your layout template
+  description: "Securely sign in to your PeerLox account to access your notes, study materials, and academic collections.",
   robots: {
     index: true,
     follow: true,
   },
   alternates: {
-    canonical: "https://peernotez.netlify.app/login",
+    canonical: "https://peerLox.in/login",
   },
 };
 

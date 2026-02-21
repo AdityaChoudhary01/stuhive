@@ -3,7 +3,7 @@ import Blog from "@/lib/models/Blog";
 import Note from "@/lib/models/Note";
 import User from "@/lib/models/User";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://peernotez.netlify.app';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://peerlox.in';
 
 // Helper to safely format dates for XML (W3C format)
 const formatDate = (date) => {

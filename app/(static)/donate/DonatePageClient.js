@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image'; // 🚀 IMPORTED NEXT/IMAGE
 import { 
     FaServer, FaMagic, FaShieldAlt, FaBan, FaCoffee, 
     FaHeart, FaRocket, FaGlobe, FaArrowRight, FaLock, 
@@ -52,11 +53,11 @@ export default function DonatePageClient() {
                     transition: 'transform 0.1s ease-out'
                 }}>
                     <h1 className="text-6xl md:text-8xl font-black bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 mb-6 drop-shadow-2xl">
-                        Keep PeerNotez<br/>Independent.
+                        Keep PeerLox<br/>Independent.
                     </h1>
                 </div>
                 <p className="text-xl text-white/60 max-w-3xl mx-auto mb-10 leading-relaxed">
-                    PeerNotez isn't owned by a corporation. It's a student-led initiative dedicated to 
+                    PeerLox isn&apos;t owned by a corporation. It&apos;s a student-led initiative dedicated to 
                     <strong className="text-white"> free, open, and accessible</strong> academic resources. 
                     Your support directly fuels the infrastructure that keeps us online.
                 </p>
@@ -123,8 +124,8 @@ export default function DonatePageClient() {
                     </div>
                     <h2 className="text-4xl md:text-5xl font-black text-white mb-6">Built for the<br/>Community.</h2>
                     <p className="text-white/60 mb-8 text-lg leading-relaxed">
-                        "PeerNotez started as a small script on my laptop to help my classmates. Today, it serves students globally. 
-                        As a solo developer, your support allows me to spend more time coding features and less time worrying about server bills."
+                        &quot;PeerLox started as a small script on my laptop to help my classmates. Today, it serves students globally. 
+                        As a solo developer, your support allows me to spend more time coding features and less time worrying about server bills.&quot;
                     </p>
                     <div className="flex items-center gap-6 justify-center lg:justify-start text-white/40 text-sm mb-10">
                         <span className="flex items-center gap-2"><FaCheckCircle className="text-green-500" aria-hidden="true" /> Ad-Free Forever</span>
@@ -143,9 +144,13 @@ export default function DonatePageClient() {
                  <div className="relative flex justify-center">
                     <div className="absolute -inset-4 bg-gradient-to-tr from-yellow-400 to-purple-500 rounded-[50px] blur opacity-20 animate-pulse" aria-hidden="true"></div>
                     <div className="relative bg-[#0a0118] p-4 rounded-[40px] border border-white/10">
-                        <img 
+                        {/* 🚀 FIX: Replaced img with Next.js Image Component */}
+                        <Image 
                             src={bmacProfileUrl} 
                             alt="Aditya Choudhary - Founder and Solo Architect" 
+                            width={320}
+                            height={320}
+                            unoptimized
                             className="w-full max-w-[320px] rounded-[32px] shadow-2xl grayscale hover:grayscale-0 transition-all duration-700" 
                         />
                         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[80%] bg-black/60 backdrop-blur-md border border-white/10 p-4 rounded-2xl text-center">
