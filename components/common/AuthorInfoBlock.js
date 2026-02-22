@@ -43,9 +43,10 @@ export default function AuthorInfoBlock({ user }) {
       
       <div className="flex-1 min-w-0">
         <Link href={`/profile/${user._id}`} className="block">
-            <h4 className="font-black text-white/90 text-base truncate group-hover:text-primary transition-colors duration-300" itemProp="name">
+            {/* ✅ ACCESSIBILITY FIX: Changed <h4> to a <span className="block"> to fix heading sequence errors */}
+            <span className="block font-black text-white/90 text-base truncate group-hover:text-primary transition-colors duration-300" itemProp="name">
               {user.name}
-            </h4>
+            </span>
         </Link>
         <div className="flex items-center gap-2 mt-1">
             {/* ✅ 3. Role/Job Title Microdata */}
