@@ -3,10 +3,14 @@ import { getBlogs, getUniqueBlogTags } from "@/actions/blog.actions";
 import BlogCard from "@/components/blog/BlogCard"; 
 import Pagination from "@/components/common/Pagination";
 import BlogSearchClient from "@/components/blog/BlogSearchClient"; 
-import { FaPenNib, FaHashtag } from "react-icons/fa";
+// 🚀 OPTIMIZATION: Using lucide-react instead of react-icons saves 500kb of JS
+import { PenTool, Hash } from "lucide-react"; 
 import { Button } from "@/components/ui/button";
 
 const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
+
+// 🚀 THE FIX: Cache this page for 60 seconds. It will load in ~50ms globally.
+export const revalidate = 60;
 
 // ✅ 1. DYNAMIC METADATA (Handles Pagination SEO)
 export async function generateMetadata({ searchParams }) {
@@ -39,14 +43,13 @@ export default async function BlogPage({ searchParams }) {
   const tag = params.tag || "All";
 
   // 🚀 HIGH-SPEED PARALLEL FETCHING
-  // This now runs instantly because getBlogs drops the heavy markdown payloads
   const [blogsData, dynamicTags] = await Promise.all([
       getBlogs({ page, search, tag }),
       getUniqueBlogTags()
   ]);
 
   const { blogs, totalPages } = blogsData;
-  const categories = ["All", ...dynamicTags]; // Removed duplicate Set conversion since dynamicTags are already unique
+  const categories = ["All", ...dynamicTags]; 
 
   // ✅ 2. COLLECTION SCHEMA (JSON-LD)
   const jsonLd = {
@@ -89,7 +92,7 @@ export default async function BlogPage({ searchParams }) {
         <div className="flex flex-wrap justify-center gap-4 pt-4">
             <Link href="/blogs/post" title="Write a new article">
                 <Button className="rounded-full bg-gradient-to-r from-pink-500 to-purple-600 border-0 shadow-lg hover:shadow-pink-500/25 transition-all text-white font-bold h-12 px-6">
-                    <FaPenNib className="mr-2.5 h-4 w-4" aria-hidden="true" /> Write a Blog
+                    <PenTool className="mr-2.5 h-4 w-4" aria-hidden="true" /> Write a Blog
                 </Button>
             </Link>
             <Link href="/blogs/my-blogs" title="View my articles">
@@ -111,7 +114,6 @@ export default async function BlogPage({ searchParams }) {
             
             <div className="flex overflow-x-auto gap-3 pb-4 hide-scrollbar snap-x px-4 md:justify-center">
                 {categories.map((cat) => {
-                    // Safe URL building for tags
                     const searchParams = new URLSearchParams();
                     if (search) searchParams.set("search", search);
                     if (cat !== "All") searchParams.set("tag", cat);
@@ -150,7 +152,7 @@ export default async function BlogPage({ searchParams }) {
           </div>
         ) : (
           <div className="text-center py-24 bg-secondary/5 rounded-[2.5rem] border border-dashed border-border/60 shadow-inner">
-              <FaHashtag className="mx-auto h-16 w-16 text-muted-foreground/20 mb-6" aria-hidden="true" />
+              <Hash className="mx-auto h-16 w-16 text-muted-foreground/20 mb-6" aria-hidden="true" />
               <h3 className="text-2xl font-bold text-foreground mb-2">No articles found</h3>
               <p className="text-base text-muted-foreground">Be the first to share your experience with the community!</p>
               

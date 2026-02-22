@@ -15,11 +15,16 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
+// 🚀 THE FIX: Cache at the Edge, but automatically refresh data every 30 seconds
+export const revalidate = 30;
+
 const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
 
 // ✅ 1. HIGH-OCTANE DYNAMIC SEO METADATA
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
+  
+  // 🚀 Thanks to React cache(), this DB call is perfectly reused by the main component!
   const blog = await getBlogBySlug(resolvedParams.slug, false);
   
   if (!blog) return { title: "Blog Not Found" };
@@ -68,8 +73,9 @@ export default async function BlogDetailPage({ params }) {
   // Fetch related blogs AFTER we have the main blog ID
   const relatedBlogs = await getRelatedBlogs(blog._id);
 
-  // --- Metrics ---
-  const readTime = Math.ceil((blog.content?.split(/\s+/).length || 0) / 200);
+  // 🚀 THE METRICS FIX: Read from the DB directly, fallback to math only if missing
+  const readTime = blog.readTime || Math.ceil((blog.content?.split(/\s+/).length || 0) / 200) || 3;
+  
   const totalReviews = blog.reviews?.length || 0;
   const averageRating = totalReviews > 0
     ? (blog.reviews.reduce((acc, review) => acc + (review.rating || 0), 0) / totalReviews).toFixed(1)
@@ -179,7 +185,6 @@ export default async function BlogDetailPage({ params }) {
              </span>
              <span className="flex items-center gap-2">
                 <Eye className="w-4 h-4 text-cyan-400" aria-hidden="true" />
-                {/* 🚀 FIXED: Now uses viewCount and updates optimistically */}
                 {blog.viewCount + 1 || 1}
              </span>
              <span className="flex items-center gap-2 text-foreground bg-secondary/50 px-3 py-1 rounded-full">

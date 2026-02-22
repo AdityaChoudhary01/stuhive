@@ -8,11 +8,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { deleteFileFromR2 } from "@/lib/r2"; 
 import { indexNewContent, removeContentFromIndex } from "@/lib/googleIndexing"; 
+import { cache } from "react"; // 🚀 ADDED: React Cache for Instant Next.js Loading
 
 /**
  * FETCH BLOGS (Pagination, Search, Filter by Tags)
+ * 🚀 WRAPPED IN CACHE: Prevents duplicate DB calls during server renders
  */
-export async function getBlogs({ page = 1, limit = 9, search = "", tag = "", isFeatured }) {
+export const getBlogs = cache(async ({ page = 1, limit = 9, search = "", tag = "", isFeatured }) => {
   await connectDB();
   try {
     const skip = (page - 1) * limit;
@@ -33,7 +35,7 @@ export async function getBlogs({ page = 1, limit = 9, search = "", tag = "", isF
     }
 
     const blogs = await Blog.find(query)
-      .select("-content -reviews") // 🚀 MASSIVE SPEED BOOST: Do not fetch heavy markdown or reviews for lists
+      .select("-content -reviews") // 🚀 MASSIVE SPEED BOOST
       .populate('author', 'name avatar role email')
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -52,6 +54,7 @@ export async function getBlogs({ page = 1, limit = 9, search = "", tag = "", isF
       numReviews: b.numReviews || 0,
       viewCount: b.viewCount || 0,
       isFeatured: b.isFeatured || false,
+      readTime: b.readTime || 3, // 🚀 FAST: Read pre-calculated time from DB
       reviews: [], // Excluded for speed
       createdAt: b.createdAt ? b.createdAt.toISOString() : new Date().toISOString(),
       updatedAt: b.updatedAt ? b.updatedAt.toISOString() : new Date().toISOString(),
@@ -66,12 +69,13 @@ export async function getBlogs({ page = 1, limit = 9, search = "", tag = "", isF
     console.error("Get Blogs Error:", error);
     return { blogs: [], total: 0, totalPages: 0 };
   }
-}
+});
 
 /**
  * GET BLOG BY SLUG
+ * 🚀 WRAPPED IN CACHE: Shares data instantly between generateMetadata and the Page UI
  */
-export async function getBlogBySlug(slug) {
+export const getBlogBySlug = cache(async (slug) => {
  await connectDB();
  try {
    const blog = await Blog.findOne({ slug })
@@ -94,6 +98,7 @@ export async function getBlogBySlug(slug) {
      numReviews: blog.numReviews || 0,
      viewCount: blog.viewCount || 0,
      isFeatured: blog.isFeatured || false,
+     readTime: blog.readTime || 3, // 🚀 FAST: Read pre-calculated time from DB
      reviews: blog.reviews ? blog.reviews.map(r => ({
        ...r,
        _id: r._id.toString(),
@@ -110,7 +115,7 @@ export async function getBlogBySlug(slug) {
    console.error("Get Blog By Slug Error:", error);
    return null;
  }
-}
+});
 
 /**
  * INCREMENT BLOG VIEWS (Non-blocking)
@@ -144,17 +149,16 @@ export async function updateBlog(blogId, updateData, userId) {
       return { success: false, error: "Unauthorized to update this blog" };
     }
 
-    // 1. R2 Cleanup: If a new coverImageKey is provided, delete the old one from Cloudflare R2
+    // 1. R2 Cleanup
     if (updateData.coverImageKey && updateData.coverImageKey !== blog.coverImageKey) {
         if (blog.coverImageKey) {
             await deleteFileFromR2(blog.coverImageKey);
         }
     }
 
-    // Capture the old slug in case the title update changes it
     const oldSlug = blog.slug;
 
-    // 2. Handle Slug updating if title changes
+    // 2. Handle Slug updating
     if (updateData.title && updateData.title !== blog.title) {
          let newSlug = updateData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
          const existing = await Blog.findOne({ slug: newSlug });
@@ -164,19 +168,22 @@ export async function updateBlog(blogId, updateData, userId) {
          updateData.slug = newSlug;
     }
 
-    // 3. Apply updates using Mongoose's native .set() method
+    // 🚀 3. PRE-CALCULATE READ TIME ON UPDATE
+    if (updateData.content) {
+        const wordCount = updateData.content.split(/\s+/).length;
+        updateData.readTime = Math.ceil(wordCount / 200) || 1;
+    }
+
+    // Apply updates
     blog.set(updateData);
-    
-    // 4. Save to DB
     await blog.save();
 
-    // ✅ SEO: If the URL changed, await the removal of the old one
+    // SEO
     if (updateData.slug && updateData.slug !== oldSlug) {
         const removeStatus = await removeContentFromIndex(oldSlug, 'blog');
         console.log(`[ACTION LOG] Blog URL changed. Old Google URL Removal ping: ${removeStatus ? 'DELIVERED' : 'FAILED'}`);
     }
     
-    // ✅ SEO: Await Google confirmation for the updated/new content
     const seoStatus = await indexNewContent(blog.slug, 'blog'); 
     console.log(`[ACTION LOG] Blog updated. Google Indexing ping: ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
     
@@ -200,17 +207,21 @@ export async function createBlog({ title, content, summary, tags, coverImage, co
     const existing = await Blog.findOne({ slug });
     if (existing) slug = `${slug}-${Date.now()}`;
 
+    // 🚀 PRE-CALCULATE READ TIME ON CREATE
+    const wordCount = content ? content.split(/\s+/).length : 0;
+    const readTime = Math.ceil(wordCount / 200) || 1;
+
     const newBlog = new Blog({
       title, content, summary, tags, slug,
       coverImage,           // The public R2 Read URL
       coverImageKey,        // The secret R2 object key for deletion later
-      author: userId, rating: 0, numReviews: 0, viewCount: 0, isFeatured: false
+      author: userId, rating: 0, numReviews: 0, viewCount: 0, isFeatured: false,
+      readTime              // 🚀 Saved directly to DB
     });
 
     await newBlog.save();
     await User.findByIdAndUpdate(userId, { $inc: { blogCount: 1 } });
 
-    // ✅ SEO: Await Google confirmation before the serverless function completes
     const seoStatus = await indexNewContent(newBlog.slug, 'blog');
     console.log(`[ACTION LOG] Blog created. Google Indexing ping: ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
 
@@ -231,12 +242,10 @@ export async function deleteBlog(blogId, userId) {
     const session = await getServerSession(authOptions);
     if (blog.author.toString() !== userId && session?.user?.role !== "admin") return { success: false, error: "Unauthorized" };
 
-    // R2 Cleanup: Delete the cover image from Cloudflare before destroying the DB record
     if (blog.coverImageKey) {
         await deleteFileFromR2(blog.coverImageKey);
     }
 
-    // ✅ SEO: Await Google removal confirmation
     const seoStatus = await removeContentFromIndex(blog.slug, 'blog');
     console.log(`[ACTION LOG] Blog deleted. Google Removal ping: ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
 
@@ -330,12 +339,13 @@ export async function deleteBlogReview(blogId, reviewId) {
 
 /**
  * GET RELATED BLOGS
+ * 🚀 WRAPPED IN CACHE
  */
-export async function getRelatedBlogs(blogId) {
+export const getRelatedBlogs = cache(async (blogId) => {
   await connectDB();
   try {
     const relatedBlogs = await Blog.find({ _id: { $ne: blogId } })
-      .select('title summary slug createdAt author rating numReviews isFeatured coverImage viewCount tags')
+      .select('title summary slug createdAt author rating numReviews isFeatured coverImage viewCount tags readTime')
       .populate('author', 'name avatar role email')
       .sort({ createdAt: -1 })
       .limit(3)
@@ -347,11 +357,12 @@ export async function getRelatedBlogs(blogId) {
       author: b.author ? { ...b.author, _id: b.author._id.toString() } : null,
       tags: b.tags ? Array.from(b.tags) : [],
       viewCount: b.viewCount || 0,
+      readTime: b.readTime || 3, // 🚀 FAST: Propagated down
       createdAt: b.createdAt?.toISOString()
     }));
     return safeRelated;
   } catch (error) { return []; }
-}
+});
 
 /**
  * GET MY BLOGS
@@ -369,6 +380,7 @@ export async function getMyBlogs(userId) {
       _id: b._id.toString(), 
       tags: b.tags ? Array.from(b.tags) : [],
       author: b.author?.toString(), 
+      readTime: b.readTime || 3, // 🚀 FAST: Propagated down
       createdAt: b.createdAt?.toISOString()
     }));
     return safeBlogs;
@@ -396,7 +408,8 @@ export async function getBlogsForUser(userId) {
       numReviews: b.numReviews || 0,
       viewCount: b.viewCount || 0,
       isFeatured: b.isFeatured || false,
-      reviews: [], // Excluded
+      readTime: b.readTime || 3, // 🚀 FAST: Propagated down
+      reviews: [], 
       createdAt: b.createdAt ? b.createdAt.toISOString() : new Date().toISOString(),
       updatedAt: b.updatedAt ? b.updatedAt.toISOString() : new Date().toISOString(),
     }));
@@ -410,8 +423,9 @@ export async function getBlogsForUser(userId) {
 
 /**
  * GET UNIQUE BLOG TAGS (CATEGORIES)
+ * 🚀 WRAPPED IN CACHE
  */
-export async function getUniqueBlogTags() {
+export const getUniqueBlogTags = cache(async () => {
   await connectDB();
   try {
     const rawTags = await Blog.distinct("tags");
@@ -429,4 +443,4 @@ export async function getUniqueBlogTags() {
     console.error("Error fetching unique tags:", error);
     return [];
   }
-}
+});
