@@ -45,7 +45,7 @@ export default function Navbar() {
   const [isMobile, setIsMobile] = useState(false);
   const [unreadTotal, setUnreadTotal] = useState(0);
 
-  const LOGO_URL = 'https://res.cloudinary.com/dmtnonxtt/image/upload/v1771679371/aqpebgj5izdezfstneix.png';
+  const LOGO_URL = 'https://res.cloudinary.com/dmtnonxtt/image/upload/v1771749043/vshx4isacdlfv6x6aaqv.png';
 
   // Fetch initial unread count from DB
   useEffect(() => {
