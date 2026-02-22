@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
 
 export default async function BlogListServer({ params }) {
-  // ✅ 1. OPTIMIZATION: Immediate destructuring to prevent waterfall
+  // Immediate destructuring to prevent waterfall
   const { page = 1, search = "", tag = "All" } = params;
 
-  // ✅ 2. OPTIMIZATION: Parallel fetching fetches everything in one network trip
+  // Parallel fetching fetches everything in one network trip
   const [blogsData, dynamicTags] = await Promise.all([
       getBlogs({ page: Number(page), search, tag }),
       getUniqueBlogTags()
@@ -44,13 +44,18 @@ export default async function BlogListServer({ params }) {
       />
 
       <div className="max-w-4xl mx-auto mb-12">
-        <nav className="relative w-full" aria-label="Blog Categories">
-            <div className="flex overflow-x-auto gap-3 pb-4 hide-scrollbar px-4 md:justify-center">
+        <nav className="relative w-full overflow-hidden" aria-label="Blog Categories">
+            {/* Fade gradients to indicate scrolling is possible */}
+            <div className="absolute left-0 top-0 bottom-4 w-8 bg-gradient-to-r from-[#0a0a0a] to-transparent pointer-events-none z-10" />
+            <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-[#0a0a0a] to-transparent pointer-events-none z-10" />
+            
+            {/* ✅ FIXED SCROLLING BUG: Removed md:justify-center so the track always starts from the left */}
+            <div className="flex overflow-x-auto gap-3 pb-4 hide-scrollbar px-6 relative w-full snap-x snap-mandatory">
                 {categories.map((cat) => (
                     <Link 
                         key={cat} 
                         href={`/blogs?${new URLSearchParams({ ...(search && { search }), ...(cat !== "All" && { tag: cat }) })}`}
-                        className={`px-5 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider transition-all duration-300 ${
+                        className={`snap-start shrink-0 px-5 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider transition-all duration-300 ${
                             tag === cat 
                             ? "bg-cyan-500 text-black shadow-[0_0_15px_rgba(34,211,238,0.4)]" 
                             : "bg-white/5 text-gray-400 border border-white/10 hover:text-white"
@@ -68,7 +73,6 @@ export default async function BlogListServer({ params }) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {blogs.map((blog, index) => (
                   <article key={blog._id} className="h-full transform transition-all duration-300 hover:-translate-y-2">
-                      {/* ✅ 3. OPTIMIZATION: Only priority-load the very first image to save mobile CPU */}
                       <BlogCard blog={blog} priority={index === 0} />
                   </article>
               ))}

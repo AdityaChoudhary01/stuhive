@@ -52,7 +52,6 @@ export default function BlogCard({ blog, priority = false }) {
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 priority={priority}
-                // ✅ FINAL SPEED BOOST: Tells browser to fetch this image immediately
                 fetchPriority={priority ? "high" : "auto"} 
                 unoptimized={true}
                 className="object-cover transition-transform duration-500 group-hover:scale-105 will-change-transform transform-gpu"
@@ -109,15 +108,31 @@ export default function BlogCard({ blog, priority = false }) {
             </p>
 
             <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/10">
-              <div className="flex items-center gap-2">
-                <Avatar className="w-7 h-7 border border-white/20 shrink-0">
-                  <AvatarImage src={blog.author?.avatar} alt={`${blog.author?.name} avatar`} />
-                  <AvatarFallback className="bg-secondary text-[10px] font-black">{blog.author?.name?.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <span className="text-[11px] font-bold text-gray-200 flex items-center gap-1">
-                    {blog.author?.name} 
-                    {isAdmin && <ShieldCheck className="w-3 h-3 text-emerald-400" aria-label="Verified Admin" />}
-                </span>
+              
+              {/* ✅ PROMINENT ADMIN BADGE ADDED HERE */}
+              <div className="flex items-center gap-2.5">
+                <div className="relative">
+                  <Avatar className="w-8 h-8 border border-white/20 shrink-0">
+                    <AvatarImage src={blog.author?.avatar} alt={`${blog.author?.name} avatar`} className="object-cover" />
+                    <AvatarFallback className="bg-secondary text-[10px] font-black">{blog.author?.name?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  {isAdmin && (
+                    <div className="absolute -bottom-1 -right-1 bg-[#0a0a0a] rounded-full p-0.5 z-10" aria-hidden="true">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400/20" />
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-bold text-gray-200 truncate max-w-[120px]">
+                      {blog.author?.name} 
+                  </span>
+                  {isAdmin ? (
+                    <span className="text-[8px] uppercase tracking-widest text-emerald-400 font-bold mt-0.5">Admin</span>
+                  ) : (
+                    <span className="text-[8px] uppercase tracking-widest text-gray-500 font-bold mt-0.5">Contributor</span>
+                  )}
+                </div>
               </div>
               
               <div className="text-cyan-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-1 group-hover:translate-x-1 transition-transform" aria-hidden="true">
