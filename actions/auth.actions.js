@@ -2,6 +2,7 @@
 
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
+import { indexNewContent } from "@/lib/googleIndexing"; // 🚀 Import the SEO Indexer
 
 export async function registerUser(formData) {
   await connectDB();
@@ -28,6 +29,12 @@ export async function registerUser(formData) {
     });
 
     await newUser.save(); // <--- Mongoose hashes it here
+
+    // 🚀 SEO: Instantly ping Google to index the new public profile!
+    // Notice we DO NOT 'await' this. It runs in the background.
+    indexNewContent(newUser._id.toString(), 'profile')
+      .then(status => console.log(`[SEO] Profile indexed: ${status}`))
+      .catch(err => console.error(`[SEO] Profile indexing failed:`, err));
     
     return { success: true };
   } catch (error) {
