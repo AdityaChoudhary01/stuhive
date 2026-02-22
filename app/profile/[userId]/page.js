@@ -114,8 +114,9 @@ export default async function PublicProfilePage({ params }) {
     createdAt: blog.createdAt instanceof Date ? blog.createdAt.toISOString() : new Date(blog.createdAt).toISOString(),
   }));
 
+  // ✅ Added explicit responsive horizontal padding (px-3 sm:px-6 md:px-8) and mx-auto
   return (
-    <main className="container py-8 max-w-6xl pt-24">
+    <main className="w-full max-w-6xl mx-auto px-3 sm:px-6 md:px-8 py-8 pt-24">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

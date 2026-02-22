@@ -7,7 +7,7 @@ import {
 import connectDB from '@/lib/db';
 import Note from '@/lib/models/Note';
 import User from '@/lib/models/User';
-import Loader from "@/components/common/Loader"; // 🚀 Import your cinematic loader
+import Loader from "@/components/common/Loader"; 
 
 // 🚀 THE FIX: Cache this page at the edge for 1 hour. It will load in ~50ms globally.
 export const revalidate = 3600;
@@ -142,9 +142,12 @@ export default function AboutPage() {
                     <figure className="relative group">
                         <div className="absolute -inset-1 bg-gradient-to-r from-[#00d4ff] to-[#ff00cc] rounded-full blur opacity-40 group-hover:opacity-70 transition duration-1000"></div>
                         <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full border-2 border-white/20 overflow-hidden bg-black">
+                            {/* ✅ LCP/PERFORMANCE FIX: Added Cloudinary transforms (w_400, f_auto, q_auto) to serve a perfectly sized WebP */}
                             <img 
-                                src="https://res.cloudinary.com/dmtnonxtt/image/upload/v1771760208/ycmuivb92hyqwqrwkaoi.webp" 
+                                src="https://res.cloudinary.com/dmtnonxtt/image/upload/w_400,f_auto,q_auto/v1771760208/ycmuivb92hyqwqrwkaoi.webp" 
                                 alt="Aditya Choudhary - Founder of StuHive" 
+                                loading="lazy"
+                                decoding="async"
                                 className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                             />
                         </div>
@@ -228,7 +231,8 @@ export default function AboutPage() {
                 </Link>
             </nav>
 
-            <footer style={{textAlign: 'center', marginTop: '4rem', color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem'}}>
+            {/* ✅ ACCESSIBILITY FIX: Contrast ratio improved by changing text-white/30 to text-white/60 */}
+            <footer style={{textAlign: 'center', marginTop: '4rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', fontWeight: '500'}}>
                 StuHive. Built for the students of today, by the student who dared to code.
             </footer>
         </main>

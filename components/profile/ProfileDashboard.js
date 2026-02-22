@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { FaUpload, FaBookmark, FaList, FaPenNib, FaEdit, FaRss, FaPlus } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import NoteCard from "@/components/notes/NoteCard";
 import BlogCard from "@/components/blog/BlogCard";
 import RoleBadge from "@/components/common/RoleBadge";
-import dynamic from 'next/dynamic'; // ✅ Import dynamic 
+import dynamic from 'next/dynamic'; 
 import { updateProfile, updateUserAvatar } from "@/actions/user.actions";
 import { deleteCollection, renameCollection, createCollection } from "@/actions/collection.actions"; 
 import { deleteBlog } from "@/actions/blog.actions";
@@ -23,6 +23,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+const EditNoteModal = dynamic(() => import('@/components/notes/EditNoteModal'), { 
+  ssr: false, 
+  loading: () => <Loader2 className="animate-spin text-cyan-400 mx-auto mt-4" /> 
+});
 
 export default function ProfileDashboard({ user, initialMyNotes, initialSavedNotes, initialCollections, initialMyBlogs }) {
   const { data: session, update: updateSession } = useSession();
@@ -39,14 +44,13 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
   const [isCreatingCollection, setIsCreatingCollection] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState("");
 
-  const [avatar, setAvatar] = useState(user?.avatar || "");
+  // ✅ OPTIMISTIC STATE: We no longer sync with useEffect. 
+  // We use this state strictly to show a temporary image during an active upload sequence.
+  const [optimisticAvatar, setOptimisticAvatar] = useState(null); 
+  
   const [myNotes, setMyNotes] = useState(initialMyNotes || []);
   const [collections, setCollections] = useState(initialCollections || []);
   const [myBlogs, setMyBlogs] = useState(initialMyBlogs || []); 
-
-  useEffect(() => {
-     if (user?.avatar) setAvatar(user.avatar);
-  }, [user?.avatar]);
 
   const handleNameSave = async (e) => {
     e.preventDefault();
@@ -59,12 +63,11 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
     }
   };
 
-  // ✅ UPDATED: Now accepts both URL and R2 Key for proper cleanup
   const handleAvatarUpdate = async (newUrl, avatarKey) => {
-    const oldAvatar = avatar;
-    setAvatar(newUrl);
+    // 1. Immediately show the new image (Optimistic UI) to make it feel fast
+    setOptimisticAvatar(newUrl);
 
-    // Call user action with the R2 key so the old image can be deleted
+    // 2. Process the background update
     const res = await updateUserAvatar(user._id, newUrl, avatarKey);
     
     if (res.success) {
@@ -74,7 +77,8 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
         user: { ...session?.user, image: newUrl, avatar: newUrl } 
       });
     } else {
-      setAvatar(oldAvatar);
+      // 3. Revert if it fails
+      setOptimisticAvatar(null);
       toast({ title: "Update Failed", description: res.error, variant: "destructive" });
     }
   };
@@ -83,7 +87,6 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
     if (!confirm("Are you sure you want to permanently delete this note?")) return;
     setIsDeletingNoteId(noteId);
     
-    // ✅ The deleteNote action now handles R2 cleanup internally
     const res = await deleteNote(noteId, user._id);
     
     if (res.success) {
@@ -95,7 +98,6 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
     setIsDeletingNoteId(null);
   };
 
-  // ... (rest of your handlers: Collections, Blogs, etc. remain the same)
   const handleCreateCollection = async (e) => {
     e.preventDefault();
     if (!newCollectionName.trim()) return;
@@ -144,22 +146,16 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
     }
   };
 
-
-  // ✅ Add this dynamic import:
-const EditNoteModal = dynamic(() => import('@/components/notes/EditNoteModal'), { 
-  ssr: false, // Prevents server-side loading crashes
-  loading: () => <Loader2 className="animate-spin" /> 
-});
-
   if (!user) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
       </div>
     );
   }
 
-  const displayAvatar = avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'Student')}`;
+  // ✅ Fallback chain: Optimistic state -> Server prop -> Default placeholder
+  const displayAvatar = optimisticAvatar || user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'Student')}`;
 
   return (
     <div className="container py-8 max-w-6xl">
@@ -175,7 +171,7 @@ const EditNoteModal = dynamic(() => import('@/components/notes/EditNoteModal'), 
                 </div>
             ) : (
                 <form onSubmit={handleNameSave} className="flex gap-2 mb-2 relative z-10">
-                    <Input value={newName} onChange={e => setNewName(e.target.value)} className="h-8 w-48 text-center" />
+                    <Input value={newName} onChange={e => setNewName(e.target.value)} className="h-8 w-48 text-center" autoFocus />
                     <Button size="sm" type="submit">Save</Button>
                     <Button size="sm" variant="ghost" onClick={() => setIsEditingName(false)}>Cancel</Button>
                 </form>
@@ -201,9 +197,10 @@ const EditNoteModal = dynamic(() => import('@/components/notes/EditNoteModal'), 
         <div className="min-h-[400px]">
             {activeTab === 'uploads' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {myNotes.map(note => (
+                    {myNotes.map((note, index) => (
                         <div key={note._id} className="relative group">
-                            <NoteCard note={{...note, user}} /> 
+                            {/* Passed priority to first 3 items to help with LCP if needed */}
+                            <NoteCard note={{...note, user}} priority={index < 3} /> 
                             <div className="absolute top-2 left-2 flex gap-2 z-30 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                 <Button 
                                   variant="secondary" 
@@ -236,7 +233,7 @@ const EditNoteModal = dynamic(() => import('@/components/notes/EditNoteModal'), 
 
             {activeTab === 'saved' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {initialSavedNotes?.map(note => <NoteCard key={note._id} note={note} />)}
+                    {initialSavedNotes?.map((note, index) => <NoteCard key={note._id} note={note} priority={index < 3} />)}
                     {(!initialSavedNotes || initialSavedNotes.length === 0) && (
                       <EmptyState 
                         msg="You haven't saved any notes to your collection." 
@@ -248,9 +245,9 @@ const EditNoteModal = dynamic(() => import('@/components/notes/EditNoteModal'), 
 
             {activeTab === 'blogs' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {myBlogs.map(blog => (
+                    {myBlogs.map((blog, index) => (
                         <div key={blog._id} className="relative group h-full">
-                          <BlogCard blog={{...blog, author: user}} />
+                          <BlogCard blog={{...blog, author: user}} priority={index < 2} />
                           <div className="absolute top-3 right-3 z-20">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -272,6 +269,12 @@ const EditNoteModal = dynamic(() => import('@/components/notes/EditNoteModal'), 
                           </div>
                         </div>
                     ))}
+                    {myBlogs.length === 0 && (
+                      <EmptyState 
+                        msg="You haven't written any blogs yet." 
+                        action={<Link href="/blogs/post"><Button className="rounded-full font-bold px-6 bg-purple-500 text-white hover:bg-purple-400"><FaPenNib className="mr-2"/> Write a Blog</Button></Link>} 
+                      />
+                    )}
                 </div>
             )}
 
