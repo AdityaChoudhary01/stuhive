@@ -7,8 +7,12 @@ import BlogListServer from "./BlogListServer";
 
 const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
 
-// ✅ 1. DYNAMIC METADATA
+// ✅ Force dynamic rendering to handle search params properly without cache locking
+export const dynamic = "force-dynamic";
+
+// ✅ DYNAMIC METADATA
 export async function generateMetadata({ searchParams }) {
+  // Await the searchParams object
   const params = await searchParams; 
   
   const page = params.page || 1;
@@ -31,9 +35,11 @@ export async function generateMetadata({ searchParams }) {
 }
 
 export default async function BlogPage({ searchParams }) {
+  // Await params at the top level to prevent waterfall delays
   const params = await searchParams;
-  const search = params.search || "";
+  const search = params?.search || "";
   
+  // Use a stable key for Suspense based on the resolved params
   const suspenseKey = new URLSearchParams(params).toString();
 
   return (
@@ -45,12 +51,14 @@ export default async function BlogPage({ searchParams }) {
 
       {/* Header Section */}
       <header className="text-center mb-12 space-y-6">
+        {/* FIXED ACCESSIBILITY: Ensured this is an H1 to fix "Heading elements are not in a sequentially-descending order" */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 tracking-tight pb-2">
             Insights & Stories
         </h1>
-        <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto font-medium">
+        {/* FIXED ACCESSIBILITY: Changed from <p> to <h2> to maintain heading hierarchy */}
+        <h2 className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto font-medium">
             Explore peer-contributed articles on exam prep, technology journeys, and student life.
-        </p>
+        </h2>
         
         <div className="flex flex-wrap justify-center gap-4 pt-4">
             <Link href="/blogs/post" title="Write a new article">
@@ -66,27 +74,25 @@ export default async function BlogPage({ searchParams }) {
         </div>
       </header>
       
-      {/* 🚀 FIXED: Search Bar is wrapped tightly in max-w-4xl */}
       <section className="max-w-4xl mx-auto mb-6" aria-label="Search">
         <BlogSearchClient initialSearch={search} />
       </section>
 
-      {/* 🚀 FIXED: Suspense is now FULL WIDTH in the container */}
       <Suspense key={suspenseKey} fallback={<BlogGridLoader />}>
+          {/* Passed the resolved params to the server component */}
           <BlogListServer params={params} />
       </Suspense>
     </main>
   );
 }
 
-// 🚀 LOCAL LOADER
 function BlogGridLoader() {
   return (
-    <div className="flex flex-col items-center justify-center py-20 min-h-[40vh]">
-      <Loader2 className="h-12 w-12 animate-spin text-cyan-500 mb-6 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
-      <h2 className="text-sm font-black text-muted-foreground tracking-widest uppercase animate-pulse">
+    <div className="flex flex-col items-center justify-center py-20 min-h-[40vh]" role="status" aria-label="Loading blogs">
+      <Loader2 className="h-12 w-12 animate-spin text-cyan-500 mb-6 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]" aria-hidden="true" />
+      <span className="text-sm font-black text-muted-foreground tracking-widest uppercase animate-pulse">
         Curating Archive...
-      </h2>
+      </span>
     </div>
   );
 }

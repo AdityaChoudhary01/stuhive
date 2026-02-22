@@ -19,7 +19,7 @@ import ViewCounter from "./ViewCounter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Download, Calendar, Eye, ShieldCheck, Info } from "lucide-react";
+import { Download, Calendar, Eye, ShieldCheck, Info, HeartHandshake } from "lucide-react"; // 🚀 Added HeartHandshake
 
 // Utils
 import { formatDate } from "@/lib/utils";
@@ -61,7 +61,7 @@ export async function generateMetadata({ params }) {
 export default async function ViewNotePage({ params }) {
   const resolvedParams = await params;
   
-  // 🚀 PARALLEL FETCHING: Fetch the session and the main note at the same time to cut load times in half
+  // 🚀 PARALLEL FETCHING
   const [session, note] = await Promise.all([
     getServerSession(authOptions),
     getNoteById(resolvedParams.id)
@@ -107,7 +107,7 @@ export default async function ViewNotePage({ params }) {
     }
   };
 
-  // 🚀 SERIALIZATION: Even if .lean() is used, MongoDB ObjectIds must be strings for Client Components
+  // 🚀 SERIALIZATION
   const serializedNote = {
     ...note,
     _id: note._id.toString(),
@@ -122,7 +122,8 @@ export default async function ViewNotePage({ params }) {
   };
 
   return (
-    <main className="container py-8 md:py-12 pt-24 md:pt-32 max-w-7xl relative">
+    // 🚀 FIXED: Replaced standard 'container' with 'w-full px-3 md:px-8 mx-auto' to reduce horizontal padding on mobile
+    <main className="w-full px-3 md:px-8 mx-auto py-8 md:py-12 pt-24 md:pt-32 max-w-7xl relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -133,23 +134,37 @@ export default async function ViewNotePage({ params }) {
 
       <div className="absolute top-20 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-primary/10 blur-[100px] pointer-events-none rounded-full" />
 
-      <article className="grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-12 relative z-10">
+      <article className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-12 relative z-10">
         
         {/* --- LEFT COLUMN --- */}
         <div className="xl:col-span-8 space-y-8 md:space-y-10">
           
           <header className="space-y-6">
-            <nav className="flex flex-wrap items-center gap-3" aria-label="Breadcrumb">
-                <Badge variant="secondary" className="px-3 py-1 text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest">
+            <nav className="flex flex-wrap items-center gap-2 md:gap-3" aria-label="Breadcrumb">
+                <Badge variant="secondary" className="px-2.5 py-1 text-[10px] md:text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-widest">
                   {note.university}
                 </Badge>
-                <Badge variant="outline" className="px-3 py-1 text-xs font-bold border-white/10 text-muted-foreground uppercase tracking-widest bg-white/5">
+                <Badge variant="outline" className="px-2.5 py-1 text-[10px] md:text-xs font-bold border-white/10 text-muted-foreground uppercase tracking-widest bg-white/5">
                   {note.course}
                 </Badge>
+                
+                {/* 🚀 FIXED: Restored Subject */}
+                {note.subject && (
+                  <Badge variant="outline" className="px-2.5 py-1 text-[10px] md:text-xs font-bold border-pink-500/20 text-pink-400 uppercase tracking-widest bg-pink-500/5">
+                    {note.subject}
+                  </Badge>
+                )}
+                
+                {/* 🚀 FIXED: Restored Year */}
+                {note.year && (
+                  <Badge variant="outline" className="px-2.5 py-1 text-[10px] md:text-xs font-bold border-emerald-500/20 text-emerald-400 uppercase tracking-widest bg-emerald-500/5">
+                    {note.year}
+                  </Badge>
+                )}
             </nav>
             
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-5">
-                <div className="flex items-start gap-4">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div className="flex items-start gap-3 md:gap-4">
                   <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground leading-tight">
                     {note.title}
                   </h1>
@@ -163,32 +178,32 @@ export default async function ViewNotePage({ params }) {
                 </div>
             </div>
             
-            <div className="flex flex-wrap items-center gap-4 md:gap-8 text-xs font-bold uppercase tracking-wider text-muted-foreground bg-secondary/20 p-4 rounded-2xl border border-border w-fit">
-                <span className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-cyan-400" aria-hidden="true" /> 
+            <div className="flex flex-wrap items-center gap-4 md:gap-8 text-[11px] md:text-xs font-bold uppercase tracking-wider text-muted-foreground bg-secondary/20 p-3 md:p-4 rounded-2xl border border-border w-fit">
+                <span className="flex items-center gap-1.5 md:gap-2">
+                  <Calendar className="w-3.5 h-3.5 md:w-4 md:h-4 text-cyan-400" aria-hidden="true" /> 
                   <time dateTime={note.uploadDate}>{formatDate(note.uploadDate)}</time>
                 </span>
-                <span className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-purple-400" aria-hidden="true" /> 
+                <span className="flex items-center gap-1.5 md:gap-2">
+                  <Eye className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-400" aria-hidden="true" /> 
                   <span className="text-foreground">{note.viewCount || 0}</span> Views
                 </span>
-                <span className="flex items-center gap-2">
-                  <Download className="w-4 h-4 text-emerald-400" aria-hidden="true" /> 
+                <span className="flex items-center gap-1.5 md:gap-2">
+                  <Download className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" aria-hidden="true" /> 
                   <span className="text-foreground">{note.downloadCount || 0}</span> Downloads
                 </span>
             </div>
           </header>
 
-          <section className="rounded-[2rem] border border-white/10 bg-background/50 backdrop-blur-xl overflow-hidden shadow-2xl relative group">
+          <section className="rounded-[1.5rem] md:rounded-[2rem] border border-white/10 bg-background/50 backdrop-blur-xl overflow-hidden shadow-2xl relative group">
              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 opacity-80" />
              
-             <div className="min-h-[500px] md:min-h-[700px] bg-black/40">
+             <div className="min-h-[400px] md:min-h-[700px] bg-black/40">
                <ClientPDFLoader url={signedUrl} fileType={note.fileType} title={note.title} />
              </div>
              
-             <div className="p-4 md:p-6 bg-secondary/30 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-5">
-                <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-widest bg-black/20 px-3 py-1.5 rounded-full border border-white/5">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+             <div className="p-4 md:p-6 bg-secondary/30 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 md:gap-5">
+                <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold text-muted-foreground uppercase tracking-widest bg-black/20 px-3 py-1.5 rounded-full border border-white/5">
+                    <ShieldCheck className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400" />
                     <span>Secure R2 Encrypted Stream</span>
                 </div>
                 
@@ -199,8 +214,8 @@ export default async function ViewNotePage({ params }) {
              </div>
           </section>
 
-          <section className="bg-gradient-to-br from-secondary/30 to-background border border-border p-6 md:p-8 rounded-[2rem] shadow-lg">
-            <h2 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-foreground">
+          <section className="bg-gradient-to-br from-secondary/30 to-background border border-border p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-lg">
+            <h2 className="text-lg md:text-xl font-bold mb-3 md:mb-4 flex items-center gap-2 text-foreground">
                 <Info className="w-5 h-5 text-cyan-400" />
                 About this material
             </h2>
@@ -218,28 +233,35 @@ export default async function ViewNotePage({ params }) {
 
         {/* --- RIGHT COLUMN --- */}
         <aside className="xl:col-span-4 space-y-6 md:space-y-8">
-            <div className="rounded-[2rem] border border-white/10 bg-gradient-to-b from-secondary/20 to-background p-6 md:p-8 shadow-xl backdrop-blur-md">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 mb-6">
+            <div className="rounded-[1.5rem] md:rounded-[2rem] border border-white/10 bg-gradient-to-b from-secondary/20 to-background p-5 md:p-8 shadow-xl backdrop-blur-md">
+                <h3 className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 mb-5 md:mb-6">
                   Contributor
                 </h3>
                 <AuthorInfoBlock user={serializedNote.user} />
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-secondary/10 p-6 md:p-8 shadow-xl backdrop-blur-md">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 mb-6">
+            <div className="rounded-[1.5rem] md:rounded-[2rem] border border-white/10 bg-secondary/10 p-5 md:p-8 shadow-xl backdrop-blur-md">
+                <h3 className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 mb-5 md:mb-6">
                   Similar Materials
                 </h3>
                 <RelatedNotes notes={filteredRelated} />
             </div>
 
-            <section className="rounded-[2rem] bg-gradient-to-br from-cyan-500/10 via-background to-purple-500/10 border border-cyan-500/20 p-8 text-center relative overflow-hidden group shadow-[0_0_30px_-10px_rgba(34,211,238,0.2)]">
+            {/* 🚀 ENHANCED: Support Card */}
+            <section className="rounded-[1.5rem] md:rounded-[2rem] bg-gradient-to-b from-cyan-500/20 via-background to-background border border-cyan-500/30 p-6 md:p-8 text-center relative overflow-hidden group shadow-[0_0_40px_-10px_rgba(34,211,238,0.25)]">
                 <div className="absolute inset-0 bg-cyan-400/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none duration-500" />
-                <h4 className="text-lg font-black text-foreground tracking-tight mb-2">KEEP StuHive FREE</h4>
-                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-6 leading-relaxed">
-                  Help us maintain high-speed cloud storage for everyone.
+                
+                <div className="bg-cyan-500/20 w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-5 border border-cyan-500/30 group-hover:scale-110 transition-transform duration-500">
+                   <HeartHandshake className="w-6 h-6 md:w-8 md:h-8 text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
+                </div>
+
+                <h4 className="text-lg md:text-xl font-black text-foreground tracking-tight mb-2">Keep StuHive Free</h4>
+                <p className="text-[11px] md:text-xs text-muted-foreground font-medium mb-6 leading-relaxed">
+                  We rely on your support to maintain high-speed cloud storage and ad-free studying for everyone.
                 </p>
+
                 <Link href="/donate" title="Support StuHive">
-                    <Button variant="outline" className="w-full h-12 rounded-xl border-cyan-400/30 bg-cyan-400/10 text-cyan-400 hover:bg-cyan-400 hover:text-black font-black uppercase tracking-widest text-xs transition-all">
+                    <Button className="w-full h-12 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black uppercase tracking-widest text-xs hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] transition-all hover:-translate-y-1 border-0">
                         Support the Platform
                     </Button>
                 </Link>

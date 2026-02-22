@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
 
 export default async function BlogListServer({ params }) {
-  const page = Number(params.page) || 1;
-  const search = params.search || "";
-  const tag = params.tag || "All";
+  const page = Number(params?.page) || 1;
+  const search = params?.search || "";
+  const tag = params?.tag || "All";
 
   const [blogsData, dynamicTags] = await Promise.all([
       getBlogs({ page, search, tag }),
@@ -43,7 +43,6 @@ export default async function BlogListServer({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* 🚀 FIXED: Added the max-w-4xl wrapper JUST for the tags navigation */}
       <div className="max-w-4xl mx-auto mb-12 space-y-6">
         <nav className="relative w-full" aria-label="Blog Categories">
             <div className="absolute left-0 top-0 bottom-4 w-12 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
@@ -77,20 +76,21 @@ export default async function BlogListServer({ params }) {
         </nav>
       </div>
 
-      {/* 🚀 FIXED: The grid is now free to expand to its normal wide size */}
       <section aria-label="Blog posts grid">
         {blogs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blogs.map(blog => (
+              {blogs.map((blog, index) => (
                   <article key={blog._id} className="h-full transform transition-all duration-300 hover:-translate-y-2">
-                      <BlogCard blog={blog} />
+                      {/* FIXED LCP: Pass priority to the first card to preload its image */}
+                      <BlogCard blog={blog} priority={index === 0} />
                   </article>
               ))}
           </div>
         ) : (
           <div className="text-center py-24 bg-secondary/5 rounded-[2.5rem] border border-dashed border-border/60 shadow-inner">
               <Hash className="mx-auto h-16 w-16 text-muted-foreground/20 mb-6" aria-hidden="true" />
-              <h3 className="text-2xl font-bold text-foreground mb-2">No articles found</h3>
+              {/* FIXED ACCESSIBILITY: Changed h3 to h2 */}
+              <h2 className="text-2xl font-bold text-foreground mb-2">No articles found</h2>
               <p className="text-base text-muted-foreground">Be the first to share your experience with the community!</p>
               
               {(search || tag !== "All") && (
@@ -102,7 +102,6 @@ export default async function BlogListServer({ params }) {
         )}
       </section>
 
-      {/* Pagination Footer */}
       {totalPages > 1 && (
         <footer className="mt-16" aria-label="Pagination">
             <Pagination currentPage={page} totalPages={totalPages} />

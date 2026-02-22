@@ -1,11 +1,13 @@
 import Link from "next/link";
+import Image from "next/image"; // ✅ Imported Next.js Image
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, ArrowRight, Star, Eye, ShieldCheck } from "lucide-react"; 
 import { formatDate } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export default function BlogCard({ blog }) {
+// ✅ Added `priority` prop to handle the LCP fix from the parent component
+export default function BlogCard({ blog, priority = false }) {
   const readTime = blog.readTime || 3; 
   const rating = blog.rating || 0;
   const views = blog.viewCount || 0;
@@ -47,13 +49,14 @@ export default function BlogCard({ blog }) {
           {/* Cover Image */}
           <div className="relative h-44 w-full overflow-hidden bg-secondary/20 shrink-0">
             {blog.coverImage ? (
-              <img 
+              // ✅ FIXED: Using Next.js Image with `unoptimized` and dynamic `priority`
+              <Image 
                 src={blog.coverImage} 
                 alt={`Cover for ${blog.title}`} 
-                loading="lazy" 
-                decoding="async"
                 width={600}
                 height={400}
+                priority={priority}
+                unoptimized={true}
                 className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
               />
             ) : (
