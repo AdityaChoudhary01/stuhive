@@ -138,7 +138,7 @@ export default function PublicProfileView({ profile, notes, blogs, currentUser, 
                     <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                         {profile.noteCount > 5 && (
                              <Badge variant="outline" className="gap-2 border-yellow-500/30 text-yellow-500 bg-yellow-500/5 px-4 py-1 font-bold">
-                                <FaStar className="animate-pulse" /> PeerLox Star
+                                <FaStar className="animate-pulse" /> StuHive Star
                              </Badge>
                         )}
                     </div>

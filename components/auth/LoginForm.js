@@ -95,7 +95,7 @@ export default function LoginForm() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Link href="/forgot-password" title="Reset your PeerLox password" className="text-xs text-primary hover:underline">Forgot password?</Link>
+            <Link href="/forgot-password" title="Reset your StuHive password" className="text-xs text-primary hover:underline">Forgot password?</Link>
           </div>
           <div className="relative">
             <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
@@ -122,7 +122,7 @@ export default function LoginForm() {
       </Button>
 
       <footer className="text-center text-sm text-muted-foreground">
-        Don't have an account? <Link href="/signup" title="Create a new PeerLox account" className="text-primary font-medium hover:underline">Sign up</Link>
+        Don't have an account? <Link href="/signup" title="Create a new StuHive account" className="text-primary font-medium hover:underline">Sign up</Link>
       </footer>
     </section>
   );

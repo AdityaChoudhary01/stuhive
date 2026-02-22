@@ -1,13 +1,13 @@
-# 📑 PeerLox: The Cinematic Academic Discovery Engine
+# 📑 StuHive: The Cinematic Academic Discovery Engine
 
 <div align="center">
 <p><strong>Empowering students through decentralized, open-access knowledge sharing.</strong></p>
-<a href="[https://peerlox.in](https://peerlox.in)">Live Website</a> •
-<a href="[https://peerlox.in/search](https://www.google.com/search?q=https://peerlox.in/search)">Explore Library</a> •
-<a href="[https://peerlox.in/blogs](https://www.google.com/search?q=https://peerlox.in/blogs)">Community Blogs</a>
+<a href="[https://stuhive.in](https://stuhive.in)">Live Website</a> •
+<a href="[https://stuhive.in/search](https://www.google.com/search?q=https://stuhive.in/search)">Explore Library</a> •
+<a href="[https://stuhive.in/blogs](https://www.google.com/search?q=https://stuhive.in/blogs)">Community Blogs</a>
 </div>
 
-**PeerLox** is a high-performance, decentralized academic library designed to empower students through seamless knowledge sharing. Built with a strict focus on **Cinematic UI/UX**, **Technical SEO**, and **Scalable Next.js 15 Architecture**, it transforms static study materials into a dynamic, real-time discovery experience.
+**StuHive** is a high-performance, decentralized academic library designed to empower students through seamless knowledge sharing. Built with a strict focus on **Cinematic UI/UX**, **Technical SEO**, and **Scalable Next.js 15 Architecture**, it transforms static study materials into a dynamic, real-time discovery experience.
 
 ---
 
@@ -17,14 +17,14 @@ Explore the live platform modules:
 
 | Module | Description | Live URL |
 | --- | --- | --- |
-| **Discovery Engine** | Global search, filtering, and pagination for study notes. | [peerlox.in/search](https://www.google.com/search?q=https://peerlox.in/search) |
-| **Global Search** | Cross-platform search for notes, blogs, and users. | [peerlox.in/global-search](https://www.google.com/search?q=https://peerlox.in/global-search) |
-| **Community Blogs** | Student-written articles, tutorials, and experiences. | [peerlox.in/blogs](https://www.google.com/search?q=https://peerlox.in/blogs) |
-| **Real-Time Chat** | Peer-to-peer messaging and presence tracking. | [peerlox.in/chat](https://www.google.com/search?q=https://peerlox.in/chat) |
-| **User Dashboard** | Manage uploads, saved collections, and follower stats. | [peerlox.in/profile](https://www.google.com/search?q=https://peerlox.in/profile) |
-| **Support Platform** | Secure contact terminal routed via Brevo SMTP. | [peerlox.in/contact](https://www.google.com/search?q=https://peerlox.in/contact) |
-| **Wall of Fame** | Real-time tracking of community supporters & donors. | [peerlox.in/supporters](https://www.google.com/search?q=https://peerlox.in/supporters) |
-| **Legal Hub** | Privacy, Terms of Service, and DMCA guidelines. | [peerlox.in/privacy](https://www.google.com/search?q=https://peerlox.in/privacy) |
+| **Discovery Engine** | Global search, filtering, and pagination for study notes. | [stuhive.in/search](https://www.google.com/search?q=https://stuhive.in/search) |
+| **Global Search** | Cross-platform search for notes, blogs, and users. | [stuhive.in/global-search](https://www.google.com/search?q=https://stuhive.in/global-search) |
+| **Community Blogs** | Student-written articles, tutorials, and experiences. | [stuhive.in/blogs](https://www.google.com/search?q=https://stuhive.in/blogs) |
+| **Real-Time Chat** | Peer-to-peer messaging and presence tracking. | [stuhive.in/chat](https://www.google.com/search?q=https://stuhive.in/chat) |
+| **User Dashboard** | Manage uploads, saved collections, and follower stats. | [stuhive.in/profile](https://www.google.com/search?q=https://stuhive.in/profile) |
+| **Support Platform** | Secure contact terminal routed via Brevo SMTP. | [stuhive.in/contact](https://www.google.com/search?q=https://stuhive.in/contact) |
+| **Wall of Fame** | Real-time tracking of community supporters & donors. | [stuhive.in/supporters](https://www.google.com/search?q=https://stuhive.in/supporters) |
+| **Legal Hub** | Privacy, Terms of Service, and DMCA guidelines. | [stuhive.in/privacy](https://www.google.com/search?q=https://stuhive.in/privacy) |
 
 ---
 
@@ -72,7 +72,7 @@ Explore the live platform modules:
 
 ## 📉 Performance Optimization Strategies
 
-PeerLox implements a ruthless performance strategy optimized for Vercel deployment:
+StuHive implements a ruthless performance strategy optimized for Vercel deployment:
 
 1. **Strict React Purity:** Eliminated cascading renders and hydration mismatches by pushing non-deterministic state updates (like `Date.now()` or randomized mock data) into asynchronous event loops (`setTimeout`).
 2. **Dynamic Bundle Splitting:** Heavy modules (like the Ably Chat Client and PDF renderers) are wrapped in Next.js `next/dynamic` to ensure they are only downloaded when a user actually opens them.
@@ -86,8 +86,8 @@ PeerLox implements a ruthless performance strategy optimized for Vercel deployme
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/AdityaChoudhary01/PeerLox.git
-cd PeerLox
+git clone https://github.com/AdityaChoudhary01/StuHive.git
+cd StuHive
 
 ```
 

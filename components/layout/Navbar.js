@@ -154,7 +154,7 @@ export default function Navbar() {
             <Link href="/" style={styles.logoSection} onClick={() => setMenuOpen(false)}>
               <Image 
                 src={LOGO_URL} 
-                alt="PeerLox Logo" 
+                alt="StuHive Logo" 
                 width={140} 
                 height={44} 
                 style={styles.logo} 

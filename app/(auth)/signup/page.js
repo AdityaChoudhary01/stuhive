@@ -3,13 +3,13 @@ import SignupForm from "@/components/auth/SignupForm";
 // ✅ HIGH-OCTANE SEO METADATA
 export const metadata = {
   title: "Create an Account",
-  description: "Join the PeerLox community today. Create an account to share your study materials, download university notes, and start collaborating with students worldwide.",
+  description: "Join the StuHive community today. Create an account to share your study materials, download university notes, and start collaborating with students worldwide.",
   robots: {
     index: true,
     follow: true,
   },
   alternates: {
-    canonical: "https://peerlox.in/signup",
+    canonical: "https://stuhive.in/signup",
   },
 };
 

@@ -12,21 +12,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Users, FileText, Download, Trophy, Sparkles, Flame } from "lucide-react";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://peerlox.in";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://stuhive.in";
 
 // ✅ 1. CONCISE SEO METADATA (Inherits Template from Layout)
 export const metadata = {
-  title: "PeerLox | Free Academic Notes & Study Materials",
+  title: "StuHive | Free Academic Notes & Study Materials",
   description: "Join thousands of students sharing handwritten notes, university PDFs, and academic blogs. Access high-quality study materials for free and ace your exams.",
-  keywords: ["academic notes", "PeerLox","peer notez", "university study tips", "free PDF notes", "student collaboration"],
+  keywords: ["academic notes", "StuHive","peer notez", "university study tips", "free PDF notes", "student collaboration"],
   alternates: {
     canonical: APP_URL,
   },
   openGraph: {
-    title: "PeerLox | Learn Better Together",
+    title: "StuHive | Learn Better Together",
     description: "The global hub for students to find and share study materials.",
     url: APP_URL,
-    siteName: "PeerLox",
+    siteName: "StuHive",
     type: "website",
     images: [{ url: `${APP_URL}/logo512.png` }]
   },
@@ -45,7 +45,7 @@ export default async function HomePage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "PeerLox",
+    "name": "StuHive",
     "url": APP_URL,
     "potentialAction": {
       "@type": "SearchAction",
@@ -68,7 +68,7 @@ export default async function HomePage() {
       <HeroSection />
 
       {/* 🚀 REDUCED HORIZONTAL MARGINS: Changed px-4 to px-2 sm:px-6 */}
-      <section className="relative z-20 -mt-16 sm:-mt-24 container max-w-7xl px-2 sm:px-6 pt-10" aria-label="PeerLox Stats">
+      <section className="relative z-20 -mt-16 sm:-mt-24 container max-w-7xl px-2 sm:px-6 pt-10" aria-label="StuHive Stats">
         {/* REDUCED GAPS: gap-4 to gap-2 on mobile */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-6">
           

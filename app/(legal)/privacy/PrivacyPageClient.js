@@ -8,7 +8,7 @@ import {
 import Link from 'next/link';
 
 export default function PrivacyPageClient() {
-    const contactEmail = "peerlox.support@gmail.com"; 
+    const contactEmail = "StuHive.support@gmail.com"; 
 
     const styles = {
         // 🔹 Responsive paddings using clamp()
@@ -78,7 +78,7 @@ export default function PrivacyPageClient() {
             <section style={styles.sectionCard}>
                 <h2 style={styles.sectionHeading}><FaUserShield style={{color: '#00ffaa'}} aria-hidden="true" /> 1. Data Architecture</h2>
                 <p style={{color: 'rgba(255,255,255,0.7)', fontSize: '1.1rem', marginBottom: '2rem'}}>
-                    We follow the strict principle of <strong>Data Minimization</strong>. We only collect what is strictly necessary to run the PeerLox ecosystem in compliance with global privacy standards, including the Digital Personal Data Protection Act (DPDP) and GDPR.
+                    We follow the strict principle of <strong>Data Minimization</strong>. We only collect what is strictly necessary to run the StuHive ecosystem in compliance with global privacy standards, including the Digital Personal Data Protection Act (DPDP) and GDPR.
                 </p>
                 
                 <h3 style={styles.subHeading}><FaUserSecret aria-hidden="true" /> Information You Provide</h3>
@@ -101,7 +101,7 @@ export default function PrivacyPageClient() {
             <section style={styles.sectionCard}>
                 <h2 style={styles.sectionHeading}><FaGoogle style={{color: '#4285F4'}} aria-hidden="true" /> 2. Google OAuth & API Services Disclosure</h2>
                 <p style={{color: 'rgba(255,255,255,0.7)', marginBottom: '1.5rem', lineHeight: '1.8'}}>
-                    PeerLox&apos;s use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" style={{color: '#00d4ff', textDecoration: 'underline'}}>Google API Services User Data Policy</a>, including the Limited Use requirements.
+                    StuHive&apos;s use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" style={{color: '#00d4ff', textDecoration: 'underline'}}>Google API Services User Data Policy</a>, including the Limited Use requirements.
                 </p>
                 
                 <h3 style={styles.subHeading}>Scope of Google Data Collected</h3>
@@ -115,7 +115,7 @@ export default function PrivacyPageClient() {
                         <strong>No Data Selling:</strong> We absolutely do not sell, rent, lease, or trade your Google data, or any derived data, to third-party advertising networks, data brokers, or marketing agencies.
                     </li>
                     <li style={styles.listItem}>
-                        <strong>Strict Functional Use:</strong> Your Google data is used exclusively to provision your PeerLox account, visually identify you to other users (via your avatar and name), and send you essential service notifications.
+                        <strong>Strict Functional Use:</strong> Your Google data is used exclusively to provision your StuHive account, visually identify you to other users (via your avatar and name), and send you essential service notifications.
                     </li>
                     <li style={styles.listItem}>
                         <strong>No Human Reading:</strong> No human will read your Google data or personal communications, unless explicitly required for security purposes, to comply with applicable law, or if you request technical support.
@@ -126,7 +126,7 @@ export default function PrivacyPageClient() {
             <section style={styles.sectionCard}>
                 <h2 style={styles.sectionHeading}><FaShareAlt style={{color: '#ffcc00'}} aria-hidden="true" /> 3. Third-Party Data Sharing</h2>
                 <p style={{color: 'rgba(255,255,255,0.7)', marginBottom: '2rem'}}>
-                    To operate PeerLox, we securely share necessary data fragments with trusted, compliance-verified infrastructure partners. <strong>We do not share your Google OAuth data for marketing.</strong>
+                    To operate StuHive, we securely share necessary data fragments with trusted, compliance-verified infrastructure partners. <strong>We do not share your Google OAuth data for marketing.</strong>
                 </p>
                 <div className="space-y-4">
                     <div style={styles.listItem}>
@@ -166,7 +166,7 @@ export default function PrivacyPageClient() {
                         <strong>Account Deletion:</strong> If you choose to delete your account, your Google OAuth profile data, personal information, and chat histories are permanently and irreversibly purged from our active databases within 30 days.
                     </div>
                     <div style={styles.listItem}>
-                        <strong>Revoking Access:</strong> You may instantly revoke PeerLox&apos;s access to your Google account at any time by visiting your Google Account Security settings (myaccount.google.com/permissions).
+                        <strong>Revoking Access:</strong> You may instantly revoke StuHive&apos;s access to your Google account at any time by visiting your Google Account Security settings (myaccount.google.com/permissions).
                     </div>
                 </div>
             </section>
@@ -220,12 +220,12 @@ export default function PrivacyPageClient() {
                     <FaShieldAlt aria-hidden="true" /> DMCA Policy <FaArrowRight size={12} />
                 </Link>
                 <Link href="/about" style={styles.navLink} title="About Us">
-                    <FaFileAlt aria-hidden="true" /> About PeerLox <FaArrowRight size={12} />
+                    <FaFileAlt aria-hidden="true" /> About StuHive <FaArrowRight size={12} />
                 </Link>
             </nav>
 
             <footer style={{textAlign: 'center', marginTop: '4rem', color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem'}}>
-                &copy; {new Date().getFullYear()} PeerLox. Designed for privacy, built for students. PeerLox is a Data Fiduciary.
+                &copy; {new Date().getFullYear()} StuHive. Designed for privacy, built for students. StuHive is a Data Fiduciary.
             </footer>
         </article>
     );

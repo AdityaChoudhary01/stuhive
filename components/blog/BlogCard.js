@@ -26,10 +26,10 @@ export default function BlogCard({ blog }) {
     },
     "publisher": {
       "@type": "Organization",
-      "name": "PeerLox",
+      "name": "StuHive",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://peerlox.in/logo512.png"
+        "url": "https://stuhive.in/logo512.png"
       }
     },
     "description": blog.summary || blog.excerpt || "",

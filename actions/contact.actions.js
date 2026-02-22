@@ -25,13 +25,13 @@ export async function submitContactForm(formData) {
       },
       body: JSON.stringify({
         sender: {
-          name: "PeerLox System",
+          name: "StuHive System",
           email: process.env.BREVO_VERIFIED_SENDER_EMAIL
         },
         to: [
           {
             email: process.env.BREVO_VERIFIED_SENDER_EMAIL, // Sending to yourself
-            name: "PeerLox Admin"
+            name: "StuHive Admin"
           }
         ],
         replyTo: {
@@ -57,7 +57,7 @@ export async function submitContactForm(formData) {
                     <tr>
                       <td style="background: linear-gradient(135deg, #00d4ff 0%, #a855f7 100%); padding: 30px 40px; text-align: center;">
                         <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">
-                          PeerLox
+                          StuHive
                         </h1>
                         <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0; font-size: 14px; font-weight: 500;">
                           New Contact Submission

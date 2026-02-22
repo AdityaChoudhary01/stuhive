@@ -60,7 +60,7 @@ export default function SignupForm() {
       toast({ title: "Login Error", description: "Account created, but automatic login failed.", variant: "destructive" });
       setLoading(false);
     } else {
-      toast({ title: "Welcome to PeerLox!" });
+      toast({ title: "Welcome to StuHive!" });
       router.push("/");
       router.refresh();
     }
@@ -83,7 +83,7 @@ export default function SignupForm() {
     <section className="w-full max-w-md p-8 space-y-6 bg-card border rounded-2xl shadow-xl">
       <header className="text-center space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Create an account</h1>
-        <p className="text-sm text-muted-foreground">Join PeerLox to discover and share study materials</p>
+        <p className="text-sm text-muted-foreground">Join StuHive to discover and share study materials</p>
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-4">

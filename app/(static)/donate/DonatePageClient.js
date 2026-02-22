@@ -53,11 +53,11 @@ export default function DonatePageClient() {
                     transition: 'transform 0.1s ease-out'
                 }}>
                     <h1 className="text-6xl md:text-8xl font-black bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 mb-6 drop-shadow-2xl">
-                        Keep PeerLox<br/>Independent.
+                        Keep StuHive<br/>Independent.
                     </h1>
                 </div>
                 <p className="text-xl text-white/60 max-w-3xl mx-auto mb-10 leading-relaxed">
-                    PeerLox isn&apos;t owned by a corporation. It&apos;s a student-led initiative dedicated to 
+                    StuHive isn&apos;t owned by a corporation. It&apos;s a student-led initiative dedicated to 
                     <strong className="text-white"> free, open, and accessible</strong> academic resources. 
                     Your support directly fuels the infrastructure that keeps us online.
                 </p>
@@ -124,7 +124,7 @@ export default function DonatePageClient() {
                     </div>
                     <h2 className="text-4xl md:text-5xl font-black text-white mb-6">Built for the<br/>Community.</h2>
                     <p className="text-white/60 mb-8 text-lg leading-relaxed">
-                        &quot;PeerLox started as a small script on my laptop to help my classmates. Today, it serves students globally. 
+                        &quot;StuHive started as a small script on my laptop to help my classmates. Today, it serves students globally. 
                         As a solo developer, your support allows me to spend more time coding features and less time worrying about server bills.&quot;
                     </p>
                     <div className="flex items-center gap-6 justify-center lg:justify-start text-white/40 text-sm mb-10">

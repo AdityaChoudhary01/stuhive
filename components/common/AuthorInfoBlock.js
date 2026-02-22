@@ -11,12 +11,12 @@ export default function AuthorInfoBlock({ user }) {
     "@context": "https://schema.org",
     "@type": "Person",
     "name": user.name,
-    "url": `https://peerlox.in/profile/${user._id}`,
+    "url": `https://stuhive.in/profile/${user._id}`,
     "image": user.avatar,
     "jobTitle": user.role || "Student Contributor",
     "affiliation": {
       "@type": "Organization",
-      "name": "PeerLox"
+      "name": "StuHive"
     }
   };
 
@@ -54,7 +54,7 @@ export default function AuthorInfoBlock({ user }) {
             </div>
             
             {/* Semantic Divider for bots */}
-            <span className="sr-only">Verified Contributor at PeerLox</span>
+            <span className="sr-only">Verified Contributor at StuHive</span>
         </div>
       </div>
     </div>

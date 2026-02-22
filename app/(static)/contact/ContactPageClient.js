@@ -60,7 +60,7 @@ export default function ContactPageClient() {
                     Connect with <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">Us.</span>
                 </h1>
                 <p className="text-xl text-white/50 max-w-2xl mx-auto leading-relaxed">
-                    Whether you have a bug report, a partnership proposal, or just want to discuss the future of PeerLox, our lines are open.
+                    Whether you have a bug report, a partnership proposal, or just want to discuss the future of StuHive, our lines are open.
                 </p>
             </header>
 
@@ -91,7 +91,7 @@ export default function ContactPageClient() {
                                     </div>
                                     <div>
                                         <h3 className="text-white font-bold mb-1">Physical Access</h3>
-                                        <p className="text-white/40 leading-relaxed text-sm">PeerLox HQ, Ghaziabad,<br/>Uttar Pradesh, India - 201009</p>
+                                        <p className="text-white/40 leading-relaxed text-sm">StuHive HQ, Ghaziabad,<br/>Uttar Pradesh, India - 201009</p>
                                     </div>
                                 </div>
 
@@ -189,7 +189,7 @@ export default function ContactPageClient() {
             </nav>
 
             <footer className="text-center mt-12 text-white/10 text-[10px] font-black uppercase tracking-[0.5em]">
-                Encrypted Communication • PeerLox
+                Encrypted Communication • StuHive
             </footer>
         </main>
     );

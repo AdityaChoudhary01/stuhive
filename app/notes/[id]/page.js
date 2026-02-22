@@ -25,7 +25,7 @@ import { Download, Calendar, Eye, ShieldCheck, Info } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { generateReadUrl } from "@/lib/r2";
 
-const APP_URL = process.env.NEXTAUTH_URL || "https://peerlox.in";
+const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
 
 // ✅ 1. HIGH-OCTANE DYNAMIC SEO METADATA
 export async function generateMetadata({ params }) {
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }) {
   const ogImage = note.thumbnailUrl || `${APP_URL}/default-note-og.jpg`;
 
   return {
-    title: `${note.title} - ${note.subject} | PeerLox`,
+    title: `${note.title} - ${note.subject} | StuHive`,
     description: `Download ${note.title} for ${note.course} at ${note.university}. ${note.description?.substring(0, 120)}...`,
     keywords: [note.subject, note.course, note.university, "study notes", "academic material", "PDF notes"],
     alternates: {
@@ -97,7 +97,7 @@ export default async function ViewNotePage({ params }) {
       "courseMode": "online",
       "instructor": {
         "@type": "Person",
-        "name": note.user?.name || "PeerLox Contributor"
+        "name": note.user?.name || "StuHive Contributor"
       }
     },
     "educationalLevel": "University",
@@ -234,11 +234,11 @@ export default async function ViewNotePage({ params }) {
 
             <section className="rounded-[2rem] bg-gradient-to-br from-cyan-500/10 via-background to-purple-500/10 border border-cyan-500/20 p-8 text-center relative overflow-hidden group shadow-[0_0_30px_-10px_rgba(34,211,238,0.2)]">
                 <div className="absolute inset-0 bg-cyan-400/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none duration-500" />
-                <h4 className="text-lg font-black text-foreground tracking-tight mb-2">KEEP PeerLox FREE</h4>
+                <h4 className="text-lg font-black text-foreground tracking-tight mb-2">KEEP StuHive FREE</h4>
                 <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-6 leading-relaxed">
                   Help us maintain high-speed cloud storage for everyone.
                 </p>
-                <Link href="/donate" title="Support PeerLox">
+                <Link href="/donate" title="Support StuHive">
                     <Button variant="outline" className="w-full h-12 rounded-xl border-cyan-400/30 bg-cyan-400/10 text-cyan-400 hover:bg-cyan-400 hover:text-black font-black uppercase tracking-widest text-xs transition-all">
                         Support the Platform
                     </Button>

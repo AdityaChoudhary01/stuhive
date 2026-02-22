@@ -1,17 +1,17 @@
 import DonatePageClient from "./DonatePageClient";
 
 // ✅ 1. HIGH-OCTANE SEO METADATA
-const APP_URL = process.env.NEXTAUTH_URL || "https://peerlox.in";
+const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
 
 export const metadata = {
-    title: "Support PeerLox | Fuel Independent Academic Learning",
-    description: "Help keep PeerLox independent and ad-free. Your donations directly fund high-speed hosting and secure storage for free academic resources.",
-    keywords: ["Support PeerLox", "Donate to Education", "Student Led Initiative", "Independent Academic Resources", "PeerLox Server Fund"],
+    title: "Support StuHive | Fuel Independent Academic Learning",
+    description: "Help keep StuHive independent and ad-free. Your donations directly fund high-speed hosting and secure storage for free academic resources.",
+    keywords: ["Support StuHive", "Donate to Education", "Student Led Initiative", "Independent Academic Resources", "StuHive Server Fund"],
     alternates: {
         canonical: `${APP_URL}/donate`,
     },
     openGraph: {
-        title: "Keep PeerLox Independent | Donate Now",
+        title: "Keep StuHive Independent | Donate Now",
         description: "Zero profit. 100% infrastructure. Help us provide free knowledge to students worldwide.",
         url: `${APP_URL}/donate`,
         type: "website",
@@ -23,11 +23,11 @@ export default function DonatePage() {
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "DonatePage",
-        "name": "PeerLox Donation Hub",
-        "description": "Donation page to support the infrastructure of PeerLox.",
+        "name": "StuHive Donation Hub",
+        "description": "Donation page to support the infrastructure of StuHive.",
         "mainEntity": {
             "@type": "Organization",
-            "name": "PeerLox",
+            "name": "StuHive",
             "url": APP_URL
         }
     };

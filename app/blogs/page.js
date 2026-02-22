@@ -6,7 +6,7 @@ import BlogSearchClient from "@/components/blog/BlogSearchClient";
 import { FaPenNib, FaHashtag } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 
-const APP_URL = process.env.NEXTAUTH_URL || "https://peerlox.in";
+const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
 
 // ✅ 1. DYNAMIC METADATA (Handles Pagination SEO)
 export async function generateMetadata({ searchParams }) {
@@ -16,16 +16,16 @@ export async function generateMetadata({ searchParams }) {
   const tag = params.tag || "All";
   
   return {
-    title: page > 1 ? `Articles - Page ${page} | PeerLox` : "Insights & Stories | Academic Blog",
-    description: `Browse ${tag !== "All" ? tag : ""} academic articles, tech journeys, and study tips from the PeerLox student community. Page ${page}.`,
+    title: page > 1 ? `Articles - Page ${page} | StuHive` : "Insights & Stories | Academic Blog",
+    description: `Browse ${tag !== "All" ? tag : ""} academic articles, tech journeys, and study tips from the StuHive student community. Page ${page}.`,
     alternates: {
       canonical: `${APP_URL}/blogs`,
     },
     openGraph: {
-      title: "PeerLox Insights | The Student Blog",
+      title: "StuHive Insights | The Student Blog",
       description: "Knowledge sharing and experiences from students worldwide.",
       url: `${APP_URL}/blogs`,
-      siteName: "PeerLox",
+      siteName: "StuHive",
       type: "website",
     },
   };
@@ -52,7 +52,7 @@ export default async function BlogPage({ searchParams }) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "name": "PeerLox Academic Blogs",
+    "name": "StuHive Academic Blogs",
     "description": "A collection of student-written articles about education, technology, and university life.",
     "url": `${APP_URL}/blogs`,
     "mainEntity": {

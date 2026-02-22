@@ -7,7 +7,7 @@ import { getBlogsForUser } from "@/actions/blog.actions";
 import { getUserCollections } from "@/actions/collection.actions";
 
 export const metadata = {
-  title: "Dashboard | PeerLox",
+  title: "Dashboard | StuHive",
   description: "Manage your notes, collections, and profile.",
 };
 

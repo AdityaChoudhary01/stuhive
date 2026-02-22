@@ -8,7 +8,7 @@ import {
 import Link from 'next/link';
 
 export default function DMCAPageClient() {
-    const designatedAgentEmail = "peerlox.support@gmail.com"; 
+    const designatedAgentEmail = "aadiwrld01@gmail.com"; 
     const takedownDeadline = "36 hours"; 
 
     const styles = {
@@ -87,7 +87,7 @@ export default function DMCAPageClient() {
                     <FaShieldAlt aria-hidden="true" /> IP Protection & DMCA
                 </h1>
                 <p style={styles.subtitle}>
-                    PeerLox is an academic ecosystem built on respect. We strictly abide by the Digital Millennium Copyright Act (DMCA), the EU Copyright Directive, and Section 79 of the Indian IT Act (2000).
+                    StuHive is an academic ecosystem built on respect. We strictly abide by the Digital Millennium Copyright Act (DMCA), the EU Copyright Directive, and Section 79 of the Indian IT Act (2000).
                 </p>
             </header>
 
@@ -96,7 +96,7 @@ export default function DMCAPageClient() {
                     <h2 style={styles.sectionHeading}><FaGavel style={{color: '#ffcc00'}} aria-hidden="true" /> Safe Harbor Compliance</h2>
                     <div style={styles.text}>
                         <p>
-                            PeerLox operates strictly as an intermediary service provider. Under the <strong>&quot;Safe Harbor&quot;</strong> provisions of international copyright law, PeerLox is not directly liable for the materials users upload, provided we act expeditiously to remove or disable access to infringing material upon receiving a valid legal notice.
+                            StuHive operates strictly as an intermediary service provider. Under the <strong>&quot;Safe Harbor&quot;</strong> provisions of international copyright law, StuHive is not directly liable for the materials users upload, provided we act expeditiously to remove or disable access to infringing material upon receiving a valid legal notice.
                         </p>
                     </div>
                 </section>
@@ -105,7 +105,7 @@ export default function DMCAPageClient() {
                     <h2 style={styles.sectionHeading}><FaBookOpen style={{color: '#00d4ff'}} aria-hidden="true" /> Fair Use in Education</h2>
                     <div style={styles.text}>
                         <p>
-                            Because PeerLox is an educational platform, certain user uploads may fall under <strong>&quot;Fair Use&quot;</strong> (or &quot;Fair Dealing&quot; under Indian law). This includes brief quotations, transformative commentary, or the sharing of self-written notes that reference factual data. We evaluate all takedown requests with this academic context in mind.
+                            Because StuHive is an educational platform, certain user uploads may fall under <strong>&quot;Fair Use&quot;</strong> (or &quot;Fair Dealing&quot; under Indian law). This includes brief quotations, transformative commentary, or the sharing of self-written notes that reference factual data. We evaluate all takedown requests with this academic context in mind.
                         </p>
                     </div>
                 </section>
@@ -114,10 +114,10 @@ export default function DMCAPageClient() {
             <section style={{...styles.glassSection, marginBottom: 'clamp(2rem, 5vw, 4rem)'}}>
                 <h2 style={styles.sectionHeading}><FaFileContract style={{color: '#ff00cc'}} aria-hidden="true" /> Filing a Takedown Notice</h2>
                 <div style={styles.text}>
-                    <p>If you are a copyright owner, or authorized to act on behalf of one, and you believe that material on PeerLox infringes upon your copyrights, you must submit a formal notice containing the following elements:</p>
+                    <p>If you are a copyright owner, or authorized to act on behalf of one, and you believe that material on StuHive infringes upon your copyrights, you must submit a formal notice containing the following elements:</p>
                     <div className="grid md:grid-cols-2 gap-4 mt-6">
                         <div style={styles.listItem}><FaCheckCircle style={{color: '#00ffaa', flexShrink: 0}} aria-hidden="true" /> <div><strong>Identification:</strong> A physical or electronic signature of the copyright owner.</div></div>
-                        <div style={styles.listItem}><FaCheckCircle style={{color: '#00ffaa', flexShrink: 0}} aria-hidden="true" /> <div><strong>Specific URLs:</strong> The exact PeerLox URLs of the infringing material. General site links are invalid.</div></div>
+                        <div style={styles.listItem}><FaCheckCircle style={{color: '#00ffaa', flexShrink: 0}} aria-hidden="true" /> <div><strong>Specific URLs:</strong> The exact StuHive URLs of the infringing material. General site links are invalid.</div></div>
                         <div style={styles.listItem}><FaCheckCircle style={{color: '#00ffaa', flexShrink: 0}} aria-hidden="true" /> <div><strong>Contact Info:</strong> Your full name, mailing address, telephone number, and email address.</div></div>
                         <div style={styles.listItem}><FaCheckCircle style={{color: '#00ffaa', flexShrink: 0}} aria-hidden="true" /> <div><strong>Good Faith Statement:</strong> A statement that the use of the material is not authorized by the copyright owner or the law.</div></div>
                     </div>
@@ -143,7 +143,7 @@ export default function DMCAPageClient() {
                 <section style={{...styles.glassSection, borderColor: 'rgba(255, 0, 85, 0.3)'}}>
                     <h2 style={styles.sectionHeading}><FaExclamationTriangle style={{color: '#ff0055'}} aria-hidden="true" /> Repeat Infringer Policy</h2>
                     <div style={styles.text}>
-                        <p>PeerLox actively protects creators by maintaining a strict &quot;Three-Strikes&quot; policy.</p>
+                        <p>StuHive actively protects creators by maintaining a strict &quot;Three-Strikes&quot; policy.</p>
                         <aside style={styles.warningBox}>
                             <div className="flex gap-4 items-center">
                                 <FaUserSecret size={40} style={{color: '#ff0055', flexShrink: 0}} aria-hidden="true" />
@@ -165,7 +165,7 @@ export default function DMCAPageClient() {
                         <ul className="mt-4 space-y-2 opacity-80 text-sm list-disc pl-4">
                             <li>You must explicitly state under penalty of perjury that you possess the rights to the removed content.</li>
                             <li>You must consent to the jurisdiction of the courts where you reside.</li>
-                            <li>Upon receiving a valid Counter-Notice, PeerLox will restore the material in 10-14 business days, unless the original claimant files a court order against you.</li>
+                            <li>Upon receiving a valid Counter-Notice, StuHive will restore the material in 10-14 business days, unless the original claimant files a court order against you.</li>
                         </ul>
                     </div>
                 </section>
@@ -179,7 +179,7 @@ export default function DMCAPageClient() {
                     <FaGavel /> Terms of Service <FaArrowRight size={12} />
                 </Link>
                 <Link href="/about" style={styles.navLink} title="About Us">
-                    <FaFileAlt /> About PeerLox <FaArrowRight size={12} />
+                    <FaFileAlt /> About StuHive <FaArrowRight size={12} />
                 </Link>
             </nav>
 

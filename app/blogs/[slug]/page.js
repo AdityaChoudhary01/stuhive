@@ -15,7 +15,7 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
-const APP_URL = process.env.NEXTAUTH_URL || "https://peerlox.in";
+const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
 
 // ✅ 1. HIGH-OCTANE DYNAMIC SEO METADATA
 export async function generateMetadata({ params }) {
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }) {
   return {
     title: blog.title,
     description: blog.summary,
-    keywords: blog.tags?.join(", ") || "academic blog, study tips, PeerLox",
+    keywords: blog.tags?.join(", ") || "academic blog, study tips, StuHive",
     alternates: {
         canonical: `${APP_URL}/blogs/${resolvedParams.slug}`,
     },
@@ -90,7 +90,7 @@ export default async function BlogDetailPage({ params }) {
     },
     "publisher": {
       "@type": "Organization",
-      "name": "PeerLox",
+      "name": "StuHive",
       "logo": {
         "@type": "ImageObject",
         "url": `${APP_URL}/logo192.png`

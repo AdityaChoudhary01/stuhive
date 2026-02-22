@@ -1,6 +1,6 @@
 {
-  "short_name": "PeerLox",
-  "name": "PeerLox - Student Learning Platform",
+  "short_name": "StuHive",
+  "name": "StuHive - Student Learning Platform",
   "description": "Share and discover academic notes, blogs, and study materials.",
   "icons": [
     {
@@ -40,13 +40,13 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "PeerLox Desktop Dashboard"
+      "label": "StuHive Desktop Dashboard"
     },
     {
       "src": "/screenshot-mobile.png",
       "sizes": "750x1334",
       "type": "image/png",
-      "label": "PeerLox Mobile View"
+      "label": "StuHive Mobile View"
     }
   ]
 }

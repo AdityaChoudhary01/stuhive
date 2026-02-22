@@ -17,7 +17,7 @@ export async function subscribeToNewsletter(subscriberEmail) {
       'https://api.brevo.com/v3/smtp/email',
       {
         sender: {
-          name: "PeerLox Newsletter",
+          name: "StuHive Newsletter",
           email: senderEmail, // ✅ FIX: Must be your verified Brevo email
         },
         to: [
@@ -34,7 +34,7 @@ export async function subscribeToNewsletter(subscriberEmail) {
           <html>
             <body style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
               <h2 style="color: #4facfe;">New Newsletter Subscriber! 🎉</h2>
-              <p>Someone just joined the PeerLox community via the footer form.</p>
+              <p>Someone just joined the StuHive community via the footer form.</p>
               <div style="background: #f4f4f4; padding: 15px; border-radius: 8px; margin-top: 10px;">
                 <p style="margin: 0;"><strong>Subscriber Email:</strong> <a href="mailto:${subscriberEmail}">${subscriberEmail}</a></p>
                 <p style="margin: 5px 0 0 0; font-size: 12px; color: #888;">Request ID: ${requestId}</p>

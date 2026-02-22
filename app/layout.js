@@ -21,17 +21,17 @@ export const viewport = {
 
 // ✅ Global SEO Safety Net
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://peerlox.in"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://stuhive.in"),
   title: {
-    default: "PeerLox | Free Academic Notes & Study Materials",
-    template: "%s | PeerLox"
+    default: "StuHive | Free Academic Notes & Study Materials",
+    template: "%s | StuHive"
   },
-  description: "Join PeerLox to discover, share, and review university notes, PDFs, and study materials.",
+  description: "Join StuHive to discover, share, and review university notes, PDFs, and study materials.",
   manifest: "/manifest.json", 
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "PeerLox",
+    title: "StuHive",
   },
   icons: {
     icon: [
@@ -46,14 +46,14 @@ export const metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://peerlox.in",
-    siteName: "PeerLox",
+    url: "https://stuhive.in",
+    siteName: "StuHive",
     images: [
       {
         url: "/logo512.png",
         width: 512,
         height: 512,
-        alt: "PeerLox Logo",
+        alt: "StuHive Logo",
       },
     ],
   },

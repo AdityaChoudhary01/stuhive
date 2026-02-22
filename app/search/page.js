@@ -6,7 +6,7 @@ import Pagination from "@/components/common/Pagination";
 import { FaSearch, FaRegFolderOpen, FaArrowLeft, FaFilter } from "react-icons/fa";
 import Link from "next/link";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://peerlox.in";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://stuhive.in";
 
 // ✅ 1. FIXED & HIGH-OCTANE DYNAMIC METADATA
 export async function generateMetadata({ searchParams }) {
@@ -25,13 +25,13 @@ export async function generateMetadata({ searchParams }) {
   const formattedCount = totalCount?.toLocaleString() || "thousands of";
 
   return {
-    title: `${dynamicTitle} | PeerLox Library${pageSuffix}`,
+    title: `${dynamicTitle} | StuHive Library${pageSuffix}`,
     description: `Explore ${formattedCount} verified academic notes, course materials, and exam guides. Filter by university, subject, and course level.`,
     alternates: {
       canonical: `${APP_URL}/search`,
     },
     openGraph: {
-      title: `${dynamicTitle} | PeerLox Archive`,
+      title: `${dynamicTitle} | StuHive Archive`,
       description: `Access a library of ${formattedCount} student-led academic resources.`,
       url: `${APP_URL}/search`,
       type: "website",

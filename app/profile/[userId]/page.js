@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import PublicProfileView from "@/components/profile/PublicProfileView";
 
-const APP_URL = process.env.NEXTAUTH_URL || "https://peerlox.in";
+const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
 
 // ✅ 1. DYNAMIC SEO METADATA (Crawlable by Google without login)
 export async function generateMetadata({ params }) {
@@ -13,10 +13,10 @@ export async function generateMetadata({ params }) {
   const user = await getUserProfile(userId);
   if (!user) return { title: "User Not Found" };
 
-  const profileTitle = `${user.name} | Portfolio & Study Materials | PeerLox`;
+  const profileTitle = `${user.name} | Portfolio & Study Materials | StuHive`;
   const profileDesc = user.bio 
     ? `${user.bio.substring(0, 150)}` 
-    : `Explore academic notes and articles contributed by ${user.name} on PeerLox.`;
+    : `Explore academic notes and articles contributed by ${user.name} on StuHive.`;
 
   return {
     title: profileTitle,

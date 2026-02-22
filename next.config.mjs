@@ -7,7 +7,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'cdn.peerlox.in', // Your professional Custom Domain
+        hostname: 'cdn.stuhive.in', // Your professional Custom Domain
         pathname: '/**',
       },
       {

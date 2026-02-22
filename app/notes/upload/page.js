@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import UploadForm from "@/components/notes/UploadForm";
 
 export const metadata = {
-  title: "Upload Notes | PeerLox",
-  description: "Share your academic notes, PDFs, and study materials with the PeerLox community.",
+  title: "Upload Notes | StuHive",
+  description: "Share your academic notes, PDFs, and study materials with the StuHive community.",
 };
 
 export default async function UploadPage() {
