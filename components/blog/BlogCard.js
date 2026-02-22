@@ -42,11 +42,8 @@ export default function BlogCard({ blog, priority = false }) {
       />
       
       <Link href={`/blogs/${blog.slug}`} title={`Read: ${blog.title}`} className="block h-full group">
-        {/* Added transform-gpu and translate-z-0 to prevent sub-pixel flickering */}
         <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(102,126,234,0.15)] hover:border-primary/40 flex flex-col bg-[#0a0a0a] border border-white/10 hover:-translate-y-1 transform-gpu">
           
-          {/* Cover Image Wrapper */}
-          {/* Added -mb-[1px] and relative z-0 to overlap the seam slightly and kill the flicker */}
           <div className="relative h-44 w-full overflow-hidden bg-secondary/20 shrink-0 -mb-[1px] z-0">
             {blog.coverImage ? (
               <Image 
@@ -55,8 +52,9 @@ export default function BlogCard({ blog, priority = false }) {
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 priority={priority}
+                // ✅ FINAL SPEED BOOST: Tells browser to fetch this image immediately
+                fetchPriority={priority ? "high" : "auto"} 
                 unoptimized={true}
-                // Added will-change-transform and scale-[1.01] to keep image "active" for the GPU
                 className="object-cover transition-transform duration-500 group-hover:scale-105 will-change-transform transform-gpu"
               />
             ) : (
@@ -72,14 +70,10 @@ export default function BlogCard({ blog, priority = false }) {
                 </Badge>
               ))}
             </div>
-            {/* Dark gradient overlap to further hide the seam */}
             <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#0a0a0a] to-transparent opacity-90 z-10" aria-hidden="true" />
           </div>
 
-          {/* Card Content */}
-          {/* Added relative z-10 to ensure it sits cleanly above the image overlap */}
           <CardContent className="flex flex-col flex-grow p-4 sm:p-5 relative z-10 bg-[#0a0a0a]">
-            
             <div className="flex items-center gap-x-3 text-[10px] font-bold uppercase tracking-wider text-gray-300 mb-2">
               <span className="flex items-center gap-1" aria-label={`Published on ${formatDate(blog.createdAt)}`}>
                 <Calendar className="w-3 h-3 text-cyan-400" aria-hidden="true" /> {formatDate(blog.createdAt)}

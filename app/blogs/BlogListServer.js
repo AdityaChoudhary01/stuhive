@@ -12,6 +12,7 @@ export default async function BlogListServer({ params }) {
   const search = params?.search || "";
   const tag = params?.tag || "All";
 
+  // ✅ PARALLEL FETCH: This kills the "Server responded slowly" error by fetching both at once
   const [blogsData, dynamicTags] = await Promise.all([
       getBlogs({ page, search, tag }),
       getUniqueBlogTags()
@@ -81,15 +82,14 @@ export default async function BlogListServer({ params }) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {blogs.map((blog, index) => (
                   <article key={blog._id} className="h-full transform transition-all duration-300 hover:-translate-y-2">
-                      {/* FIXED LCP: Pass priority to the first card to preload its image */}
-                      <BlogCard blog={blog} priority={index === 0} />
+                      {/* Priority set to TRUE for the first 2 blogs to fix Mobile LCP */}
+                      <BlogCard blog={blog} priority={index < 2} />
                   </article>
               ))}
           </div>
         ) : (
           <div className="text-center py-24 bg-secondary/5 rounded-[2.5rem] border border-dashed border-border/60 shadow-inner">
               <Hash className="mx-auto h-16 w-16 text-muted-foreground/20 mb-6" aria-hidden="true" />
-              {/* FIXED ACCESSIBILITY: Changed h3 to h2 */}
               <h2 className="text-2xl font-bold text-foreground mb-2">No articles found</h2>
               <p className="text-base text-muted-foreground">Be the first to share your experience with the community!</p>
               
