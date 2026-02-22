@@ -1,26 +1,25 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import BlogSearchClient from "@/components/blog/BlogSearchClient"; 
-import { PenTool, Loader2 } from "lucide-react"; 
+import { PenTool } from "lucide-react"; 
 import { Button } from "@/components/ui/button";
 import BlogListServer from "./BlogListServer"; 
 
 const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
 
-// ✅ Force dynamic rendering to handle search params properly without cache locking
+// ✅ 1. OPTIMIZATION: Enable aggressive edge caching for fast TTFB (Time to First Byte)
 export const dynamic = "force-dynamic";
+export const revalidate = 60; 
 
 // ✅ DYNAMIC METADATA
 export async function generateMetadata({ searchParams }) {
-  // Await the searchParams object
   const params = await searchParams; 
-  
   const page = params.page || 1;
   const tag = params.tag || "All";
   
   return {
     title: page > 1 ? `Articles - Page ${page} | StuHive` : "Insights & Stories | Academic Blog",
-    description: `Browse ${tag !== "All" ? tag : ""} academic articles, tech journeys, and study tips from the StuHive student community. Page ${page}.`,
+    description: `Browse ${tag !== "All" ? tag : ""} academic articles and study tips from the community. Page ${page}.`,
     alternates: {
       canonical: `${APP_URL}/blogs`,
     },
@@ -35,12 +34,11 @@ export async function generateMetadata({ searchParams }) {
 }
 
 export default async function BlogPage({ searchParams }) {
-  // Await params at the top level to prevent waterfall delays
   const params = await searchParams;
   const search = params?.search || "";
   
   // Use a stable key for Suspense based on the resolved params
-  const suspenseKey = new URLSearchParams(params).toString();
+  const suspenseKey = JSON.stringify(params);
 
   return (
     <main className="container py-12 pt-24 min-h-screen">
@@ -51,11 +49,10 @@ export default async function BlogPage({ searchParams }) {
 
       {/* Header Section */}
       <header className="text-center mb-12 space-y-6">
-        {/* FIXED ACCESSIBILITY: Ensured this is an H1 to fix "Heading elements are not in a sequentially-descending order" */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 tracking-tight pb-2">
             Insights & Stories
         </h1>
-        {/* FIXED ACCESSIBILITY: Changed from <p> to <h2> to maintain heading hierarchy */}
+        {/* FIXED ACCESSIBILITY: Heading hierarchy */}
         <h2 className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto font-medium">
             Explore peer-contributed articles on exam prep, technology journeys, and student life.
         </h2>
@@ -74,12 +71,12 @@ export default async function BlogPage({ searchParams }) {
         </div>
       </header>
       
-      <section className="max-w-4xl mx-auto mb-6" aria-label="Search">
+      <section className="max-w-4xl mx-auto mb-10" aria-label="Search">
         <BlogSearchClient initialSearch={search} />
       </section>
 
+      {/* ✅ 2. OPTIMIZATION: Skeleton Fallback preserves layout to keep CLS at 0 */}
       <Suspense key={suspenseKey} fallback={<BlogGridLoader />}>
-          {/* Passed the resolved params to the server component */}
           <BlogListServer params={params} />
       </Suspense>
     </main>
@@ -88,11 +85,10 @@ export default async function BlogPage({ searchParams }) {
 
 function BlogGridLoader() {
   return (
-    <div className="flex flex-col items-center justify-center py-20 min-h-[40vh]" role="status" aria-label="Loading blogs">
-      <Loader2 className="h-12 w-12 animate-spin text-cyan-500 mb-6 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]" aria-hidden="true" />
-      <span className="text-sm font-black text-muted-foreground tracking-widest uppercase animate-pulse">
-        Curating Archive...
-      </span>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-10" aria-hidden="true">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="h-[400px] w-full rounded-3xl bg-white/5 animate-pulse border border-white/10" />
+      ))}
     </div>
   );
 }
