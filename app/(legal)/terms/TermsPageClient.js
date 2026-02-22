@@ -9,7 +9,6 @@ import {
 
 export default function TermsPageClient() {
     const styles = {
-        // 🔹 Reduced vertical padding on mobile, stays 4rem/8rem on desktop
         wrapper: { paddingTop: 'clamp(2rem, 5vw, 4rem)', paddingBottom: 'clamp(4rem, 8vw, 8rem)', minHeight: '100vh' },
         header: { textAlign: 'center', marginBottom: 'clamp(3rem, 6vw, 5rem)' },
         title: { 
@@ -26,20 +25,17 @@ export default function TermsPageClient() {
         sectionCard: { 
             background: 'rgba(255, 255, 255, 0.02)', backdropFilter: 'blur(15px)', 
             borderRadius: '32px', border: '1px solid rgba(255, 255, 255, 0.08)', 
-            // 🔹 Padding shrinks to 1.5rem on mobile, maxes out at 3.5rem on desktop
             padding: 'clamp(1.5rem, 5vw, 3.5rem)', 
             marginBottom: 'clamp(2rem, 5vw, 3rem)', 
             boxShadow: '0 20px 50px rgba(0,0,0,0.3)' 
         },
         sectionHeading: { 
-            // 🔹 Heading shrinks slightly on mobile to fit better
             fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: '800', color: '#fff', 
             marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '15px' 
         },
         text: { color: 'rgba(255, 255, 255, 0.75)', lineHeight: 1.8, fontSize: '1.05rem' },
         listItem: { 
             background: 'rgba(255, 255, 255, 0.03)', borderLeft: '4px solid #ffcc00', 
-            // 🔹 Inner list padding shrinks slightly on mobile
             padding: 'clamp(1rem, 3vw, 1.2rem) clamp(1rem, 4vw, 1.5rem)', 
             marginBottom: '1rem', borderRadius: '0 16px 16px 0', 
             color: 'rgba(255, 255, 255, 0.85)', fontSize: '1rem'
@@ -47,7 +43,6 @@ export default function TermsPageClient() {
         warningBox: { 
             background: 'linear-gradient(to right, rgba(255, 0, 85, 0.1), transparent)', 
             borderLeft: '4px solid #ff0055', 
-            // 🔹 Warning box padding shrinks to 1.2rem on mobile
             padding: 'clamp(1.2rem, 4vw, 2rem)', 
             borderRadius: '0 20px 20px 0', 
             marginTop: '2rem', color: '#ffb3c1'
@@ -75,6 +70,7 @@ export default function TermsPageClient() {
                 <h2 style={styles.sectionHeading}><FaHandshake style={{color: '#00ffaa'}} aria-hidden="true" /> 1. The Covenant</h2>
                 <div style={styles.text}>
                     <p className="mb-4">
+                        {/* ✅ ESLINT FIX: Escaped quotes */}
                         By accessing StuHive (&quot;the Service&quot;), you confirm that you are at least 13 years of age. You agree to be bound by these Terms of Service, our <Link href="/privacy" title="Privacy Policy" style={{color: '#00d4ff', fontWeight: 'bold'}}>Privacy Engine (Policy)</Link>, and our <Link href="/dmca" title="DMCA Policy" style={{color: '#ff00cc', fontWeight: 'bold'}}>Copyright Policy</Link>.
                     </p>
                     <p>
@@ -87,10 +83,12 @@ export default function TermsPageClient() {
                 <h2 style={styles.sectionHeading}><FaGoogle style={{color: '#4285F4'}} aria-hidden="true" /> 2. Google OAuth & API Services</h2>
                 <div style={styles.text}>
                     <p className="mb-4">
+                        {/* ✅ ESLINT FIX: Escaped quotes */}
                         StuHive utilizes Google OAuth 2.0 for secure, seamless user authentication. By choosing to &quot;Continue with Google&quot;, you authorize us to access specific, limited data from your Google Account (primarily your Name, Email Address, and Profile Picture) strictly for the purpose of account creation, identification, and communication within our platform.
                     </p>
                     <p className="mb-4">
                         <strong>Google API Services User Data Policy Compliance:</strong><br />
+                        {/* ✅ ESLINT FIX: Escaped quotes */}
                         StuHive&apos;s use and transfer to any other app of information received from Google APIs will adhere strictly to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" style={{color: '#00d4ff', textDecoration: 'underline'}}>Google API Services User Data Policy</a>, including the Limited Use requirements. 
                     </p>
                     <ul className="mt-4 space-y-3">
@@ -156,6 +154,7 @@ export default function TermsPageClient() {
                 <h2 style={styles.sectionHeading}><FaBalanceScale style={{color: '#00ffaa'}} aria-hidden="true" /> 7. Limitation of Liability</h2>
                 <div style={styles.text}>
                     <p>
+                        {/* ✅ ESLINT FIX: Escaped quotes */}
                         StuHive provides its service &quot;AS IS&quot; and &quot;AS AVAILABLE.&quot; We do not guarantee the accuracy, completeness, or validity of any user-uploaded notes. Use of materials found on this site for graded assignments is entirely at your own risk. We are not responsible for any academic disciplinary actions taken against you by your institution.
                     </p>
                 </div>
@@ -171,8 +170,7 @@ export default function TermsPageClient() {
                         If you have any questions regarding these Terms, require assistance with your account, or wish to submit a data deletion request regarding your Google OAuth information, please contact us at:
                     </p>
                     <div style={{...styles.listItem, marginTop: '1.5rem', display: 'inline-block'}}>
-                        <strong>Email:</strong> StuHive.support@gmail.com <br/>
-                        <span style={{fontSize: '0.85rem', opacity: 0.7}}>(Please replace with your actual support email before deployment)</span>
+                        <strong>Email:</strong> adityanain552@gmail.com
                     </div>
                 </div>
             </section>
@@ -189,8 +187,9 @@ export default function TermsPageClient() {
                 </Link>
             </nav>
 
-            <footer style={{textAlign: 'center', marginTop: '4rem', color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem'}}>
-                &copy; {new Date().getFullYear()} StuHive Legal. Build your future, respect the past.
+            {/* ✅ ACCESSIBILITY FIX: Contrast increased to pass validation */}
+            <footer style={{textAlign: 'center', marginTop: '4rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem'}}>
+                © {new Date().getFullYear()} StuHive Legal. Build your future, respect the past.
             </footer>
         </article>
     );

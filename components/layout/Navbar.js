@@ -38,7 +38,8 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [unreadTotal, setUnreadTotal] = useState(0);
 
-  const LOGO_URL = 'https://res.cloudinary.com/dmtnonxtt/image/upload/v1771749043/vshx4isacdlfv6x6aaqv.png';
+  // ✅ PERFORMANCE FIX: Added w_300, f_auto, q_auto to instantly serve a tiny, perfectly sized WebP
+  const LOGO_URL = 'https://res.cloudinary.com/dmtnonxtt/image/upload/w_300,f_auto,q_auto/v1771749043/vshx4isacdlfv6x6aaqv.png';
 
   // Fetch initial unread count from DB
   useEffect(() => {
@@ -63,8 +64,6 @@ export default function Navbar() {
   // Reset unread count when visiting chat
   useEffect(() => {
     if (pathname.startsWith('/chat')) {
-      // ✅ FIXED ESLINT ERROR: Wrapped in setTimeout to make the state update asynchronous, 
-      // escaping the synchronous effect body and satisfying the ESLint rule.
       const timer = setTimeout(() => {
         setUnreadTotal((prev) => (prev > 0 ? 0 : prev));
       }, 0);
@@ -108,7 +107,6 @@ export default function Navbar() {
         </ChannelProvider>
       )}
 
-      {/* ✅ FIXED CLS: Navbar wrapper uses pure CSS media queries for layout rather than JS `isMobile` */}
       <div className={`fixed top-0 left-0 right-0 z-[1000] transition-all duration-300 ${scrolled ? 'py-2' : 'py-3'}`}>
         <div 
           className="mx-4 md:mx-auto max-w-[1400px] rounded-[50px] transition-all duration-300 px-6 py-1.5 flex items-center justify-between gap-2 h-[46px]"
@@ -122,11 +120,14 @@ export default function Navbar() {
         >
             
           <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center shrink-0">
+            {/* ✅ LCP FIX: Added unoptimized and fetchPriority="high" so Next.js doesn't delay the load */}
             <Image 
               src={LOGO_URL} 
               alt="StuHive Logo" 
               width={140} 
               height={44} 
+              unoptimized={true} 
+              fetchPriority="high"
               className="object-contain drop-shadow-[0_0_15px_rgba(102,126,234,0.6)] transition-all duration-300"
               style={{ width: scrolled ? '120px' : '140px', height: scrolled ? '38px' : '44px' }}
               priority

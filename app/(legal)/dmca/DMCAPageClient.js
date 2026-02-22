@@ -64,7 +64,6 @@ export default function DMCAPageClient() {
             borderLeft: '4px solid #ff0055', padding: 'clamp(1.2rem, 4vw, 2rem)', 
             borderRadius: '0 20px 20px 0', marginTop: '2rem' 
         },
-        // 🔹 FIX: Adjusted spacing and layout for the navigation links
         navBox: { 
             display: 'flex', justifyContent: 'center', flexWrap: 'wrap', 
             gap: 'clamp(1rem, 3vw, 2rem)', marginTop: 'clamp(4rem, 8vw, 6rem)' 
@@ -76,7 +75,8 @@ export default function DMCAPageClient() {
         },
         footerNotes: { 
             textAlign: 'center', marginTop: 'clamp(3rem, 6vw, 5rem)', 
-            color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' 
+            // ✅ ACCESSIBILITY FIX: Contrast increased from 0.4 to 0.6
+            color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' 
         }
     };
 
@@ -127,9 +127,10 @@ export default function DMCAPageClient() {
                 </div>
             </section>
 
-            <address style={styles.agentCard}>
+            <address style={styles.agentCard} className="not-italic">
                 <FaEnvelope size={40} style={{color: '#00d4ff', marginBottom: '1rem'}} aria-hidden="true" />
-                <h3 style={{color: '#fff', fontSize: 'clamp(1.5rem, 4vw, 1.8rem)', fontWeight: '800', fontStyle: 'normal'}}>Designated Copyright Agent</h3>
+                {/* ✅ ACCESSIBILITY FIX: Changed h3 to h2 to maintain sequential document flow */}
+                <h2 style={{color: '#fff', fontSize: 'clamp(1.5rem, 4vw, 1.8rem)', fontWeight: '800', fontStyle: 'normal'}}>Designated Copyright Agent</h2>
                 <p style={{color: 'rgba(255,255,255,0.6)', maxWidth: '600px', margin: '1rem auto', fontStyle: 'normal'}}>
                     Please email formal legal notices to the address below. To ensure immediate attention, use the subject line <strong>&quot;URGENT: COPYRIGHT TAKEDOWN&quot;</strong>.
                 </p>

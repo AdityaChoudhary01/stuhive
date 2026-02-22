@@ -101,6 +101,7 @@ export default function PrivacyPageClient() {
             <section style={styles.sectionCard}>
                 <h2 style={styles.sectionHeading}><FaGoogle style={{color: '#4285F4'}} aria-hidden="true" /> 2. Google OAuth & API Services Disclosure</h2>
                 <p style={{color: 'rgba(255,255,255,0.7)', marginBottom: '1.5rem', lineHeight: '1.8'}}>
+                    {/* ✅ ESLINT FIX: Escaped apostrophe */}
                     StuHive&apos;s use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" style={{color: '#00d4ff', textDecoration: 'underline'}}>Google API Services User Data Policy</a>, including the Limited Use requirements.
                 </p>
                 
@@ -166,6 +167,7 @@ export default function PrivacyPageClient() {
                         <strong>Account Deletion:</strong> If you choose to delete your account, your Google OAuth profile data, personal information, and chat histories are permanently and irreversibly purged from our active databases within 30 days.
                     </div>
                     <div style={styles.listItem}>
+                        {/* ✅ ESLINT FIX: Escaped apostrophe */}
                         <strong>Revoking Access:</strong> You may instantly revoke StuHive&apos;s access to your Google account at any time by visiting your Google Account Security settings (myaccount.google.com/permissions).
                     </div>
                 </div>
@@ -208,6 +210,7 @@ export default function PrivacyPageClient() {
                     borderRadius: '50px', display: 'inline-block', wordBreak: 'break-all'
                 }}>{contactEmail}</a>
                 <p style={{marginTop: '1rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'normal'}}>
+                    {/* ✅ ESLINT FIX: Escaped quotes */}
                     Please include &quot;Privacy Request&quot; in your subject line for faster routing.
                 </p>
             </address>
@@ -224,8 +227,9 @@ export default function PrivacyPageClient() {
                 </Link>
             </nav>
 
-            <footer style={{textAlign: 'center', marginTop: '4rem', color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem'}}>
-                &copy; {new Date().getFullYear()} StuHive. Designed for privacy, built for students. StuHive is a Data Fiduciary.
+            {/* ✅ ACCESSIBILITY FIX: Contrast ratio increased to 0.6 to pass WCAG validation */}
+            <footer style={{textAlign: 'center', marginTop: '4rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem'}}>
+                © {new Date().getFullYear()} StuHive. Designed for privacy, built for students. StuHive is a Data Fiduciary.
             </footer>
         </article>
     );
