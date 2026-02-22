@@ -46,84 +46,90 @@ export default function BlogCard({ blog }) {
       />
       
       <Link href={`/blogs/${blog.slug}`} title={`Read: ${blog.title}`} className="block h-full group">
-        <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(102,126,234,0.15)] hover:border-primary/40 flex flex-col bg-white/[0.03] backdrop-blur-md border border-white/10 hover:-translate-y-1">
+        <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(102,126,234,0.15)] hover:border-primary/40 flex flex-col bg-[#0a0a0a] border border-white/10 hover:-translate-y-1">
           
-          {/* Cover Image - Reduced height from h-48 to h-44 */}
-          <div className="relative h-44 w-full overflow-hidden bg-secondary/20">
+          {/* Cover Image - FIXED: Added explicit width/height for Lighthouse CLS test */}
+          <div className="relative h-44 w-full overflow-hidden bg-secondary/20 shrink-0">
             {blog.coverImage ? (
               <img 
                 src={blog.coverImage} 
-                alt={blog.title} 
+                alt={`Cover for ${blog.title}`} 
                 loading="lazy" 
+                decoding="async"
+                width={600}
+                height={400}
                 className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-muted-foreground font-medium bg-secondary/5">
-                <span className="text-[10px] uppercase tracking-widest opacity-50 font-black">StuHive</span>
+              <div className="absolute inset-0 flex items-center justify-center bg-secondary/5">
+                <span className="text-[10px] uppercase tracking-widest text-white/60 font-black">StuHive</span>
               </div>
             )}
             
-            <div className="absolute top-3 left-3 flex flex-wrap gap-2 z-10">
+            <div className="absolute top-3 left-3 flex flex-wrap gap-2 z-10" aria-label="Blog Categories">
               {blog.tags?.slice(0, 2).map((tag) => (
-                <Badge key={tag} variant="secondary" className="bg-black/60 text-white backdrop-blur-md border border-white/10 text-[9px] uppercase font-bold px-2 py-0.5">
+                <Badge key={tag} variant="secondary" className="bg-black/80 text-white backdrop-blur-md border border-white/20 text-[9px] uppercase font-bold px-2 py-0.5">
                   {tag}
                 </Badge>
               ))}
             </div>
-            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#0a0a0a] to-transparent opacity-60" />
+            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#0a0a0a] to-transparent opacity-80" aria-hidden="true" />
           </div>
 
-          <CardContent className="flex flex-col flex-grow p-4 sm:p-5 bg-[#0a0a0a]">
+          <CardContent className="flex flex-col flex-grow p-4 sm:p-5">
             
-            {/* 🚀 Clean Metadata Row - No individual containers */}
-            <div className="flex items-center gap-x-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3 h-3 text-cyan-400" /> {formatDate(blog.createdAt)}
+            {/* 🚀 Clean Metadata Row - FIXED CONTRAST: Changed text-muted-foreground to text-gray-300 */}
+            <div className="flex items-center gap-x-3 text-[10px] font-bold uppercase tracking-wider text-gray-300 mb-2">
+              <span className="flex items-center gap-1" aria-label={`Published on ${formatDate(blog.createdAt)}`}>
+                <Calendar className="w-3 h-3 text-cyan-400" aria-hidden="true" /> {formatDate(blog.createdAt)}
               </span>
-              <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3 text-pink-400" /> {readTime} min
+              <span className="flex items-center gap-1" aria-label={`${readTime} minute read time`}>
+                <Clock className="w-3 h-3 text-pink-400" aria-hidden="true" /> {readTime} min
               </span>
-              <span className="flex items-center gap-1">
-                <Eye className="w-3 h-3 text-purple-400" /> {views}
+              <span className="flex items-center gap-1" aria-label={`${views} views`}>
+                <Eye className="w-3 h-3 text-purple-400" aria-hidden="true" /> {views}
               </span>
             </div>
 
-            <h3 className="text-lg font-extrabold tracking-tight leading-snug mb-2 line-clamp-2 text-white/95 group-hover:text-cyan-400 transition-colors duration-300">
+            <h3 className="text-lg font-extrabold tracking-tight leading-snug mb-2 line-clamp-2 text-white group-hover:text-cyan-400 transition-colors duration-300">
               {blog.title}
             </h3>
             
-            {/* Star Ratings */}
-            <div className="flex items-center gap-2 mb-3" aria-label={`Rated ${rating.toFixed(1)} stars`}>
+            {/* Star Ratings - FIXED ARIA LABEL */}
+            <div className="flex items-center gap-2 mb-3" aria-label={`Rated ${rating.toFixed(1)} out of 5 stars by ${blog.numReviews || 0} reviewers`}>
               <div className="flex gap-0.5" aria-hidden="true">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star 
                     key={star} 
-                    className={`w-3 h-3 ${star <= Math.round(rating) ? "fill-yellow-500 text-yellow-500" : "text-white/10"}`} 
+                    className={`w-3 h-3 ${star <= Math.round(rating) ? "fill-yellow-500 text-yellow-500" : "text-white/20"}`} 
                   />
                 ))}
               </div>
-              <span className="text-[9px] font-bold text-white/40">
+              {/* FIXED CONTRAST: text-white/40 -> text-gray-400 */}
+              <span className="text-[9px] font-bold text-gray-400">
                 {rating.toFixed(1)} ({blog.numReviews || 0})
               </span>
             </div>
             
-            <p className="text-white/50 text-xs leading-relaxed line-clamp-2 mb-4 flex-grow font-medium">
+            {/* FIXED CONTRAST: text-white/50 -> text-gray-300 */}
+            <p className="text-gray-300 text-xs leading-relaxed line-clamp-2 mb-4 flex-grow font-medium">
               {blog.summary || blog.excerpt || "Click to read the full article on StuHive..."}
             </p>
 
-            <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/5">
+            <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/10">
               <div className="flex items-center gap-2">
-                <Avatar className="w-7 h-7 border border-white/10">
-                  <AvatarImage src={blog.author?.avatar} alt={blog.author?.name} />
+                <Avatar className="w-7 h-7 border border-white/20 shrink-0">
+                  <AvatarImage src={blog.author?.avatar} alt={`${blog.author?.name} avatar`} />
                   <AvatarFallback className="bg-secondary text-[10px] font-black">{blog.author?.name?.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <span className="text-[11px] font-bold text-white/70 flex items-center gap-1">
+                {/* FIXED CONTRAST: text-white/70 -> text-gray-200 */}
+                <span className="text-[11px] font-bold text-gray-200 flex items-center gap-1">
                     {blog.author?.name} 
-                    {isAdmin && <ShieldCheck className="w-3 h-3 text-emerald-400" />}
+                    {isAdmin && <ShieldCheck className="w-3 h-3 text-emerald-400" aria-label="Verified Admin" />}
                 </span>
               </div>
               
-              <div className="text-cyan-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-1 group-hover:translate-x-1 transition-all">
+              <div className="text-cyan-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-1 group-hover:translate-x-1 transition-transform" aria-hidden="true">
                 Read <ArrowRight className="w-3 h-3" />
               </div>
             </div>

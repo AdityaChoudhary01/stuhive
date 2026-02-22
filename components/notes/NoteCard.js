@@ -15,11 +15,11 @@ import { incrementDownloadCount, getNoteDownloadUrl } from "@/actions/note.actio
 import { toggleSaveNote } from "@/actions/user.actions"; 
 
 const FileIcon = ({ type, className }) => {
-  if (type?.includes("pdf")) return <FileText className={className} />;
-  if (type?.includes("image")) return <ImageIcon className={className} />;
-  if (type?.includes("presentation") || type?.includes("powerpoint")) return <Presentation className={className} />;
-  if (type?.includes("spreadsheet") || type?.includes("excel")) return <TableIcon className={className} />;
-  return <FileType className={className} />;
+  if (type?.includes("pdf")) return <FileText className={className} aria-hidden="true" />;
+  if (type?.includes("image")) return <ImageIcon className={className} aria-hidden="true" />;
+  if (type?.includes("presentation") || type?.includes("powerpoint")) return <Presentation className={className} aria-hidden="true" />;
+  if (type?.includes("spreadsheet") || type?.includes("excel")) return <TableIcon className={className} aria-hidden="true" />;
+  return <FileType className={className} aria-hidden="true" />;
 };
 
 export default function NoteCard({ note }) {
@@ -42,8 +42,6 @@ export default function NoteCard({ note }) {
     ? `${r2PublicUrl}/${note.thumbnailKey}` 
     : (note.fileType?.startsWith("image/") ? `${r2PublicUrl}/${note.fileKey}` : null);
 
-  // ✅ 1. SEO: Educational Schema Data
-  // This turns a simple div into an "EducationalOccupationalCredential" or "Article" for Google
   const noteSchema = {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
@@ -123,26 +121,27 @@ export default function NoteCard({ note }) {
       className="w-full max-w-[400px] mx-auto h-full flex flex-col group relative bg-[#050505] border border-white/10 rounded-[28px] overflow-hidden transition-all duration-500 hover:translate-y-[-6px] hover:shadow-[0_20px_50px_-15px_rgba(34,211,238,0.3)] hover:border-cyan-500/40 isolate"
       style={{ transform: "translateZ(0)" }}
     >
-      {/* ✅ 2. SEO: Inject JSON-LD Schema (Hidden) */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(noteSchema) }}
       />
 
-      {/* Cinematic Top Flare */}
       <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-50 pointer-events-none" />
 
-      {/* --- WRAPPER FOR BOTH SECTIONS --- */}
       <div className="flex flex-col h-full bg-[#050505]">
         
         {/* --- TOP SECTION (IMAGE) --- */}
         <div className="relative h-48 sm:h-56 w-full shrink-0 transform-gpu overflow-hidden bottom-[-2px]">
-          {/* Animated Save Heart */}
-          <button onClick={handleSave} className="absolute top-4 right-4 z-40 p-2.5 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 hover:bg-white/10 hover:scale-110 transition-all duration-300 shadow-2xl">
-            <Heart className={`h-4 w-4 transition-colors duration-300 ${isSaved ? "fill-pink-500 text-pink-500 drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]" : "text-white/80"}`} />
+          
+          {/* FIXED ARIA: Added aria-label to prevent "Buttons do not have an accessible name" error */}
+          <button 
+            onClick={handleSave} 
+            aria-label={isSaved ? "Remove from saved collection" : "Save note to collection"}
+            className="absolute top-4 right-4 z-40 p-2.5 rounded-full bg-black/80 backdrop-blur-xl border border-white/20 hover:bg-white/10 hover:scale-110 transition-all duration-300 shadow-2xl"
+          >
+            <Heart aria-hidden="true" className={`h-4 w-4 transition-colors duration-300 ${isSaved ? "fill-pink-500 text-pink-500 drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]" : "text-gray-300"}`} />
           </button>
 
-          {/* Floating Badges */}
           <div className="absolute top-4 left-4 z-40 flex flex-col items-start gap-2.5 max-w-[70%]">
               {note.isFeatured && (
                 <Badge className="relative overflow-hidden bg-gradient-to-r from-amber-500 to-orange-600 border-0 text-[9px] font-black uppercase tracking-widest text-white px-3 py-1 shadow-lg">
@@ -150,14 +149,25 @@ export default function NoteCard({ note }) {
                   <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent z-0 skew-x-12 animate-[shimmer_2.5s_infinite]" />
                 </Badge>
               )}
-              <Badge className="bg-black/60 backdrop-blur-xl border border-white/10 text-cyan-300 text-[9px] font-black uppercase tracking-widest px-3 py-1 shadow-xl truncate max-w-full">
+              {/* FIXED CONTRAST: Changed bg-black/60 to bg-black/80 and text-cyan-300 to text-cyan-400 */}
+              <Badge className="bg-black/80 backdrop-blur-xl border border-white/20 text-cyan-400 text-[9px] font-black uppercase tracking-widest px-3 py-1 shadow-xl truncate max-w-full">
                   {note.subject}
               </Badge>
           </div>
 
-          <Link href={`/notes/${note._id}`} title={`View ${note.title}`} className="block w-full h-full relative z-10">
+          {/* FIXED SEO/A11Y: Added tabIndex={-1} and aria-hidden="true" to prevent Lighthouse "Identical links have the same purpose" error */}
+          <Link href={`/notes/${note._id}`} tabIndex={-1} aria-hidden="true" className="block w-full h-full relative z-10">
             {thumbnailUrl ? (
-              <img src={thumbnailUrl} alt={note.title} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-[1.08] opacity-85 group-hover:opacity-100" />
+              // FIXED PERFORMANCE: Added explicit width, height, loading, and decoding attributes to prevent CLS
+              <img 
+                src={thumbnailUrl} 
+                alt={`Preview of ${note.title}`} 
+                width={400} 
+                height={250} 
+                loading="lazy" 
+                decoding="async" 
+                className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-[1.08] opacity-85 group-hover:opacity-100" 
+              />
             ) : (
               <div className="flex flex-col items-center justify-center h-full gap-3 text-white/30 group-hover:text-cyan-400 transition-all duration-700 bg-white/[0.02]">
                   <FileIcon type={note.fileType} className="h-16 w-16 group-hover:drop-shadow-[0_0_20px_rgba(34,211,238,0.4)]" />
@@ -168,57 +178,61 @@ export default function NoteCard({ note }) {
             )}
           </Link>
 
-          {/* Seamless Deep Fade */}
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent z-30 pointer-events-none" />
         </div>
 
         {/* --- BOTTOM SECTION (TEXT) --- */}
         <div className="flex flex-col flex-grow p-5 sm:p-6 pt-5 relative z-40 bg-[#050505] -mt-[1px]">
-          <Link href={`/notes/${note._id}`} title={`Download notes for ${note.course}`} className="flex-grow space-y-3 block mb-6">
+          <Link href={`/notes/${note._id}`} title={`Download notes for ${note.course}`} className="flex-grow space-y-3 block mb-6 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-lg">
             <h3 className="font-extrabold text-lg sm:text-xl tracking-tight leading-tight line-clamp-2 text-white/95 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-cyan-400 group-hover:to-blue-500 transition-all duration-500">
               {note.title}
             </h3>
-            <div className="text-xs text-white/50 font-semibold flex items-center gap-2 truncate uppercase tracking-wider">
-               <School className="w-3.5 h-3.5 text-white/30 shrink-0" /> 
-               <span className="truncate">{note.course}</span> <span className="text-white/20">•</span> <span className="truncate">{note.university}</span>
+            {/* FIXED CONTRAST: Changed text-white/50 to text-gray-400 */}
+            <div className="text-xs text-gray-400 font-semibold flex items-center gap-2 truncate uppercase tracking-wider">
+               <School aria-hidden="true" className="w-3.5 h-3.5 text-gray-500 shrink-0" /> 
+               <span className="truncate">{note.course}</span> <span className="text-gray-600">•</span> <span className="truncate">{note.university}</span>
             </div>
           </Link>
 
           {/* Stats Pills */}
           <div className="flex items-center justify-between text-sm mb-6 flex-wrap gap-2">
-              <div className="flex items-center gap-1.5 bg-white/[0.03] shadow-inner px-3.5 py-1.5 rounded-full border border-white/5">
+              <div className="flex items-center gap-1.5 bg-white/[0.03] shadow-inner px-3.5 py-1.5 rounded-full border border-white/5" aria-label={`Rated ${note.rating || 0} stars`}>
                 <StarRating rating={note.rating} size="sm" />
-                <span className="text-[10px] font-bold text-white/50 ml-1">({note.numReviews})</span>
+                {/* FIXED CONTRAST: Changed text-white/50 to text-gray-400 */}
+                <span className="text-[10px] font-bold text-gray-400 ml-1">({note.numReviews})</span>
               </div>
-              <div className="flex items-center text-white/50 text-[10px] gap-3.5 uppercase tracking-widest font-bold bg-white/[0.03] shadow-inner px-3.5 py-1.5 rounded-full border border-white/5">
-                <span className="flex items-center gap-1.5"><Eye className="h-3.5 w-3.5 text-cyan-400/80" /> {note.viewCount || 0}</span>
-                <span className="flex items-center gap-1.5"><Download className="h-3.5 w-3.5 text-emerald-400/80" /> {note.downloadCount || 0}</span>
+              <div className="flex items-center text-gray-400 text-[10px] gap-3.5 uppercase tracking-widest font-bold bg-white/[0.03] shadow-inner px-3.5 py-1.5 rounded-full border border-white/5">
+                <span className="flex items-center gap-1.5" aria-label={`${note.viewCount || 0} views`}><Eye aria-hidden="true" className="h-3.5 w-3.5 text-cyan-400/80" /> {note.viewCount || 0}</span>
+                <span className="flex items-center gap-1.5" aria-label={`${note.downloadCount || 0} downloads`}><Download aria-hidden="true" className="h-3.5 w-3.5 text-emerald-400/80" /> {note.downloadCount || 0}</span>
               </div>
           </div>
 
           {/* User Info & Get Button */}
           <div className="flex items-center justify-between gap-4 mt-auto pt-2">
               <div className="flex items-center gap-3 overflow-hidden pr-2 flex-1 min-w-0">
-                <img src={note.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(note.user?.name || 'U')}&background=random&color=fff`} alt={note.user?.name} className="w-9 h-9 rounded-full border border-white/10 shrink-0 object-cover" />
+                {/* FIXED PERFORMANCE: Added width, height, decoding to Avatar image */}
+                <img 
+                  src={note.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(note.user?.name || 'U')}&background=random&color=fff`} 
+                  alt={`${note.user?.name}'s avatar`} 
+                  width={36} 
+                  height={36} 
+                  decoding="async"
+                  loading="lazy"
+                  className="w-9 h-9 rounded-full border border-white/20 shrink-0 object-cover" 
+                />
                 <div className="flex flex-col min-w-0">
-                    <span className="text-[11px] font-extrabold truncate text-white/80">{note.user?.name || "Unknown"}</span>
-                    <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-0.5 truncate">{formatDate(note.uploadDate)}</span>
+                    <span className="text-[11px] font-extrabold truncate text-white/90">{note.user?.name || "Unknown"}</span>
+                    {/* FIXED CONTRAST: Changed text-white/40 to text-gray-400 */}
+                    <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5 truncate">{formatDate(note.uploadDate)}</span>
                 </div>
               </div>
 
-              <Button disabled={isDownloading} onClick={handleDownload} className="h-10 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-black uppercase tracking-widest text-[10px] hover:bg-cyan-400 hover:text-black hover:shadow-[0_0_20px_rgba(34,211,238,0.5)] transition-all duration-300 active:scale-95 px-5 gap-2 shrink-0">
-                {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Download className="h-4 w-4" /> <span>Get</span></>}
+              <Button disabled={isDownloading} onClick={handleDownload} aria-label={`Download ${note.title}`} className="h-10 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-black uppercase tracking-widest text-[10px] hover:bg-cyan-400 hover:text-black hover:shadow-[0_0_20px_rgba(34,211,238,0.5)] transition-all duration-300 active:scale-95 px-5 gap-2 shrink-0">
+                {isDownloading ? <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" /> : <><Download aria-hidden="true" className="h-4 w-4" /> <span>Get</span></>}
               </Button>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
     </Card>
   );
 }
