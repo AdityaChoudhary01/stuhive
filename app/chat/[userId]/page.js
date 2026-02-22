@@ -6,25 +6,31 @@ import { getConversationWithMessages } from "@/services/chat.service";
 import ChatBox from "@/components/chat/ChatBox";
 
 export async function generateMetadata({ params }) {
-  const user = await getUserProfile(params.userId);
+  // 🚀 FIX: Await the params Promise before reading userId (Next.js 15 requirement)
+  const resolvedParams = await params;
+  
+  const user = await getUserProfile(resolvedParams.userId);
   return { title: user ? `Chat with ${user.name}` : "Chat" };
 }
 
 export default async function ChatPage({ params }) {
+  // 🚀 FIX: Await the params Promise here as well
+  const resolvedParams = await params;
+  
   const session = await getServerSession(authOptions);
 
   if (!session) redirect("/login");
 
   // Prevent user from chatting with themselves
-  if (session.user.id === params.userId) redirect("/chat");
+  if (session.user.id === resolvedParams.userId) redirect("/chat");
 
-  const recipient = await getUserProfile(params.userId);
+  const recipient = await getUserProfile(resolvedParams.userId);
 
   if (!recipient) notFound();
 
   const { conversationId, messages } = await getConversationWithMessages(
     session.user.id,
-    params.userId
+    resolvedParams.userId
   );
 
   return (
