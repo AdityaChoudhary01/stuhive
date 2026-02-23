@@ -31,8 +31,8 @@
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0a0a0a",
-  "theme_color": "#00d4ff",
+  "background_color": "#0a0118",
+  "theme_color": "#0a0118",
   "categories": ["education", "lifestyle", "productivity"],
   "screenshots": [
     {
