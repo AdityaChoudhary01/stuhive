@@ -67,6 +67,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://cdn.stuhive.in" />
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="preconnect" href="https://lh3.googleusercontent.com" />
+        <meta name="msvalidate.01" content="2395AC146C62BB5D66E421F75E9E7DCF" />
       </head>
       
       <body className={`${inter.className} min-h-screen flex flex-col bg-background text-foreground antialiased`}>
