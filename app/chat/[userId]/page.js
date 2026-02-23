@@ -35,7 +35,7 @@ export default async function ChatPage({ params }) {
     // 🚀 THE FIX: Restored normal document flow using `h-[calc(100dvh-4rem)]`.
     // This explicitly takes up the exact height of the screen (minus the navbar),
     // which physically pushes the global footer down out of view where it belongs.
-    <div className="w-full flex justify-center items-start md:items-center p-0 md:p-6 lg:p-12 overflow-hidden bg-background relative h-[calc(100dvh-4rem)] md:h-[calc(100dvh-5rem)]">
+    <div className="w-full flex justify-center items-start md:items-center p-0 md:p-6 lg:p-12 overflow-hidden h-[calc(100dvh-4rem)] md:h-[calc(100dvh-5rem)]">
       
       {/* 2. Ambient Background Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] pointer-events-none hidden md:block" />

@@ -54,7 +54,7 @@ const PostBlogPage = ({ existingBlog = null, onBlogUpdated = () => {}, onClose =
         }
     };
 
-    // --- Helper: Client-Side Image Optimizer (16:9 WebP) ---
+    // --- Helper: Client-Side Image Optimizer (16:9 WebP - Aggressive Compression) ---
     const optimizeCoverImage = (file) => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -66,7 +66,10 @@ const PostBlogPage = ({ existingBlog = null, onBlogUpdated = () => {}, onClose =
                     const canvas = document.createElement("canvas");
                     const ctx = canvas.getContext("2d");
 
-                    const MAX_WIDTH = 1200;
+                    // 🚀 AGGRESSIVE FIX 1: Reduced MAX_WIDTH from 1200 to 800.
+                    // This creates an 800x450 image, which is perfectly sharp for web banners
+                    // but drastically reduces the file size footprint.
+                    const MAX_WIDTH = 800;
                     let targetWidth = img.width > MAX_WIDTH ? MAX_WIDTH : img.width;
                     let targetHeight = Math.round(targetWidth * (9 / 16));
 
@@ -87,13 +90,14 @@ const PostBlogPage = ({ existingBlog = null, onBlogUpdated = () => {}, onClose =
 
                     ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, targetWidth, targetHeight);
 
+                    // 🚀 AGGRESSIVE FIX 2: Lowered quality from 0.8 to 0.65 to hit that 20-30kb sweet spot.
                     canvas.toBlob((blob) => {
                         if (blob) {
                             resolve(new File([blob], `cover.webp`, { type: "image/webp" }));
                         } else {
                             reject(new Error("Canvas to Blob failed"));
                         }
-                    }, "image/webp", 0.8);
+                    }, "image/webp", 0.65);
                 };
                 img.onerror = (error) => reject(error);
             };
