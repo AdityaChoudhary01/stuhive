@@ -8,7 +8,7 @@ import BlogInteractions from "@/components/blog/BlogInteractions";
 import AuthorInfoBlock from "@/components/common/AuthorInfoBlock";
 import RelatedBlog from "@/components/blog/RelatedBlogs"; 
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Star, MessageCircle, Eye } from "lucide-react";
+import { Calendar, Clock, MessageCircle, Eye, Star } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
 import ReactMarkdown from "react-markdown";
@@ -140,6 +140,7 @@ export default async function BlogDetailPage({ params }) {
       "name": "StuHive",
       "logo": { "@type": "ImageObject", "url": `${APP_URL}/logo192.png` }
     },
+    // ✅ FIX: Kept interaction stats (valid for BlogPosting) but REMOVED aggregateRating (invalid for BlogPosting)
     "interactionStatistic": [
       {
         "@type": "InteractionCounter",
@@ -151,16 +152,7 @@ export default async function BlogDetailPage({ params }) {
         "interactionType": "https://schema.org/CommentAction",
         "userInteractionCount": totalReviews
       }
-    ],
-    ...(averageRating > 0 && {
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": averageRating,
-        "reviewCount": totalReviews,
-        "bestRating": "5",
-        "worstRating": "1"
-      }
-    })
+    ]
   };
 
   const MarkdownComponents = {
@@ -243,7 +235,6 @@ export default async function BlogDetailPage({ params }) {
         </h1>
 
         <div className="w-full max-w-4xl bg-white/[0.1] border border-white/30 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
-           {/* 🚀 SEO FIX: Added Semantic Address tag for authorship */}
            <address className="not-italic">
               <AuthorInfoBlock user={blog.author} />
            </address>
@@ -262,6 +253,7 @@ export default async function BlogDetailPage({ params }) {
                 <Eye className="w-4 h-4 text-cyan-400" aria-hidden="true" />
                 {blog.viewCount + 1 || 1}
              </span>
+             {/* Note: We still display the stars in the UI visually, we just don't push them to Google's JSON-LD to prevent the error */}
              <span className="flex items-center gap-2 text-white bg-white/20 px-3 py-1 rounded-full border border-white/30" title="Average Rating">
                 <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" aria-hidden="true" />
                 <span>
