@@ -9,11 +9,13 @@ import {
   editMessage,
   deleteMessageForEveryone,
   toggleReaction,
-  // 🔹 You will need to create this function in your chat.service.js
   getOlderMessages 
 } from "@/services/chat.service";
 
-import { Send, MoreHorizontal, Edit2, Trash2, Check, CheckCheck, Loader2 } from "lucide-react";
+import { 
+  Send, MoreHorizontal, Edit2, Trash2, Check, CheckCheck, 
+  Loader2, Reply, X, Paperclip, FileText, Image as ImageIcon
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,9 +45,14 @@ function formatTime(dateString) {
 }
 
 /* ============================= */
-/* 🔹 Message Action Menu */
+/* 🔹 Message Action Menu (Smart Positioning) */
 /* ============================= */
-function MessageMenu({ message, isMe, onReact, onEdit, onDelete, close }) {
+function MessageMenu({ message, isMe, clickY, onReact, onEdit, onDelete, onReply, close }) {
+  // 🚀 FIXED: No more useEffect! We calculate direction instantly based on the click coordinate
+  const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+  // If the user clicked in the bottom half of the screen, open upwards. If top half, open downwards.
+  const openUpwards = clickY > viewportHeight / 2;
+
   return (
     <>
       <div 
@@ -57,56 +64,257 @@ function MessageMenu({ message, isMe, onReact, onEdit, onDelete, close }) {
       />
       
       <div 
-        className={`absolute z-50 bottom-[calc(100%+0.5rem)] w-64 bg-background/95 backdrop-blur-2xl border border-border/50 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] rounded-2xl p-3 animate-in fade-in zoom-in-95 duration-200 origin-bottom ${
+        className={`absolute z-50 w-56 sm:w-64 bg-background/95 backdrop-blur-2xl border border-border/50 shadow-2xl rounded-2xl p-3 animate-in fade-in zoom-in-95 duration-200 ${
           isMe ? "right-0" : "left-0"
+        } ${
+          openUpwards 
+            ? "bottom-[calc(100%+0.5rem)] origin-bottom" // Pops UP safely
+            : "top-[calc(100%+0.5rem)] origin-top"       // Pops DOWN safely
         }`}
       >
+        {/* Emojis */}
         <div className="flex justify-between items-center mb-3 px-1">
           {EMOJIS.map((e, index) => (
             <button
               key={e}
-              style={{ animationDelay: `${index * 40}ms` }}
+              style={{ animationDelay: `${index * 30}ms` }}
               onClick={(ev) => {
                 ev.stopPropagation();
                 onReact(e);
                 close();
               }}
-              className="text-xl hover:scale-150 hover:-translate-y-2 active:scale-95 transition-all duration-300 animate-in slide-in-from-bottom-2 fade-in"
+              className={`text-xl hover:scale-150 hover:-translate-y-2 active:scale-95 transition-all duration-300 animate-in fade-in ${openUpwards ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'}`}
             >
               {e}
             </button>
           ))}
         </div>
 
-        {isMe && (
-          <div className="border-t border-border/50 pt-2 space-y-1 text-sm font-medium">
-            <button
-              onClick={(ev) => {
-                ev.stopPropagation();
-                onEdit();
-                close();
-              }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-muted/80 transition-colors text-foreground"
-            >
-              <Edit2 className="w-4 h-4 text-muted-foreground" /> Edit Message
-            </button>
+        <div className="border-t border-border/50 pt-2 space-y-1 text-sm font-medium">
+          <button
+            onClick={(ev) => {
+              ev.stopPropagation();
+              onReply();
+              close();
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted/80 transition-colors text-foreground"
+          >
+            <Reply className="w-4 h-4 text-muted-foreground" /> Reply
+          </button>
 
-            <button
-              onClick={(ev) => {
-                ev.stopPropagation();
-                onDelete();
-                close();
-              }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-destructive/10 text-destructive transition-colors"
-            >
-              <Trash2 className="w-4 h-4" /> Delete for Everyone
-            </button>
-          </div>
-        )}
+          {isMe && (
+            <>
+              <button
+                onClick={(ev) => {
+                  ev.stopPropagation();
+                  onEdit();
+                  close();
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted/80 transition-colors text-foreground"
+              >
+                <Edit2 className="w-4 h-4 text-muted-foreground" /> Edit Message
+              </button>
+
+              <button
+                onClick={(ev) => {
+                  ev.stopPropagation();
+                  onDelete();
+                  close();
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-destructive/10 text-destructive transition-colors"
+              >
+                <Trash2 className="w-4 h-4" /> Delete for Everyone
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </>
   );
 }
+
+/* ============================= */
+/* 🔹 Individual Message Component (Handles Swipe + Desktop Mouse Drag) */
+/* ============================= */
+function MessageItem({ msg, isMe, isRead, isDelivered, recipient, onReply, onReact, onEdit, onDelete, activeMenu, setActiveMenu }) {
+  const [dragX, setDragX] = useState(0);
+  const startX = useRef(0);
+  const startY = useRef(0);
+  const isDraggingRef = useRef(false);
+
+  // Swipe-to-reply logic
+  const handleDragStart = (clientX, clientY) => {
+    startX.current = clientX;
+    startY.current = clientY;
+    isDraggingRef.current = true;
+  };
+
+  const handleDragMove = (clientX, clientY) => {
+    if (!isDraggingRef.current) return;
+    const diffX = clientX - startX.current;
+    const diffY = clientY - startY.current;
+
+    // Cancel horizontal swipe if user is scrolling vertically
+    if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(dragX) < 10) {
+      isDraggingRef.current = false;
+      setDragX(0);
+      return;
+    }
+
+    if (diffX > 0 && diffX < 80) {
+      setDragX(diffX);
+    }
+  };
+
+  const handleDragEnd = () => {
+    if (!isDraggingRef.current) return;
+    if (dragX > 50) {
+      onReply(msg);
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+    }
+    setDragX(0);
+    isDraggingRef.current = false;
+  };
+
+  // Fixed ESLint by directly calculating the transition style
+  const transitionStyle = dragX > 0 ? 'none' : 'transform 0.2s ease-out';
+
+  return (
+    <div
+      className={`flex w-full ${isMe ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-2 duration-300 relative`}
+      onTouchStart={(e) => handleDragStart(e.touches[0].clientX, e.touches[0].clientY)}
+      onTouchMove={(e) => handleDragMove(e.touches[0].clientX, e.touches[0].clientY)}
+      onTouchEnd={handleDragEnd}
+      onMouseDown={(e) => handleDragStart(e.clientX, e.clientY)}
+      onMouseMove={(e) => handleDragMove(e.clientX, e.clientY)}
+      onMouseUp={handleDragEnd}
+      onMouseLeave={handleDragEnd}
+    >
+      {/* Reply Icon Indicator */}
+      <div 
+        className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center justify-center bg-secondary/80 rounded-full w-8 h-8 transition-opacity"
+        style={{ 
+          opacity: dragX / 60,
+          transform: `translate(${dragX - 40}px, -50%)`
+        }}
+      >
+        <Reply className="w-4 h-4 text-foreground" />
+      </div>
+
+      <div 
+        className="relative group max-w-[85%] sm:max-w-[70%] flex flex-col z-10"
+        style={{ transform: `translateX(${dragX}px)`, transition: transitionStyle }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          // Pass the exact Y coordinate of the click to the menu
+          setActiveMenu({ id: msg._id, y: e.clientY });
+        }}
+      >
+        <div
+          className={`relative px-3 pt-2 pb-1.5 shadow-sm text-[15px] leading-relaxed break-words flex flex-col ${
+            isMe
+              ? "bg-primary text-primary-foreground rounded-2xl rounded-br-sm shadow-primary/20"
+              : "bg-muted text-foreground border border-border/40 rounded-2xl rounded-bl-sm"
+          }`}
+        >
+          {msg.deletedForEveryone ? (
+            <span className="italic opacity-60 flex items-center gap-2 text-sm pb-1 px-1">
+              <Trash2 className="w-3.5 h-3.5" /> This message was deleted
+            </span>
+          ) : (
+            <>
+              {/* WhatsApp-style Quoted Reply Box */}
+              {msg.replyTo && (
+                <div className={`mb-1.5 p-2 rounded-xl text-sm border-l-4 ${isMe ? 'bg-primary-foreground/10 border-primary-foreground/50 text-primary-foreground/90' : 'bg-background/60 border-primary/50 text-muted-foreground'} flex flex-col gap-0.5 pointer-events-none select-none`}>
+                  <span className={`font-bold text-xs ${isMe ? 'text-primary-foreground' : 'text-primary'}`}>
+                    {String(msg.replyTo.sender) === String(recipient._id) ? recipient.name : "You"}
+                  </span>
+                  <span className="line-clamp-2 text-xs opacity-90">{msg.replyTo.content}</span>
+                </div>
+              )}
+
+              {/* 🚀 IMAGE / ATTACHMENT DISPLAY */}
+              {msg.imageUrl && (
+                <div className="mb-2 mt-1 rounded-xl overflow-hidden bg-black/10 flex items-center justify-center">
+                  <img src={msg.imageUrl} alt="attachment" className="max-w-full h-auto object-cover max-h-64 rounded-xl border border-white/5 shadow-sm" />
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-1">
+                <span className="whitespace-pre-wrap pl-1">{msg.content}</span>
+                
+                {/* Timestamp & Ticks aligned bottom-right tightly */}
+                <div className={`flex items-center gap-1 shrink-0 ml-auto pt-1 ${isMe ? 'text-primary-foreground/70' : 'text-muted-foreground/70'}`}>
+                  {msg.edited && <span className="text-[10px] italic">Edited</span>}
+                  <span className="text-[10px] font-medium tracking-wide">
+                    {formatTime(msg.createdAt)}
+                  </span>
+                  
+                  {isMe && (
+                    isRead ? (
+                      <CheckCheck className="w-[14px] h-[14px] text-blue-300 drop-shadow-sm ml-0.5" />
+                    ) : isDelivered ? (
+                      <CheckCheck className="w-[14px] h-[14px] opacity-70 ml-0.5" />
+                    ) : (
+                      <Check className="w-[14px] h-[14px] opacity-70 ml-0.5" />
+                    )
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Floating Reactions */}
+          {msg.reactions?.length > 0 && (
+            <div className={`absolute -bottom-3 flex gap-1 flex-wrap z-10 ${isMe ? "right-2" : "left-2"}`}>
+              {msg.reactions.map((r, i) => (
+                <span
+                  key={i}
+                  className="text-[12px] bg-background text-foreground border border-border shadow-md px-1.5 py-0.5 rounded-full cursor-default animate-in zoom-in duration-300 hover:scale-125 transition-transform origin-bottom"
+                >
+                  {r.emoji}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Three Dot Menu Trigger */}
+        {!msg.deletedForEveryone && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              // Pass the exact Y coordinate of the click to the menu
+              setActiveMenu(activeMenu?.id === msg._id ? null : { id: msg._id, y: e.clientY });
+            }}
+            className={`absolute top-1 opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-full hover:bg-muted bg-background border shadow-sm text-muted-foreground ${
+              isMe ? "-left-10" : "-right-10"
+            } hidden lg:flex items-center justify-center hover:scale-110 active:scale-95`}
+          >
+            <MoreHorizontal className="w-4 h-4" />
+          </button>
+        )}
+
+        {/* Render Smart Menu */}
+        {activeMenu?.id === msg._id && (
+          <MessageMenu
+            message={msg}
+            isMe={isMe}
+            clickY={activeMenu.y} // 🚀 Pass the Y coordinate to determine direction
+            onReact={onReact}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onReply={() => onReply(msg)}
+            close={() => setActiveMenu(null)}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 /* ============================= */
 /* 🔹 Chat Content */
@@ -114,16 +322,23 @@ function MessageMenu({ message, isMe, onReact, onEdit, onDelete, close }) {
 function ChatBoxContent({ currentUser, recipient, conversationId, initialMessages }) {
   const ably = useAbly();
   const scrollRef = useRef(null);
+  const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const [messages, setMessages] = useState(initialMessages || []);
   const [text, setText] = useState("");
-  const [activeMenu, setActiveMenu] = useState(null);
+  const [activeMenu, setActiveMenu] = useState(null); // Now stores { id, y }
+  const [replyingTo, setReplyingTo] = useState(null);
+  
+  // 🚀 FILE UPLOAD STATES
+  const [attachment, setAttachment] = useState(null);
+  const [attachmentPreview, setAttachmentPreview] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [isRecipientTyping, setIsRecipientTyping] = useState(false);
   const [lastSeen, setLastSeen] = useState(recipient.lastSeen || null);
 
-  // 🔹 Pagination States
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMoreMessages, setHasMoreMessages] = useState(initialMessages?.length >= MESSAGES_PER_PAGE);
   const [page, setPage] = useState(1);
@@ -188,12 +403,17 @@ function ChatBoxContent({ currentUser, recipient, conversationId, initialMessage
         
         if (String(message.data.sender) !== String(currentUser.id)) {
           markConversationRead(conversationId, currentUser.id);
-          
           const notifyChannel = ably.channels.get(`notifications:${currentUser.id}`);
           notifyChannel.publish("conversation-read", { conversationId });
 
           const chatChannel = ably.channels.get(channelName);
           chatChannel.publish("messages-read", { readerId: currentUser.id });
+        }
+        
+        if (scrollRef.current) {
+          setTimeout(() => {
+            scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+          }, 100);
         }
         break;
 
@@ -233,37 +453,28 @@ function ChatBoxContent({ currentUser, recipient, conversationId, initialMessage
   /* ============================= */
   /* 🔹 Pagination Logic */
   /* ============================= */
-  
-  // 1. Initial Scroll to Bottom
   useEffect(() => {
     if (scrollRef.current && page === 1 && !isLoadingMore) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isRecipientTyping, page, isLoadingMore]);
 
-  // 2. Handle Scroll Event to Load Older Messages
   const handleScroll = useCallback(async () => {
     if (!scrollRef.current || isLoadingMore || !hasMoreMessages) return;
 
-    // If we hit the absolute top of the container
     if (scrollRef.current.scrollTop === 0) {
       setIsLoadingMore(true);
-      
-      // Save current height so we know how much to offset after new messages load
       previousScrollHeight.current = scrollRef.current.scrollHeight;
 
       try {
         const nextPage = page + 1;
-        // 🚨 YOU NEED TO IMPLEMENT THIS IN chat.service.js
         const olderMessages = await getOlderMessages(conversationId, nextPage);
         
         if (olderMessages && olderMessages.length > 0) {
-          // Prepend older messages to the top
           setMessages(prev => [...olderMessages, ...prev]);
           setPage(nextPage);
-          
           if (olderMessages.length < MESSAGES_PER_PAGE) {
-            setHasMoreMessages(false); // No more history
+            setHasMoreMessages(false); 
           }
         } else {
           setHasMoreMessages(false);
@@ -276,10 +487,8 @@ function ChatBoxContent({ currentUser, recipient, conversationId, initialMessage
     }
   }, [isLoadingMore, hasMoreMessages, page, conversationId]);
 
-  // 3. Maintain Scroll Position after loading old messages
   useEffect(() => {
     if (scrollRef.current && page > 1) {
-      // Calculate the difference in height and adjust scrollTop so the view stays locked
       const currentScrollHeight = scrollRef.current.scrollHeight;
       const heightDifference = currentScrollHeight - previousScrollHeight.current;
       scrollRef.current.scrollTop = heightDifference;
@@ -288,7 +497,7 @@ function ChatBoxContent({ currentUser, recipient, conversationId, initialMessage
 
 
   /* ============================= */
-  /* 🔹 Send & Typing Actions */
+  /* 🔹 Actions */
   /* ============================= */
   const handleTyping = (value) => {
     setText(value);
@@ -301,31 +510,89 @@ function ChatBoxContent({ currentUser, recipient, conversationId, initialMessage
     }, 1500);
   };
 
+  // 🚀 Handle File Selection
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Check file size (e.g., max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File is too large. Maximum size is 5MB.");
+      return;
+    }
+
+    setAttachment(file);
+    if (file.type.startsWith("image/")) {
+      setAttachmentPreview(URL.createObjectURL(file));
+    } else {
+      setAttachmentPreview(null);
+    }
+  };
+
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!text.trim()) return;
+    if (!text.trim() && !attachment) return; // Prevent empty sends
 
-    const saved = await sendMessage({
-      senderId: currentUser.id,
-      receiverId: recipient._id,
-      content: text,
-    });
+    setIsUploading(true);
+    let finalImageUrl = null;
 
-    const chatChannel = ably.channels.get(channelName);
-    chatChannel.publish("message", saved);
+    try {
+      // 🚀 PROCESS ATTACHMENT
+      if (attachment) {
+        // For immediate working UI without needing a new backend route, we encode small images as Base64.
+        // NOTE: In production, replace this block with a function that uploads the file to Cloudflare R2
+        // and returns the public R2 URL (e.g., finalImageUrl = await uploadToR2(attachment);)
+        finalImageUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(attachment);
+        });
+      }
 
-    const notifyChannel = ably.channels.get(`notifications:${recipient._id}`);
-    notifyChannel.publish("new-message", { conversationId, content: saved.content });
+      const currentText = text;
+      const currentReply = replyingTo;
+      
+      // Clear UI instantly for snappy feel
+      setText("");
+      setReplyingTo(null);
+      setAttachment(null);
+      setAttachmentPreview(null);
 
-    setText("");
-    chatChannel.publish("typing", { senderId: currentUser.id, isTyping: false });
-    clearTimeout(typingTimeoutRef.current);
-    
-    // Force scroll to bottom when sending a new message
-    if (scrollRef.current) {
+      const saved = await sendMessage({
+        senderId: currentUser.id,
+        receiverId: recipient._id,
+        content: currentText,
+        imageUrl: finalImageUrl, // 🚀 Pass the attachment URL to the backend
+        replyTo: currentReply ? { _id: currentReply._id, content: currentReply.content, sender: currentReply.sender } : null
+      });
+
+      const chatChannel = ably.channels.get(channelName);
+      chatChannel.publish("message", saved);
+
+      const notifyChannel = ably.channels.get(`notifications:${recipient._id}`);
+      notifyChannel.publish("new-message", { conversationId, content: currentText || "Sent an attachment" });
+
+      chatChannel.publish("typing", { senderId: currentUser.id, isTyping: false });
+      clearTimeout(typingTimeoutRef.current);
+      
+      if (scrollRef.current) {
         setTimeout(() => {
-            scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+          scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
         }, 50);
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      alert("Failed to send message. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const initiateReply = (msg) => {
+    setReplyingTo(msg);
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
   };
 
@@ -349,45 +616,43 @@ function ChatBoxContent({ currentUser, recipient, conversationId, initialMessage
     channel.publish("message-deleted", { messageId: id });
   };
 
-
   /* ============================= */
   /* 🔹 UI */
   /* ============================= */
   return (
-    // 🔹 FIX: Removed relative absolute positioning traps. Flex column layout strictly partitions the header, messages, and input.
-    <div className="flex flex-col h-full w-full max-h-[100dvh] bg-background sm:border sm:border-border/40 sm:rounded-3xl sm:shadow-2xl overflow-hidden relative">
+    <div className="flex flex-col h-full w-full max-h-[100dvh] bg-background sm:border sm:border-border/40 sm:rounded-[2.5rem] sm:shadow-2xl overflow-hidden relative">
       
-      <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+      <div className="absolute inset-0 z-0 opacity-[0.04] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)', backgroundSize: '24px 24px' }} />
 
-      {/* 1. HEADER (Fixed at top, sibling to scroll area) */}
-      <div className="w-full z-20 px-4 py-3 border-b border-border/40 bg-background/80 backdrop-blur-xl flex items-center justify-between shadow-sm shrink-0">
+      {/* 1. HEADER */}
+      <div className="w-full z-20 px-4 py-3 border-b border-border/50 bg-background/90 backdrop-blur-2xl flex items-center justify-between shadow-sm shrink-0">
         <Link 
           href={`/profile/${recipient._id}`} 
           className="flex items-center gap-3 hover:bg-muted/50 p-1.5 pr-4 rounded-full transition-colors group cursor-pointer"
         >
           <div className="relative">
-            <Avatar className="w-10 h-10 border border-border/50 shadow-sm transition-transform group-hover:scale-105">
+            <Avatar className="w-11 h-11 border border-border/50 shadow-sm transition-transform group-hover:scale-105">
               <AvatarImage src={recipient.avatar} className="object-cover" />
-              <AvatarFallback className="bg-primary/10 text-primary font-medium">
+              <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
                 {recipient.name?.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <span 
-              className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background transition-colors duration-300 ${
-                isOnline ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-muted-foreground/50"
+              className={`absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-[2.5px] border-background transition-colors duration-300 ${
+                isOnline ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" : "bg-muted-foreground/40"
               }`}
             />
           </div>
 
           <div className="flex flex-col">
-            <h2 className="font-semibold text-foreground leading-none tracking-tight group-hover:text-primary transition-colors">
+            <h2 className="text-[16px] font-bold text-foreground leading-none tracking-tight group-hover:text-primary transition-colors">
               {recipient.name}
             </h2>
-            <div className="text-[11px] text-muted-foreground mt-1 font-medium min-h-[16px]">
+            <div className="text-[12px] text-muted-foreground mt-1.5 font-medium min-h-[16px]">
               {isRecipientTyping ? (
-                <span className="text-primary animate-pulse font-semibold tracking-wide">Typing...</span>
+                <span className="text-primary animate-pulse font-bold tracking-wide">typing...</span>
               ) : isOnline ? (
-                <span className="text-emerald-500 font-medium tracking-wide">Active now</span>
+                <span className="text-emerald-500 font-bold tracking-wide">Online</span>
               ) : (
                 <span>{formatLastSeen(lastSeen)}</span>
               )}
@@ -396,131 +661,127 @@ function ChatBoxContent({ currentUser, recipient, conversationId, initialMessage
         </Link>
       </div>
 
-      {/* 2. MESSAGES AREA (Independent scrolling container) */}
+      {/* 2. MESSAGES AREA */}
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-4 py-6 space-y-5 scrollbar-thin z-10"
+        className="flex-1 overflow-y-auto px-4 py-6 space-y-4 scrollbar-thin z-10 bg-secondary/5 relative"
       >
-        {/* Loading Spinner for old messages */}
         {isLoadingMore && (
-           <div className="w-full flex justify-center py-2">
+           <div className="w-full flex justify-center py-3">
                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
            </div>
         )}
 
         {messages.map((msg) => {
           const isMe = String(msg.sender) === String(currentUser.id);
-          
           const isRead = msg.readBy && msg.readBy.some(id => String(id) === String(recipient._id));
           const isDelivered = isOnline || isRead; 
 
           return (
-            <div
-              key={msg._id}
-              className={`flex w-full ${isMe ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-2 duration-300`}
-            >
-              <div 
-                className="relative group max-w-[85%] sm:max-w-[70%] flex flex-col"
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  setActiveMenu(msg._id);
-                }}
-              >
-                <div
-                  className={`relative px-4 py-2.5 shadow-sm text-[15px] leading-relaxed break-words ${
-                    isMe
-                      ? "bg-primary text-primary-foreground rounded-2xl rounded-br-sm shadow-primary/20"
-                      : "bg-muted/80 text-foreground border border-border/50 rounded-2xl rounded-bl-sm"
-                  }`}
-                >
-                  {msg.deletedForEveryone ? (
-                    <span className="italic opacity-60 flex items-center gap-2 text-sm">
-                      <Trash2 className="w-3.5 h-3.5" /> This message was deleted
-                    </span>
-                  ) : (
-                    <div className="flex flex-col">
-                      <div className="whitespace-pre-wrap">{msg.content}</div>
-                      
-                      <div className={`flex items-center gap-1 mt-1 -mb-1 ${isMe ? 'justify-end text-primary-foreground/80' : 'justify-start text-muted-foreground'}`}>
-                        {msg.edited && <span className="text-[10px] mr-1 opacity-70">Edited</span>}
-                        <span className="text-[10px] opacity-80 font-medium">
-                          {formatTime(msg.createdAt)}
-                        </span>
-                        
-                        {isMe && (
-                          isRead ? (
-                            <CheckCheck className="w-[14px] h-[14px] text-blue-300 drop-shadow-sm ml-0.5" />
-                          ) : isDelivered ? (
-                            <CheckCheck className="w-[14px] h-[14px] opacity-70 ml-0.5" />
-                          ) : (
-                            <Check className="w-[14px] h-[14px] opacity-70 ml-0.5" />
-                          )
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {msg.reactions?.length > 0 && (
-                    <div className={`absolute -bottom-3 flex gap-1 flex-wrap z-10 ${isMe ? "right-2" : "left-2"}`}>
-                      {msg.reactions.map((r, i) => (
-                        <span
-                          key={i}
-                          className="text-[12px] bg-background text-foreground border border-border shadow-md px-1.5 py-0.5 rounded-full cursor-default animate-in zoom-in duration-300 hover:scale-125 transition-transform origin-bottom"
-                        >
-                          {r.emoji}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {!msg.deletedForEveryone && (
-                  <button
-                    onClick={() => setActiveMenu(activeMenu === msg._id ? null : msg._id)}
-                    className={`absolute top-2 opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-full hover:bg-muted bg-background border shadow-sm text-muted-foreground ${
-                      isMe ? "-left-10" : "-right-10"
-                    } hidden md:flex items-center justify-center hover:scale-110 active:scale-95`}
-                  >
-                    <MoreHorizontal className="w-4 h-4" />
-                  </button>
-                )}
-
-                {activeMenu === msg._id && (
-                  <MessageMenu
-                    message={msg}
-                    isMe={isMe}
-                    onReact={(emoji) => handleReaction(msg, emoji)}
-                    onEdit={() => handleEdit(msg)}
-                    onDelete={() => handleDelete(msg._id)}
-                    close={() => setActiveMenu(null)}
-                  />
-                )}
-              </div>
-            </div>
+            <MessageItem 
+               key={msg._id}
+               msg={msg}
+               isMe={isMe}
+               isRead={isRead}
+               isDelivered={isDelivered}
+               recipient={recipient}
+               onReply={initiateReply}
+               onReact={(emoji) => handleReaction(msg, emoji)}
+               onEdit={() => handleEdit(msg)}
+               onDelete={() => handleDelete(msg._id)}
+               activeMenu={activeMenu}
+               setActiveMenu={setActiveMenu}
+            />
           );
         })}
       </div>
 
-      {/* 3. INPUT AREA (Fixed at bottom, sibling to scroll area) */}
-      <div className="w-full p-4 bg-gradient-to-t from-background via-background/95 to-transparent shrink-0 z-20">
+      {/* 3. INPUT AREA */}
+      <div className="w-full p-3 md:p-4 bg-background border-t border-border/40 shrink-0 z-20">
+        
+        {/* Reply Preview Banner */}
+        {replyingTo && (
+          <div className="max-w-4xl mx-auto mb-2 flex items-center bg-secondary/40 border-l-4 border-primary rounded-r-xl p-2.5 relative animate-in slide-in-from-bottom-2 fade-in">
+            <div className="flex-1 overflow-hidden pr-8">
+              <span className="text-xs font-bold text-primary block mb-0.5">
+                {String(replyingTo.sender) === String(currentUser.id) ? "Replying to yourself" : `Replying to ${recipient.name}`}
+              </span>
+              <span className="text-sm text-muted-foreground line-clamp-1">{replyingTo.content}</span>
+            </div>
+            <button 
+              onClick={() => setReplyingTo(null)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted rounded-full text-muted-foreground transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* 🚀 Attachment Preview Banner */}
+        {attachment && (
+          <div className="max-w-4xl mx-auto mb-2 flex items-center bg-secondary/20 border border-border/50 rounded-xl p-2.5 relative animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-lg overflow-hidden bg-background flex items-center justify-center mr-3 border border-border">
+              {attachmentPreview ? (
+                <img src={attachmentPreview} alt="Preview" className="w-full h-full object-cover" />
+              ) : (
+                <FileText className="w-6 h-6 text-primary" />
+              )}
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <span className="text-sm font-medium text-foreground truncate block">{attachment.name}</span>
+              <span className="text-xs text-muted-foreground">{(attachment.size / 1024).toFixed(1)} KB</span>
+            </div>
+            <button 
+              onClick={() => { setAttachment(null); setAttachmentPreview(null); }}
+              className="p-1.5 hover:bg-destructive/10 hover:text-destructive rounded-full text-muted-foreground transition-colors absolute right-2"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* The Input Form */}
         <form
           onSubmit={handleSend}
-          className="flex items-center gap-2 max-w-4xl mx-auto bg-background/90 backdrop-blur-xl border border-border/60 p-1.5 pl-5 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)] focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 transition-all"
+          className="flex items-end gap-2 max-w-4xl mx-auto"
         >
-          <Input
-            value={text}
-            onChange={(e) => handleTyping(e.target.value)}
-            placeholder="Message..."
-            className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 text-[15px] px-0 h-10 placeholder:text-muted-foreground/60"
+          {/* 🚀 Hidden File Input & Trigger */}
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileSelect} 
+            accept="image/*,application/pdf" 
+            className="hidden" 
           />
+          <Button 
+            type="button" 
+            onClick={() => fileInputRef.current?.click()}
+            variant="ghost" 
+            size="icon" 
+            className="shrink-0 rounded-full h-11 w-11 text-muted-foreground hover:text-primary transition-colors flex items-center justify-center"
+          >
+            <Paperclip className="w-5 h-5" />
+          </Button>
+
+          <div className="flex-1 bg-secondary/20 border border-border/60 rounded-3xl focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 transition-all flex items-center min-h-[44px]">
+            <Input
+              ref={inputRef}
+              value={text}
+              onChange={(e) => handleTyping(e.target.value)}
+              placeholder="Type a message"
+              className="flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 text-[15px] px-4 py-3 placeholder:text-muted-foreground/60 h-auto"
+              autoComplete="off"
+            />
+          </div>
+
           <Button
             type="submit"
             size="icon"
-            disabled={!text.trim()}
-            className="rounded-full w-10 h-10 shrink-0 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 shadow-md"
+            disabled={(!text.trim() && !attachment) || isUploading}
+            className="rounded-full w-11 h-11 shrink-0 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 shadow-md"
           >
-            <Send className="w-4 h-4 ml-0.5" />
+            {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 ml-0.5" />}
           </Button>
         </form>
       </div>

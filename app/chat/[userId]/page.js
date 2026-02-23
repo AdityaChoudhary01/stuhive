@@ -6,7 +6,6 @@ import { getConversationWithMessages } from "@/services/chat.service";
 import ChatBox from "@/components/chat/ChatBox";
 
 export async function generateMetadata({ params }) {
-  // 🚀 FIX: Await the params Promise before reading userId (Next.js 15 requirement)
   const resolvedParams = await params;
   
   const user = await getUserProfile(resolvedParams.userId);
@@ -14,7 +13,6 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ChatPage({ params }) {
-  // 🚀 FIX: Await the params Promise here as well
   const resolvedParams = await params;
   
   const session = await getServerSession(authOptions);
@@ -34,15 +32,17 @@ export default async function ChatPage({ params }) {
   );
 
   return (
-    // 1. Full viewport wrapper that centers the widget on desktop and stretches on mobile
-    <div className="min-h-[100dvh] flex justify-center items-start sm:items-center p-0 sm:p-6 md:p-12 overflow-hidden">
+    // 🚀 THE FIX: Restored normal document flow using `h-[calc(100dvh-4rem)]`.
+    // This explicitly takes up the exact height of the screen (minus the navbar),
+    // which physically pushes the global footer down out of view where it belongs.
+    <div className="w-full flex justify-center items-start md:items-center p-0 md:p-6 lg:p-12 overflow-hidden bg-background relative h-[calc(100dvh-4rem)] md:h-[calc(100dvh-5rem)]">
       
-      {/* 2. Ambient Background Glows (Matches the ChatList page) */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
+      {/* 2. Ambient Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] pointer-events-none hidden md:block" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none hidden md:block" />
 
-      {/* 3. The Sizing Container for ChatBox */}
-      <div className="w-full max-w-4xl h-[100dvh] sm:h-[85vh] sm:max-h-[850px] relative z-10 flex flex-col">
+      {/* 3. The Sizing Container: Now fills exactly 100% of the calculated wrapper height */}
+      <div className="w-full h-full max-w-4xl relative z-10 flex flex-col">
         <ChatBox
           currentUser={session.user}
           recipient={recipient}
