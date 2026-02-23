@@ -13,7 +13,7 @@ const inter = Inter({ subsets: ["latin"], display: "swap" });
 // ✅ 1. FIXED VIEWPORT FOR 100/100 BEST PRACTICES & ACCESSIBILITY
 // Lighthouse strictly requires users to be able to zoom in up to 5x for visual accessibility.
 export const viewport = {
-  themeColor: "#00d4ff",
+  themeColor: "#0a0118",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5, // Increased from 1 to 5 to pass Lighthouse Best Practices
