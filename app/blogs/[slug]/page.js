@@ -13,7 +13,7 @@ import { formatDate } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw"; 
-import rehypeSanitize, { defaultSchema } from "rehype-sanitize"; // 🚀 NEW: Security Sanitizer
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize"; 
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
@@ -74,26 +74,25 @@ export default async function BlogDetailPage({ params }) {
     }
   };
 
-  // 🚀 SECURITY: Configure Sanitizer to allow structural HTML and CSS styling, 
-  // but strictly block <script>, iframes, and javascript: URIs.
+  // 🚀 SECURITY: Configured to safely allow SVGs and classes while blocking bad scripts
   const sanitizeSchema = {
     ...defaultSchema,
+    tagNames: [...(defaultSchema.tagNames || []), 'svg', 'path', 'div', 'span'],
     attributes: {
       ...defaultSchema.attributes,
-      // Allow inline styles and classes globally so your HTML/CSS request works
-      '*': [...(defaultSchema.attributes['*'] || []), 'className', 'style'],
+      '*': [...(defaultSchema.attributes['*'] || []), 'className', 'class', 'style'],
+      svg: ['xmlns', 'width', 'height', 'viewBox', 'fill', 'stroke', 'strokeWidth', 'strokeLinecap', 'strokeLinejoin', 'class'],
+      path: ['d', 'fill', 'stroke', 'strokeWidth', 'strokeLinecap', 'strokeLinejoin', 'class']
     }
   };
 
   const MarkdownComponents = {
-    // ✅ ACCESSIBILITY: Heading hierarchy re-mapped to prevent skipping levels
     h1: ({ node, ...props }) => <h2 className="text-3xl md:text-4xl font-extrabold mt-12 mb-6 text-white tracking-tight" {...props} />,
     h2: ({ node, ...props }) => <h3 className="text-2xl md:text-3xl font-bold mt-10 mb-4 pb-2 border-b border-white/10 text-white/90 tracking-tight" {...props} />,
     h3: ({ node, ...props }) => <h4 className="text-xl md:text-2xl font-semibold mt-8 mb-3 text-white/90" {...props} />,
     
-    // ✅ HYDRATION FIX: Prevent <p> from wrapping <figure> or <div> elements from raw HTML
     p: ({ node, children, ...props }) => {
-      if (node.children[0]?.tagName === "img" || node.children[0]?.tagName === "div") {
+      if (node.children[0]?.tagName === "img" || node.children[0]?.tagName === "div" || node.children[0]?.tagName === "span") {
         return <>{children}</>;
       }
       return <p className="leading-7 md:leading-8 text-base md:text-lg text-gray-200 mb-6 last:mb-0" {...props}>{children}</p>;
@@ -103,7 +102,6 @@ export default async function BlogDetailPage({ params }) {
     ol: ({ node, ...props }) => <ol className="list-decimal list-outside pl-6 mb-6 space-y-2 text-gray-300 marker:text-cyan-400 font-medium" {...props} />,
     a: ({ node, ...props }) => <a className="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 transition-colors" target="_blank" rel="noopener noreferrer" {...props} />,
     
-    // 🚀 NEW: Markdown Table Support
     table: ({ node, ...props }) => (
       <div className="overflow-x-auto my-8 rounded-xl border border-white/10 bg-white/5 shadow-2xl">
         <table className="w-full text-left border-collapse text-sm md:text-base text-gray-200" {...props} />
@@ -204,7 +202,6 @@ export default async function BlogDetailPage({ params }) {
       <section className="max-w-none mb-24 prose prose-invert prose-headings:tracking-tight prose-a:text-cyan-400">
           <ReactMarkdown 
             remarkPlugins={[remarkGfm]} 
-            // 🚀 The order here is critical: Parse raw HTML first, THEN sanitize it securely
             rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]} 
             components={MarkdownComponents}
           >
