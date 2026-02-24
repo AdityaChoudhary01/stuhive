@@ -8,7 +8,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { deleteFileFromR2 } from "@/lib/r2"; 
 import { indexNewContent, removeContentFromIndex } from "@/lib/googleIndexing"; 
-import { cache } from "react"; // 🚀 ADDED: React Cache for Instant Next.js Loading
+import { pingIndexNow } from "@/lib/indexnow"; // 🚀 ADDED: IndexNow Integration
+import { cache } from "react"; 
+
+const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in"; // 🚀 ADDED: Base URL for IndexNow
 
 /**
  * FETCH BLOGS (Pagination, Search, Filter by Tags)
@@ -178,14 +181,21 @@ export async function updateBlog(blogId, updateData, userId) {
     blog.set(updateData);
     await blog.save();
 
-    // SEO
+    // 🚀 4. SEO & INDEXING (Google + IndexNow)
+    const urlsToPing = [`${APP_URL}/blogs/${blog.slug}`];
+
     if (updateData.slug && updateData.slug !== oldSlug) {
         const removeStatus = await removeContentFromIndex(oldSlug, 'blog');
         console.log(`[ACTION LOG] Blog URL changed. Old Google URL Removal ping: ${removeStatus ? 'DELIVERED' : 'FAILED'}`);
+        // If slug changed, tell IndexNow to crawl the old one too so it sees the redirect/404
+        urlsToPing.push(`${APP_URL}/blogs/${oldSlug}`);
     }
     
     const seoStatus = await indexNewContent(blog.slug, 'blog'); 
     console.log(`[ACTION LOG] Blog updated. Google Indexing ping: ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
+
+    // 🔥 INSTANT INDEXNOW PING
+    await pingIndexNow(urlsToPing);
     
     revalidatePath(`/blogs/${blog.slug}`);
     revalidatePath('/blogs');
@@ -222,8 +232,12 @@ export async function createBlog({ title, content, summary, tags, coverImage, co
     await newBlog.save();
     await User.findByIdAndUpdate(userId, { $inc: { blogCount: 1 } });
 
+    // 🚀 SEO & INDEXING (Google + IndexNow)
     const seoStatus = await indexNewContent(newBlog.slug, 'blog');
     console.log(`[ACTION LOG] Blog created. Google Indexing ping: ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
+
+    // 🔥 INSTANT INDEXNOW PING
+    await pingIndexNow([`${APP_URL}/blogs/${newBlog.slug}`]);
 
     revalidatePath('/blogs');
     return { success: true, slug: newBlog.slug };
@@ -246,8 +260,12 @@ export async function deleteBlog(blogId, userId) {
         await deleteFileFromR2(blog.coverImageKey);
     }
 
+    // 🚀 SEO DE-INDEXING (Google + IndexNow)
     const seoStatus = await removeContentFromIndex(blog.slug, 'blog');
     console.log(`[ACTION LOG] Blog deleted. Google Removal ping: ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
+
+    // 🔥 INSTANT INDEXNOW PING (Tells them the URL is gone)
+    await pingIndexNow([`${APP_URL}/blogs/${blog.slug}`]);
 
     await Blog.findByIdAndDelete(blogId);
     await User.findByIdAndUpdate(blog.author, { $inc: { blogCount: -1 } });

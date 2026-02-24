@@ -2,7 +2,10 @@
 
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
-import { indexNewContent } from "@/lib/googleIndexing"; // 🚀 Import the SEO Indexer
+import { indexNewContent } from "@/lib/googleIndexing"; 
+import { pingIndexNow } from "@/lib/indexnow"; // 🚀 ADDED: IndexNow Integration
+
+const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in"; // 🚀 ADDED: Base URL for IndexNow
 
 export async function registerUser(formData) {
   await connectDB();
@@ -30,11 +33,18 @@ export async function registerUser(formData) {
 
     await newUser.save(); // <--- Mongoose hashes it here
 
-    // 🚀 SEO: Instantly ping Google to index the new public profile!
-    // Notice we DO NOT 'await' this. It runs in the background.
+    // 🚀 SEO: Instantly ping Google & IndexNow to index the new public profile!
+    // Notice we DO NOT 'await' these. They run in the background so the user doesn't have to wait.
+    
+    // 1. Google Ping
     indexNewContent(newUser._id.toString(), 'profile')
-      .then(status => console.log(`[SEO] Profile indexed: ${status}`))
-      .catch(err => console.error(`[SEO] Profile indexing failed:`, err));
+      .then(status => console.log(`[SEO] Google Profile Ping: ${status ? 'DELIVERED' : 'FAILED'}`))
+      .catch(err => console.error(`[SEO] Google Profile Ping Error:`, err));
+    
+    // 2. IndexNow Ping (Bing, Yahoo, Yandex, etc.)
+    pingIndexNow([`${APP_URL}/profile/${newUser._id.toString()}`])
+      .then(status => console.log(`[SEO] IndexNow Profile Ping: ${status ? 'DELIVERED' : 'FAILED'}`))
+      .catch(err => console.error(`[SEO] IndexNow Profile Ping Error:`, err));
     
     return { success: true };
   } catch (error) {

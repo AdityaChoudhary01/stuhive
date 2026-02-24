@@ -10,6 +10,9 @@ import { authOptions } from "@/lib/auth";
 import { deleteFileFromR2 } from "@/lib/r2"; 
 import { generateReadUrl } from "@/lib/r2";
 import { indexNewContent, removeContentFromIndex } from "@/lib/googleIndexing";
+import { pingIndexNow } from "@/lib/indexnow"; // 🚀 ADDED: IndexNow Integration
+
+const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in"; // 🚀 ADDED: Base URL for IndexNow
 
 /**
  * FETCH NOTES (Pagination + Search + Filtering)
@@ -214,8 +217,12 @@ export async function createNote({ title, description, university, course, subje
     // Increment User Note Count
     await User.findByIdAndUpdate(userId, { $inc: { noteCount: 1 } });
 
+    // ✅ SEO: Ping Google
     const seoStatus = await indexNewContent(newNote._id.toString(), 'note');
     
+    // 🔥 INSTANT INDEXNOW PING
+    await pingIndexNow([`${APP_URL}/notes/${newNote._id.toString()}`]);
+
     console.warn("\n=============================================");
     console.warn(`🚀 SEO STATUS: Google Indexing Ping was ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
     console.warn(`📝 NOTE ID: ${newNote._id.toString()}`);
@@ -261,6 +268,9 @@ export async function updateNote(noteId, data, userId) {
     // ✅ SEO: Await Google confirmation
     const seoStatus = await indexNewContent(noteId, 'note');
     console.log(`[ACTION LOG] Note updated. Google Indexing ping: ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
+
+    // 🔥 INSTANT INDEXNOW PING
+    await pingIndexNow([`${APP_URL}/notes/${noteId}`]);
 
     revalidatePath(`/notes/${noteId}`);
     revalidatePath('/profile');
@@ -310,6 +320,9 @@ export async function deleteNote(noteId, userId) {
     // ✅ SEO: Await Google removal confirmation
     const seoStatus = await removeContentFromIndex(noteId, 'note');
     console.log(`[ACTION LOG] Note deleted. Google Removal ping: ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
+
+    // 🔥 INSTANT INDEXNOW PING (Tells them the URL is gone)
+    await pingIndexNow([`${APP_URL}/notes/${noteId}`]);
 
     revalidatePath('/');
     revalidatePath('/search');
