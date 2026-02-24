@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FaUpload, FaBookmark, FaList, FaPenNib, FaEdit, FaRss, FaPlus } from "react-icons/fa";
+import { FaUpload, FaBookmark, FaList, FaPenNib, FaEdit, FaRss, FaPlus, FaGlobe, FaLock, FaShareAlt } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import NoteCard from "@/components/notes/NoteCard";
@@ -10,14 +10,14 @@ import BlogCard from "@/components/blog/BlogCard";
 import RoleBadge from "@/components/common/RoleBadge";
 import dynamic from 'next/dynamic'; 
 import { updateProfile, updateUserAvatar } from "@/actions/user.actions";
-import { deleteCollection, renameCollection, createCollection } from "@/actions/collection.actions"; 
+import { deleteCollection, renameCollection, createCollection, updateCollection } from "@/actions/collection.actions"; 
 import { deleteBlog } from "@/actions/blog.actions";
 import { deleteNote } from "@/actions/note.actions"; 
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from "next-auth/react";
 import { Trash2, Loader2, MoreVertical, Search } from "lucide-react"; 
 import ProfileImageUpload from "@/components/profile/ProfileImageUpload";
-import EditBio from "@/components/profile/EditBio"; // ✅ IMPORTED EDIT BIO
+import EditBio from "@/components/profile/EditBio"; 
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,11 +42,10 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
   
   const [editingColId, setEditingColId] = useState(null);
   const [editColName, setEditColName] = useState("");
+  const [editColDescription, setEditColDescription] = useState(""); 
   const [isCreatingCollection, setIsCreatingCollection] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState("");
 
-  // ✅ OPTIMISTIC STATE: We no longer sync with useEffect. 
-  // We use this state strictly to show a temporary image during an active upload sequence.
   const [optimisticAvatar, setOptimisticAvatar] = useState(null); 
   
   const [myNotes, setMyNotes] = useState(initialMyNotes || []);
@@ -65,20 +64,12 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
   };
 
   const handleAvatarUpdate = async (newUrl, avatarKey) => {
-    // 1. Immediately show the new image (Optimistic UI) to make it feel fast
     setOptimisticAvatar(newUrl);
-
-    // 2. Process the background update
     const res = await updateUserAvatar(user._id, newUrl, avatarKey);
-    
     if (res.success) {
       toast({ title: "Profile updated!" });
-      await updateSession({ 
-        ...session, 
-        user: { ...session?.user, image: newUrl, avatar: newUrl } 
-      });
+      await updateSession({ ...session, user: { ...session?.user, image: newUrl, avatar: newUrl } });
     } else {
-      // 3. Revert if it fails
       setOptimisticAvatar(null);
       toast({ title: "Update Failed", description: res.error, variant: "destructive" });
     }
@@ -87,9 +78,7 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
   const handleDeleteNote = async (noteId) => {
     if (!confirm("Are you sure you want to permanently delete this note?")) return;
     setIsDeletingNoteId(noteId);
-    
     const res = await deleteNote(noteId, user._id);
-    
     if (res.success) {
       setMyNotes(prev => prev.filter(n => n._id !== noteId));
       toast({ title: "Note Deleted", description: "Document removed from cloud storage." });
@@ -124,15 +113,26 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
     }
   };
 
-  const handleRenameCollection = async (id) => {
+  const handleSaveDetails = async (id) => {
     if (!editColName.trim()) return toast({ title: "Name cannot be empty", variant: "destructive" });
-    const res = await renameCollection(id, editColName, user._id);
+    const res = await updateCollection(id, { name: editColName, description: editColDescription }, user._id);
     if (res.success) {
-      setCollections(prev => prev.map(c => c._id === id ? { ...c, name: editColName } : c));
+      setCollections(prev => prev.map(c => c._id === id ? { ...c, name: editColName, description: editColDescription, slug: res.collection.slug } : c));
       setEditingColId(null);
-      toast({ title: "Collection Renamed" });
+      toast({ title: "Bundle Details Updated" });
     } else {
       toast({ title: "Error", description: res.error, variant: "destructive" });
+    }
+  };
+
+  const handleToggleVisibility = async (id, currentVisibility) => {
+    const newVisibility = currentVisibility === 'public' ? 'private' : 'public';
+    const res = await updateCollection(id, { visibility: newVisibility }, user._id);
+    if (res.success) {
+      setCollections(prev => prev.map(c => c._id === id ? { ...c, visibility: newVisibility, slug: res.collection.slug } : c));
+      toast({ title: `Collection is now ${newVisibility}` });
+    } else {
+      toast({ title: "Error updating visibility", variant: "destructive" });
     }
   };
 
@@ -147,6 +147,33 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
     }
   };
 
+  // 🚀 NEW: Native Share functionality for collections
+  const handleShareCollection = async (col) => {
+    const url = `https://www.stuhive.in/shared-collections/${col.slug}`;
+    const shareData = {
+      title: `${col.name} | StuHive`,
+      text: "Check out this curated study bundle on StuHive!",
+      url: url,
+    };
+
+    try {
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        toast({ title: "Shared successfully!" });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast({
+          title: "Link Copied!",
+          description: "Ready to share with your peers.",
+        });
+      }
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        console.error("Error sharing:", err);
+      }
+    }
+  };
+
   if (!user) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
@@ -155,7 +182,6 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
     );
   }
 
-  // ✅ Fallback chain: Optimistic state -> Server prop -> Default placeholder
   const displayAvatar = optimisticAvatar || user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'Student')}`;
 
   return (
@@ -182,7 +208,6 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
                 <RoleBadge role={user.role} />
             </div>
 
-            {/* ✅ INJECTED EDIT BIO SECTION HERE */}
             <div className="relative z-10 w-full mb-6">
                 <EditBio user={user} />
             </div>
@@ -206,7 +231,6 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {myNotes.map((note, index) => (
                         <div key={note._id} className="relative group">
-                            {/* Passed priority to first 3 items to help with LCP if needed */}
                             <NoteCard note={{...note, user}} priority={index < 3} /> 
                             <div className="absolute top-2 left-2 flex gap-2 z-30 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                 <Button 
@@ -286,7 +310,7 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
             )}
 
             {activeTab === 'collections' && (
-                <div className="max-w-2xl mx-auto space-y-4">
+                <div className="max-w-3xl mx-auto space-y-4">
                     <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-primary/20 shadow-sm mb-6">
                         {isCreatingCollection ? (
                           <form onSubmit={handleCreateCollection} className="flex gap-2 w-full">
@@ -301,32 +325,89 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
                         )}
                     </div>
                     {collections.map(col => (
-                        <div key={col._id} className="flex items-center justify-between p-4 bg-secondary/5 rounded-xl border hover:bg-secondary/10 transition">
+                        <div key={col._id} className="flex flex-col p-4 bg-secondary/5 rounded-xl border hover:bg-secondary/10 transition gap-3">
                             {editingColId === col._id ? (
-                                <div className="flex items-center gap-2 w-full">
-                                    <FaList className="text-primary w-5 h-5 opacity-50 hidden sm:block" />
-                                    <Input value={editColName} onChange={(e) => setEditColName(e.target.value)} className="h-8 flex-1" autoFocus />
-                                    <Button size="sm" onClick={() => handleRenameCollection(col._id)}>Save</Button>
-                                    <Button size="sm" variant="ghost" onClick={() => setEditingColId(null)}>Cancel</Button>
+                                <div className="flex flex-col gap-3 w-full bg-background/50 p-4 rounded-2xl border border-primary/30 animate-in fade-in zoom-in-95">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-primary ml-1">Bundle Name</label>
+                                        <Input 
+                                            value={editColName} 
+                                            onChange={(e) => setEditColName(e.target.value)} 
+                                            className="h-10 flex-1" 
+                                            placeholder="e.g., Engineering Mathematics II"
+                                            autoFocus 
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Short Description (SEO)</label>
+                                        <textarea 
+                                            value={editColDescription} 
+                                            onChange={(e) => setEditColDescription(e.target.value)} 
+                                            className="w-full min-h-[80px] bg-secondary/10 border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            placeholder="Describe what's inside this bundle..."
+                                            maxLength={200}
+                                        />
+                                        <p className="text-[9px] text-right text-muted-foreground">{editColDescription.length}/200</p>
+                                    </div>
+                                    <div className="flex justify-end gap-2">
+                                        <Button size="sm" variant="ghost" onClick={() => setEditingColId(null)}>Cancel</Button>
+                                        <Button size="sm" onClick={() => handleSaveDetails(col._id)}>Save Changes</Button>
+                                    </div>
                                 </div>
                             ) : (
-                                <>
+                                <div className="flex items-center justify-between w-full">
                                     <Link href={`/collections/${col._id}`} className="flex items-center gap-4 flex-1">
                                         <FaList className="text-primary w-5 h-5" />
                                         <div>
-                                            <h3 className="font-bold">{col.name}</h3>
-                                            <p className="text-xs text-muted-foreground">{col.notes?.length || 0} notes</p>
+                                            <h3 className="font-bold flex items-center gap-2 text-white">
+                                              {col.name}
+                                              {col.visibility === 'public' ? <FaGlobe className="text-cyan-400 w-3 h-3" /> : <FaLock className="text-muted-foreground w-3 h-3" />}
+                                            </h3>
+                                            <p className="text-xs text-muted-foreground">{col.notes?.length || 0} notes • <span className="capitalize">{col.visibility || 'private'}</span></p>
                                         </div>
                                     </Link>
                                     <div className="flex items-center gap-1">
-                                        <Button variant="ghost" size="icon" onClick={() => { setEditingColId(col._id); setEditColName(col.name); }} className="text-muted-foreground hover:text-primary">
+                                        <Button 
+                                          variant="ghost" 
+                                          size="icon" 
+                                          title={col.visibility === 'public' ? "Make Private" : "Make Public"}
+                                          onClick={() => handleToggleVisibility(col._id, col.visibility)}
+                                          className={col.visibility === 'public' ? "text-cyan-400 hover:bg-cyan-400/10" : "text-muted-foreground"}
+                                        >
+                                            {col.visibility === 'public' ? <FaGlobe className="w-4 h-4" /> : <FaLock className="w-4 h-4" />}
+                                        </Button>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="icon" 
+                                          onClick={() => { 
+                                            setEditingColId(col._id); 
+                                            setEditColName(col.name); 
+                                            setEditColDescription(col.description || ""); 
+                                          }} 
+                                          className="text-muted-foreground hover:text-primary"
+                                        >
                                             <FaEdit className="w-4 h-4" />
                                         </Button>
                                         <Button variant="ghost" size="icon" onClick={() => handleDeleteCollection(col._id)} className="text-destructive hover:bg-destructive/10">
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
                                     </div>
-                                </>
+                                </div>
+                            )}
+
+                            {col.visibility === 'public' && col.slug && !editingColId && (
+                              <div className="flex items-center justify-between mt-2 p-2 bg-background/50 rounded-lg border border-white/5">
+                                <span className="text-[10px] text-muted-foreground truncate max-w-[200px] sm:max-w-md">stuhive.in/shared-collections/{col.slug}</span>
+                                {/* 🚀 UPDATED: Uses handleShareCollection to open native prompt */}
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-6 text-[10px] font-black uppercase text-cyan-400 hover:bg-cyan-400/10"
+                                  onClick={() => handleShareCollection(col)}
+                                >
+                                  <FaShareAlt className="mr-1 w-2.5 h-2.5" /> Share
+                                </Button>
+                              </div>
                             )}
                         </div>
                     ))}

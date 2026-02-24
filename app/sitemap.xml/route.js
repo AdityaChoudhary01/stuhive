@@ -3,6 +3,7 @@ import connectDB from "@/lib/db";
 import Blog from "@/lib/models/Blog";
 import Note from "@/lib/models/Note";
 import User from "@/lib/models/User";
+import Collection from "@/lib/models/Collection"; // 🚀 ADDED COLLECTION MODEL
 
 const BASE_URL = 'https://www.stuhive.in';
 
@@ -18,27 +19,30 @@ export async function GET() {
   try {
     await connectDB();
 
-    // 🚀 THE FIX: Added logging and error handling specifically for blogs
+    // 🚀 Fetch all models in parallel for maximum speed
     const blogsPromise = Blog.find({}).select("slug updatedAt").lean();
     const notesPromise = Note.find({}).select("_id updatedAt").lean();
     const usersPromise = User.find({}).select("_id updatedAt").lean();
+    // 🚀 Only fetch collections that are marked as 'public'
+    const collectionsPromise = Collection.find({ visibility: 'public' }).select("slug updatedAt").lean();
 
-    const [blogs, notes, users] = await Promise.all([
+    const [blogs, notes, users, collections] = await Promise.all([
       blogsPromise,
       notesPromise,
       usersPromise,
+      collectionsPromise, // 🚀 ADDED TO PROMISE.ALL
     ]);
 
     // DEBUG: See what is actually being returned
-    console.log(`[SITEMAP] Found ${blogs.length} blogs, ${notes.length} notes, ${users.length} users.`);
+    console.log(`[SITEMAP] Found ${blogs.length} blogs, ${notes.length} notes, ${users.length} users, ${collections.length} collections.`);
+    
     if (blogs.length === 0) {
       console.warn("[SITEMAP] WARNING: No blogs found in the database. Are they published?");
-    } else {
-        console.log("[SITEMAP] Sample blog slug:", blogs[0]?.slug);
     }
 
+    // 🚀 ADDED "/shared-collections" TO STATIC ROUTES
     const staticRoutes = [
-      "", "/about", "/contact", "/blogs", "/search",
+      "", "/about", "/contact", "/blogs", "/search", "/shared-collections",
       "/login","/signup", 
       "/donate", "/supporters", "/terms", "/privacy", "/dmca"
     ].map(route => ({
@@ -50,7 +54,7 @@ export async function GET() {
 
     // Filter out any blogs that somehow don't have a slug to prevent malformed URLs
     const blogPages = blogs
-      .filter(blog => blog.slug) // 🚀 Prevent undefined slugs
+      .filter(blog => blog.slug) 
       .map(blog => ({
         url: `${BASE_URL}/blogs/${blog.slug}`,
         lastModified: formatDate(blog.updatedAt),
@@ -72,7 +76,18 @@ export async function GET() {
       changefreq: "weekly",
     }));
 
-    const allPages = [...staticRoutes, ...blogPages, ...notePages, ...profilePages];
+    // 🚀 DYNAMICALLY GENERATE COLLECTION PAGES
+    const collectionPages = collections
+      .filter(col => col.slug) // Prevent undefined slugs
+      .map(col => ({
+        url: `${BASE_URL}/shared-collections/${col.slug}`,
+        lastModified: formatDate(col.updatedAt),
+        priority: "0.8",
+        changefreq: "weekly",
+      }));
+
+    // 🚀 MERGE EVERYTHING TOGETHER
+    const allPages = [...staticRoutes, ...blogPages, ...notePages, ...profilePages, ...collectionPages];
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

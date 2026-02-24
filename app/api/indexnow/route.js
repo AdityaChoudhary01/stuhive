@@ -3,16 +3,15 @@ import connectDB from "@/lib/db";
 import Note from "@/lib/models/Note";
 import Blog from "@/lib/models/Blog";
 import User from "@/lib/models/User";
+import Collection from "@/lib/models/Collection"; // 🚀 Added Collection Model
 
 const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in";
 const INDEXNOW_KEY = "363d05a6f7284bcf8b9060f495d58655";
 
 export async function GET(request) {
-  // Optional: Add a secret key to prevent random people from triggering this URL
   const { searchParams } = new URL(request.url);
   const secret = searchParams.get("secret");
   
-  // Replace 'my-super-secret-trigger' with a password of your choice
   if (secret !== "my-super-secret-trigger") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -35,11 +34,14 @@ export async function GET(request) {
       `${APP_URL}/dmca`,
       `${APP_URL}/login`,
       `${APP_URL}/register`,
+      `${APP_URL}/shared-collections`, // 🚀 Added main collections hub
     ];
 
     // 2. Fetch all Dynamic Blogs
     const blogs = await Blog.find({}).select('slug').lean();
-    blogs.forEach(b => urls.push(`${APP_URL}/blogs/${b.slug}`));
+    blogs.forEach(b => {
+        if (b.slug) urls.push(`${APP_URL}/blogs/${b.slug}`);
+    });
 
     // 3. Fetch all Dynamic Notes
     const notes = await Note.find({}).select('_id').lean();
@@ -49,8 +51,13 @@ export async function GET(request) {
     const users = await User.find({}).select('_id').lean();
     users.forEach(u => urls.push(`${APP_URL}/profile/${u._id.toString()}`));
 
-    // 🚀 Send the massive URL list to IndexNow via Microsoft/Bing's endpoint
-    // Note: IndexNow accepts up to 10,000 URLs per request.
+    // 5. 🚀 Fetch all Dynamic Public Collections
+    const collections = await Collection.find({ visibility: 'public' }).select('slug').lean();
+    collections.forEach(c => {
+        if (c.slug) urls.push(`${APP_URL}/shared-collections/${c.slug}`);
+    });
+
+    // 🚀 Send the massive URL list to IndexNow
     const response = await fetch("https://api.indexnow.org/indexnow", {
       method: "POST",
       headers: {
