@@ -9,7 +9,7 @@ export const metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://stuhive.in/signup",
+    canonical: "https://www.stuhive.in/signup",
   },
 };
 

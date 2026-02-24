@@ -11,7 +11,7 @@ export default function AuthorInfoBlock({ user }) {
     "@context": "https://schema.org",
     "@type": "Person",
     "name": user.name,
-    "url": `https://stuhive.in/profile/${user._id}`,
+    "url": `https://www.stuhive.in/profile/${user._id}`,
     "image": user.avatar,
     "jobTitle": user.role || "Student Contributor",
     "affiliation": {

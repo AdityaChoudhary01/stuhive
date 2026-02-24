@@ -1,7 +1,7 @@
 import DonatePageClient from "./DonatePageClient";
 
 // ✅ 1. HIGH-OCTANE SEO METADATA
-const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
+const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in";
 
 export const metadata = {
     title: "Support StuHive | Fuel Independent Academic Learning",

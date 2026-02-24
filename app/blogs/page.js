@@ -5,7 +5,7 @@ import { PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BlogListServer from "./BlogListServer"; 
 
-const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
+const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in";
 
 // ✅ 1. OPTIMIZATION: Enable aggressive edge caching for fast TTFB (Time to First Byte)
 export const dynamic = "force-dynamic";

@@ -10,12 +10,12 @@ export const metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://stuhive.in/privacy",
+    canonical: "https://www.stuhive.in/privacy",
   },
   openGraph: {
     title: "Privacy Engine | StuHive Security",
     description: "Your data is your property. See how we protect it.",
-    url: "https://stuhive.in/privacy",
+    url: "https://www.stuhive.in/privacy",
     type: "website",
   },
 };

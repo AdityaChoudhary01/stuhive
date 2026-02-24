@@ -5,7 +5,7 @@ import Pagination from "@/components/common/Pagination";
 import { Hash } from "lucide-react"; 
 import { Button } from "@/components/ui/button";
 
-const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
+const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in";
 
 export default async function BlogListServer({ params }) {
   // Immediate destructuring to prevent waterfall

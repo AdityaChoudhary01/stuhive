@@ -4,7 +4,7 @@ import Blog from "@/lib/models/Blog";
 import Note from "@/lib/models/Note";
 import User from "@/lib/models/User";
 
-const BASE_URL = 'https://stuhive.in';
+const BASE_URL = 'https://www.stuhive.in';
 
 const formatDate = (date) => {
   try {

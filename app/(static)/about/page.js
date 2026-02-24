@@ -13,7 +13,7 @@ import Loader from "@/components/common/Loader";
 export const revalidate = 3600;
 
 // ✅ 1. HIGH-OCTANE SEO METADATA & SCHEMA
-const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
+const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in";
 
 export const metadata = {
     title: 'About StuHive | Mission, Vision, and the Future of Learning',

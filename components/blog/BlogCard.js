@@ -28,7 +28,7 @@ export default function BlogCard({ blog, priority = false }) {
       "name": "StuHive",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://stuhive.in/logo512.png"
+        "url": "https://www.stuhive.in/logo512.png"
       }
     },
     "description": blog.summary || blog.excerpt || ""

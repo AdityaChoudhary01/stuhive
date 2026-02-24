@@ -1,5 +1,5 @@
 export default function robots() {
-    const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://stuhive.in";
+    const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.stuhive.in";
   
     return {
       rules: [

@@ -12,7 +12,7 @@ import { generateReadUrl } from "@/lib/r2";
 import { indexNewContent, removeContentFromIndex } from "@/lib/googleIndexing";
 import { pingIndexNow } from "@/lib/indexnow"; // 🚀 ADDED: IndexNow Integration
 
-const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in"; // 🚀 ADDED: Base URL for IndexNow
+const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in"; // 🚀 ADDED: Base URL for IndexNow
 
 /**
  * FETCH NOTES (Pagination + Search + Filtering)

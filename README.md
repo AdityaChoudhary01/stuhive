@@ -2,9 +2,9 @@
 
 <div align="center">
 <p><strong>Empowering students through decentralized, open-access knowledge sharing.</strong></p>
-<a href="[https://stuhive.in](https://stuhive.in)">Live Website</a> •
-<a href="[https://stuhive.in/search](https://www.google.com/search?q=https://stuhive.in/search)">Explore Library</a> •
-<a href="[https://stuhive.in/blogs](https://www.google.com/search?q=https://stuhive.in/blogs)">Community Blogs</a>
+<a href="[https://www.stuhive.in](https://www.stuhive.in)">Live Website</a> •
+<a href="[https://www.stuhive.in/search](https://www.google.com/search?q=https://www.stuhive.in/search)">Explore Library</a> •
+<a href="[https://www.stuhive.in/blogs](https://www.google.com/search?q=https://www.stuhive.in/blogs)">Community Blogs</a>
 </div>
 
 **StuHive** is a high-performance, decentralized academic library designed to empower students through seamless knowledge sharing. Built with a strict focus on **Cinematic UI/UX**, **Technical SEO**, and **Scalable Next.js 15 Architecture**, it transforms static study materials into a dynamic, real-time discovery experience.
@@ -17,14 +17,14 @@ Explore the live platform modules:
 
 | Module | Description | Live URL |
 | --- | --- | --- |
-| **Discovery Engine** | Global search, filtering, and pagination for study notes. | [stuhive.in/search](https://www.google.com/search?q=https://stuhive.in/search) |
-| **Global Search** | Cross-platform search for notes, blogs, and users. | [stuhive.in/global-search](https://www.google.com/search?q=https://stuhive.in/global-search) |
-| **Community Blogs** | Student-written articles, tutorials, and experiences. | [stuhive.in/blogs](https://www.google.com/search?q=https://stuhive.in/blogs) |
-| **Real-Time Chat** | Peer-to-peer messaging and presence tracking. | [stuhive.in/chat](https://www.google.com/search?q=https://stuhive.in/chat) |
-| **User Dashboard** | Manage uploads, saved collections, and follower stats. | [stuhive.in/profile](https://www.google.com/search?q=https://stuhive.in/profile) |
-| **Support Platform** | Secure contact terminal routed via Brevo SMTP. | [stuhive.in/contact](https://www.google.com/search?q=https://stuhive.in/contact) |
-| **Wall of Fame** | Real-time tracking of community supporters & donors. | [stuhive.in/supporters](https://www.google.com/search?q=https://stuhive.in/supporters) |
-| **Legal Hub** | Privacy, Terms of Service, and DMCA guidelines. | [stuhive.in/privacy](https://www.google.com/search?q=https://stuhive.in/privacy) |
+| **Discovery Engine** | Global search, filtering, and pagination for study notes. | [stuhive.in/search](https://www.google.com/search?q=https://www.stuhive.in/search) |
+| **Global Search** | Cross-platform search for notes, blogs, and users. | [stuhive.in/global-search](https://www.google.com/search?q=https://www.stuhive.in/global-search) |
+| **Community Blogs** | Student-written articles, tutorials, and experiences. | [stuhive.in/blogs](https://www.google.com/search?q=https://www.stuhive.in/blogs) |
+| **Real-Time Chat** | Peer-to-peer messaging and presence tracking. | [stuhive.in/chat](https://www.google.com/search?q=https://www.stuhive.in/chat) |
+| **User Dashboard** | Manage uploads, saved collections, and follower stats. | [stuhive.in/profile](https://www.google.com/search?q=https://www.stuhive.in/profile) |
+| **Support Platform** | Secure contact terminal routed via Brevo SMTP. | [stuhive.in/contact](https://www.google.com/search?q=https://www.stuhive.in/contact) |
+| **Wall of Fame** | Real-time tracking of community supporters & donors. | [stuhive.in/supporters](https://www.google.com/search?q=https://www.stuhive.in/supporters) |
+| **Legal Hub** | Privacy, Terms of Service, and DMCA guidelines. | [stuhive.in/privacy](https://www.google.com/search?q=https://www.stuhive.in/privacy) |
 
 ---
 

@@ -4,7 +4,7 @@ import Note from "@/lib/models/Note";
 import Blog from "@/lib/models/Blog";
 import User from "@/lib/models/User";
 
-const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
+const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in";
 const INDEXNOW_KEY = "363d05a6f7284bcf8b9060f495d58655";
 
 export async function GET(request) {

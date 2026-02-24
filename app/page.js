@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Users, FileText, Download, Trophy, Sparkles, Flame } from "lucide-react";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://stuhive.in";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.stuhive.in";
 
 export const metadata = {
   title: "StuHive | Free Academic Notes & Study Materials",

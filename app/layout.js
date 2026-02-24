@@ -22,7 +22,7 @@ export const viewport = {
 
 // ✅ Global SEO Safety Net
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://stuhive.in"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.stuhive.in"),
   title: {
     default: "StuHive | Free Academic Notes & Study Materials",
     template: "%s | StuHive"
@@ -46,7 +46,7 @@ export const metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://stuhive.in",
+    url: "https://www.stuhive.in",
     siteName: "StuHive",
     images: [
       {

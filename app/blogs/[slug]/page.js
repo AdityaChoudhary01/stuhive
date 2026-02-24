@@ -18,7 +18,7 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 export const revalidate = 60;
 
-const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
+const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in";
 
 // 🚀 1. ULTRA HYPER SEO METADATA FOR BLOGS
 export async function generateMetadata({ params }) {

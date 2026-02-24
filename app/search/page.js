@@ -6,7 +6,7 @@ import Pagination from "@/components/common/Pagination";
 import { FaSearch, FaRegFolderOpen, FaArrowLeft, FaFilter } from "react-icons/fa";
 import Link from "next/link";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://stuhive.in";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.stuhive.in";
 
 // ✅ 1. FIXED DYNAMIC METADATA: Safely awaited searchParams for Next.js 15+
 export async function generateMetadata({ searchParams }) {

@@ -10,12 +10,12 @@ export const metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://stuhive.in/terms",
+    canonical: "https://www.stuhive.in/terms",
   },
   openGraph: {
     title: "Terms of Power | StuHive Legal",
     description: "Our legal binding contract for using the StuHive academic ecosystem.",
-    url: "https://stuhive.in/terms",
+    url: "https://www.stuhive.in/terms",
     type: "website",
   },
 };

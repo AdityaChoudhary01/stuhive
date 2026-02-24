@@ -8,7 +8,7 @@ import PublicProfileView from "@/components/profile/PublicProfileView";
 export const revalidate = 60;
 export const dynamic = "force-dynamic"; 
 
-const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
+const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in";
 
 export async function generateMetadata({ params }) {
   const { userId } = await params;

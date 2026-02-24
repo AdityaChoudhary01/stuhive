@@ -11,12 +11,12 @@ export const metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://stuhive.in/dmca",
+    canonical: "https://www.stuhive.in/dmca",
   },
   openGraph: {
     title: "IP Protection & DMCA | StuHive",
     description: "Our policy for protecting student creators and intellectual property.",
-    url: "https://stuhive.in/dmca",
+    url: "https://www.stuhive.in/dmca",
     type: "website",
   },
 };

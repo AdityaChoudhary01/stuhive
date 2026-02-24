@@ -25,7 +25,7 @@ import { Download, Calendar, Eye, ShieldCheck, Info, HeartHandshake } from "luci
 import { formatDate } from "@/lib/utils";
 import { generateReadUrl } from "@/lib/r2";
 
-const APP_URL = process.env.NEXTAUTH_URL || "https://stuhive.in";
+const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in";
 
 // 🚀 1. ULTRA HYPER SEO METADATA
 export async function generateMetadata({ params }) {

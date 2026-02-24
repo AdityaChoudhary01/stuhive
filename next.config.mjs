@@ -60,6 +60,24 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  
+  // 🚀 SEO FIX: Permanent 301 Redirect from non-www to www to prevent duplicate content
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'stuhive.in', // Catches the non-www domain
+          },
+        ],
+        destination: 'https://www.stuhive.in/:path*', // Forces them to the www domain
+        permanent: true, // SEO Gold: Tells Google this is a permanent move (301)
+      },
+    ];
+  },
+
   async headers() {
     return [
       {
