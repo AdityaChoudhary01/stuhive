@@ -82,7 +82,9 @@ export default async function RequestsPage({ searchParams }) {
       "dateCreated": req.createdAt || new Date().toISOString(),
       "author": {
         "@type": "Person",
-        "name": req.requester?.name || "StuHive Student"
+        "name": req.requester?.name || "StuHive Student",
+        // 🚀 FIXED: Added URL field to resolve GSC 'Missing field "url"' warning
+        "url": req.requester?._id ? `${APP_URL}/profile/${req.requester._id}` : APP_URL
       },
       "answerCount": req.status === 'fulfilled' ? 1 : 0,
       ...(req.status === 'fulfilled' && req.fulfillmentNote && {
@@ -93,7 +95,8 @@ export default async function RequestsPage({ searchParams }) {
           "dateCreated": req.updatedAt || new Date().toISOString(),
           "author": {
             "@type": "Organization",
-            "name": "StuHive Community"
+            "name": "StuHive Community",
+            "url": APP_URL
           }
         }
       })
