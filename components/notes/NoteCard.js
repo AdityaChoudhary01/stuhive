@@ -50,7 +50,6 @@ export default function NoteCard({ note, priority = false }) {
     "@type": ["LearningResource", "Course", "CreativeWork"], // ✅ Fixed Array
     "name": note.title,
     "description": note.description || `Academic notes and study material for ${note.course}.`,
-    "url": `${APP_URL}/notes/${note._id}`,
     "educationalLevel": "University", // ✅ Set statically for GSC requirement
     "teaches": note.course,           // ✅ Added 'teaches' property to support Course schema
     "author": {
