@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image"; // ✅ Imported Next.js Image
+import Image from "next/image"; 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,6 @@ const FileIcon = ({ type, className }) => {
   return <FileType className={className} aria-hidden="true" />;
 };
 
-// ✅ Added `priority` prop to receive the LCP instruction from the parent
 export default function NoteCard({ note, priority = false }) {
   const { data: session, update: updateSession } = useSession();
   const { toast } = useToast();
@@ -44,38 +43,8 @@ export default function NoteCard({ note, priority = false }) {
     ? `${r2PublicUrl}/${note.thumbnailKey}` 
     : (note.fileType?.startsWith("image/") ? `${r2PublicUrl}/${note.fileKey}` : null);
 
-  // 🚀 FIXED: GSC valid Schema for note cards inside lists. 
-  // Reverted to a clean CreativeWork to prevent mutually exclusive properties.
-  const noteSchema = {
-    "@context": "https://schema.org",
-    "@type": "CreativeWork", // ✅ Fixed: Removed the ["LearningResource", "Course"] array
-    "name": note.title,
-    "description": note.description || `Study material for ${note.course} at ${note.university}`, // ✅ Added required description fallback
-    "educationalLevel": "University", 
-    "author": {
-      "@type": "Person",
-      "name": note.user?.name || "StuHive Contributor"
-    },
-    "datePublished": note.uploadDate,
-    "educationalUse": "Study Material",
-    "image": thumbnailUrl || "https://www.stuhive.in/default-thumb.webp",
-    "provider": { // ✅ Added provider block to satisfy strict schema checks
-      "@type": "Organization",
-      "name": note.university || "StuHive"
-    },
-    "interactionStatistic": [
-      {
-        "@type": "InteractionCounter",
-        "interactionType": "https://schema.org/ViewAction",
-        "userInteractionCount": note.viewCount || 0
-      },
-      {
-        "@type": "InteractionCounter",
-        "interactionType": "https://schema.org/DownloadAction",
-        "userInteractionCount": note.downloadCount || 0
-      }
-    ]
-  };
+  // 🚀 REMOVED: noteSchema object. 
+  // SEO is handled securely by the parent Page components via an ItemList.
 
   const handleSave = async (e) => {
     e.preventDefault(); 
@@ -120,17 +89,13 @@ export default function NoteCard({ note, priority = false }) {
     <Card 
       className="w-full max-w-[400px] mx-auto h-full flex flex-col group relative bg-[#050505] border border-white/10 rounded-[28px] overflow-hidden transition-all duration-500 hover:translate-y-[-6px] hover:shadow-[0_20px_50px_-15px_rgba(34,211,238,0.3)] hover:border-cyan-500/40 isolate transform-gpu"
     >
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(noteSchema) }}
-      />
+      {/* 🚀 REMOVED: <script type="application/ld+json"> tag. */}
 
       <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-50 pointer-events-none" />
 
       <div className="flex flex-col h-full bg-[#050505]">
         
         {/* --- TOP SECTION (IMAGE) --- */}
-        {/* ✅ FIXED FLICKER: Added -mb-[1px] to overlap seams */}
         <div className="relative h-48 sm:h-56 w-full shrink-0 transform-gpu overflow-hidden -mb-[1px] z-0">
           
           <button 
@@ -155,22 +120,21 @@ export default function NoteCard({ note, priority = false }) {
 
           <Link href={`/notes/${note._id}`} tabIndex={-1} aria-hidden="true" className="block w-full h-full relative z-10">
             {thumbnailUrl ? (
-              // ✅ FIXED LCP: Replaced <img> with Next.js <Image> + priority + unoptimized
               <Image 
                 src={thumbnailUrl} 
                 alt={`Preview of ${note.title}`} 
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                priority={priority} // Honors the priority prop passed from SearchPage
-                fetchPriority={priority ? "high" : "auto"} // Forces instant network request
-                unoptimized={true} // Bypasses Vercel's slow image optimization limit
+                priority={priority} 
+                fetchPriority={priority ? "high" : "auto"}
+                unoptimized={true} 
                 className="object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-[1.08] opacity-85 group-hover:opacity-100 will-change-transform transform-gpu" 
               />
             ) : (
               <div className="flex flex-col items-center justify-center h-full gap-3 text-white/30 group-hover:text-cyan-400 transition-all duration-700 bg-white/[0.02]">
                   <FileIcon type={note.fileType} className="h-16 w-16 group-hover:drop-shadow-[0_0_20px_rgba(34,211,238,0.4)]" />
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] bg-black/50 px-4 py-1.5 rounded-full border border-white/5">
-                     {note.fileType?.split('/')[1]?.split('.').pop() || 'DOC'}
+                      {note.fileType?.split('/')[1]?.split('.').pop() || 'DOC'}
                   </span>
               </div>
             )}
