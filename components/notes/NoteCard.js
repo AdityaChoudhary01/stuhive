@@ -47,8 +47,11 @@ export default function NoteCard({ note, priority = false }) {
   // 🚀 FIXED: GSC valid Schema for single note cards
   const noteSchema = {
     "@context": "https://schema.org",
-    "@type": ["LearningResource", "Course", "CreativeWork"], // ✅ Fixed Array
+    "@type": ["LearningResource", "CreativeWork"],
     "name": note.title,
+    "description": note.description || "University study notes and exam prep material.",
+    "url": `${APP_URL}/notes/${note._id}`,
+
     "educationalLevel": "University", // ✅ Set statically for GSC requirement
     "teaches": note.course,           // ✅ Added 'teaches' property to support Course schema
     "author": {

@@ -95,7 +95,6 @@ export default async function HomePage() {
   const featuredNotes = featuredNotesRes?.notes || [];
 
   // 🚀 BEYOND ULTRA: DYNAMIC KNOWLEDGE GRAPH INJECTION
-  // This maps the actual live data directly into Google's brain
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -139,12 +138,7 @@ export default async function HomePage() {
           "itemListElement": featuredNotes.map((note, index) => ({
             "@type": "ListItem",
             "position": index + 1,
-            "item": {
-              "@type": ["LearningResource", "Course", "CreativeWork"],
-              "name": note.title,
-              "url": `${APP_URL}/notes/${note._id}`,
-              "educationalLevel": "University"
-            }
+            "url": `${APP_URL}/notes/${note._id}` // SUMMARY STYLE: No 'item' nesting, no 'Course'
           }))
         }
       },
@@ -155,11 +149,7 @@ export default async function HomePage() {
         "itemListElement": collections.map((col, index) => ({
           "@type": "ListItem",
           "position": index + 1,
-          "item": {
-            "@type": "CollectionPage",
-            "name": col.name,
-            "url": `${APP_URL}/shared-collections/${col.slug}`
-          }
+          "url": `${APP_URL}/shared-collections/${col.slug}` // SUMMARY STYLE
         }))
       }
     ]
@@ -250,7 +240,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {/* 🚀 SEO: ItemList Schema Embedded in HTML */}
+          {/* 🚀 SEO: ItemList Schema Embedded in HTML (Summary Style) */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 relative z-10" itemScope itemType="https://schema.org/ItemList">
             {collections.map((col, index) => (
               <div key={col._id} itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem" className="h-full">
@@ -260,28 +250,25 @@ export default async function HomePage() {
                   className="block h-full group outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-[1.2rem] sm:rounded-[2rem]"
                   itemProp="url"
                 >
-                  <article 
-                    className="relative flex flex-col justify-between h-full p-4 sm:p-8 rounded-[1.2rem] sm:rounded-[2rem] bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-cyan-500/40 transition-all duration-500 overflow-hidden hover:-translate-y-1 hover:shadow-[0_20px_40px_-15px_rgba(34,211,238,0.15)]"
-                    itemProp="item" itemScope itemType="https://schema.org/CollectionPage"
-                  >
+                  <article className="relative flex flex-col justify-between h-full p-4 sm:p-8 rounded-[1.2rem] sm:rounded-[2rem] bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-cyan-500/40 transition-all duration-500 overflow-hidden hover:-translate-y-1 hover:shadow-[0_20px_40px_-15px_rgba(34,211,238,0.15)]">
                     <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                     
                     <div className="relative z-10">
-                      <h3 className="text-sm sm:text-2xl font-black text-white/95 mb-2 sm:mb-3 group-hover:text-cyan-400 transition-colors line-clamp-2 leading-snug sm:leading-tight tracking-tight" itemProp="name">
+                      <h3 className="text-sm sm:text-2xl font-black text-white/95 mb-2 sm:mb-3 group-hover:text-cyan-400 transition-colors line-clamp-2 leading-snug sm:leading-tight tracking-tight">
                         {col.name}
                       </h3>
-                      <p className="text-[10px] sm:text-sm text-gray-400 line-clamp-2 sm:line-clamp-3 mb-4 sm:mb-8 leading-relaxed font-medium" itemProp="description">
+                      <p className="text-[10px] sm:text-sm text-gray-400 line-clamp-2 sm:line-clamp-3 mb-4 sm:mb-8 leading-relaxed font-medium">
                         {col.description || 'Access this premium curated bundle of academic resources tailored for specific coursework.'}
                       </p>
                     </div>
 
                     <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 mt-auto pt-3 sm:pt-5 border-t border-white/10">
-                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 pr-2" itemProp="author" itemScope itemType="https://schema.org/Person">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 pr-2">
                         <Avatar className="w-5 h-5 sm:w-8 sm:h-8 border border-white/20 shrink-0">
-                          <AvatarImage src={col.user?.avatar} alt={col.user?.name} itemProp="image"/>
+                          <AvatarImage src={col.user?.avatar} alt={col.user?.name} />
                           <AvatarFallback className="bg-cyan-900 text-cyan-400 font-bold text-[8px] sm:text-xs">{col.user?.name?.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <span className="text-[9px] sm:text-xs font-bold text-gray-300 truncate group-hover:text-white transition-colors" itemProp="name">
+                        <span className="text-[9px] sm:text-xs font-bold text-gray-300 truncate group-hover:text-white transition-colors">
                           {col.user?.name}
                         </span>
                       </div>
@@ -320,7 +307,8 @@ export default async function HomePage() {
           {featuredNotes?.map((note, idx) => (
             <article key={note._id} itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem" className="w-full transition-transform duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(250,204,21,0.15)] rounded-[28px]">
                 <meta itemProp="position" content={idx + 1} />
-                <div itemProp="item" itemScope itemType="https://schema.org/LearningResource">
+                <meta itemProp="url" content={`${APP_URL}/notes/${note._id}`} /> {/* Added URL to satisfy summary page rules */}
+                <div>
                   <NoteCard note={note} priority={idx === 0} />
                 </div>
             </article>
@@ -451,6 +439,8 @@ export default async function HomePage() {
             {blogs && blogs.length > 0 ? blogs.slice(0, 2).map((blog, idx) => (
               <article key={blog._id} itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem" className="transition-transform duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.15)] rounded-[1.5rem]">
                 <meta itemProp="position" content={idx + 1} />
+                {/* Assuming BlogCard renders a Link, it's safer to ensure a URL is present for validation */}
+                <meta itemProp="url" content={`${APP_URL}/blogs/${blog.slug || blog._id}`} />
                 <BlogCard blog={blog} />
               </article>
             )) : (
