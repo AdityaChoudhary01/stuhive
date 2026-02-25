@@ -11,7 +11,6 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.stuhive.in";
 
 // ✅ 1. HIGH-OCTANE DYNAMIC METADATA
 export async function generateMetadata({ searchParams }) {
-  // Await the params object FIRST before destructuring (Next.js 15 requirement)
   const params = await searchParams;
   const { search, university, subject, course, page } = params;
   
@@ -23,7 +22,6 @@ export async function generateMetadata({ searchParams }) {
   
   const pageSuffix = page > 1 ? ` - Page ${page}` : "";
 
-  // Build canonical URL to prevent duplicate parameter indexing
   const queryParams = new URLSearchParams();
   if (search) queryParams.set("search", search);
   if (university) queryParams.set("university", university);
@@ -81,20 +79,8 @@ export default async function SearchPage({ searchParams }) {
     ]
   };
 
-  const styles = {
-    wrapper: { 
-      paddingTop: '5rem', paddingBottom: '6rem', minHeight: '100vh',
-      background: 'radial-gradient(circle at 50% 0%, rgba(102, 126, 234, 0.03), transparent)'
-    },
-    headerBox: {
-      background: 'rgba(255, 255, 255, 0.02)', backdropFilter: 'blur(10px)',
-      border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '1.5rem', 
-      padding: '1.25rem', marginBottom: '1.5rem'
-    }
-  };
-
   return (
-    <div className="w-full bg-background" style={styles.wrapper}>
+    <div className="w-full bg-background pt-20 pb-24 min-h-screen">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -115,14 +101,15 @@ export default async function SearchPage({ searchParams }) {
                     <FaFilter className="text-primary text-[10px]" aria-hidden="true" />
                     <h2 className="text-[10px] font-black uppercase tracking-widest text-white">Refine Search</h2>
                 </div>
-                <div className="p-1 rounded-[1.5rem] bg-white/[0.02] border border-white/10 backdrop-blur-sm">
+                <div className="p-1 rounded-[1.5rem] border border-white/10">
                     <NoteFilter />
                 </div>
             </div>
           </aside>
 
           <main className="w-full lg:w-3/4">
-            <header style={styles.headerBox}>
+            {/* Header section with background removed */}
+            <header className="border border-white/10 rounded-[1.5rem] p-5 mb-6">
                 <div className="flex flex-col gap-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
@@ -156,10 +143,9 @@ export default async function SearchPage({ searchParams }) {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-20 sm:py-32 rounded-[2rem] bg-white/[0.01] border border-dashed border-white/10 mx-1">
+                <div className="text-center py-20 sm:py-32 rounded-[2rem] border border-dashed border-white/10 mx-1">
                     <div className="relative inline-block mb-4">
                       <FaRegFolderOpen className="h-14 w-14 sm:h-20 sm:w-20 text-white/10" aria-hidden="true" />
-                      <div className="absolute inset-0 blur-2xl bg-primary/20 rounded-full" aria-hidden="true"></div>
                     </div>
                     <h3 className="text-xl font-black text-white/60 tracking-tight">Archive Empty</h3>
                     <p className="text-xs text-white/30 max-w-[200px] mx-auto mt-2 italic">
@@ -173,7 +159,7 @@ export default async function SearchPage({ searchParams }) {
             </section>
 
             {totalPages > 1 && (
-                <footer className="mt-12 sm:mt-20 p-4 sm:p-6 rounded-[1.5rem] bg-white/[0.02] border border-white/10 flex justify-center mx-1" aria-label="Pagination Navigation">
+                <footer className="mt-12 sm:mt-20 p-4 sm:p-6 rounded-[1.5rem] border border-white/10 flex justify-center mx-1" aria-label="Pagination Navigation">
                     <Pagination currentPage={page} totalPages={totalPages} />
                 </footer>
             )}

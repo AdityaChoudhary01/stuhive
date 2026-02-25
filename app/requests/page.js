@@ -104,7 +104,7 @@ export default async function RequestsPage({ searchParams }) {
   };
 
   return (
-    <main className="min-h-screen bg-background relative overflow-hidden selection:bg-orange-500/30">
+    <main className="min-h-screen bg-background">
       {/* 🚀 INJECT KNOWLEDGE GRAPH */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 

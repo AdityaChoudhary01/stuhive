@@ -96,7 +96,7 @@ export default async function BrowseCollectionsPage({ searchParams }) {
 
   return (
     // 🚀 MICRODATA: Identifying the whole page as a semantic WebPage / CollectionPage directory
-    <main className="relative min-h-screen bg-background text-foreground overflow-hidden selection:bg-cyan-500/30" itemScope itemType="https://schema.org/CollectionPage">
+    <main className="min-h-screen bg-background text-foreground overflow-hidden selection:bg-cyan-500/30" itemScope itemType="https://schema.org/CollectionPage">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

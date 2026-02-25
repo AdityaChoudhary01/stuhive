@@ -23,7 +23,6 @@ export async function generateMetadata({ params }) {
     ? `${collection.description.substring(0, 150)}...` 
     : `Access "${collection.name}", a premium academic collection of ${collection.notes?.length || 0} study resources curated by ${collection.user?.name} on StuHive.`;
 
-  // 🚀 If the user has an avatar, use it as the main preview image for social sharing
   const ogImage = collection.user?.avatar || `${APP_URL}/logo512.png`;
 
   return {
@@ -64,17 +63,16 @@ export async function generateMetadata({ params }) {
       images: [
         { 
           url: ogImage,
-          width: 800, // Best ratio for avatars/square images in OG tags
+          width: 800,
           height: 800,
           alt: `${collection.name} curated by ${collection.user?.name}`
         }
       ],
-      type: "article", // Treated as a curated article/directory
+      type: "article",
       publishedTime: collection.createdAt,
       modifiedTime: collection.updatedAt || collection.createdAt,
     },
     twitter: {
-      // 🚀 Changed from summary_large_image to summary so it crops avatars into nice squares next to the text
       card: "summary", 
       title,
       description,
@@ -89,10 +87,8 @@ export default async function PublicCollectionDetails({ params }) {
 
   if (!collection) return notFound();
 
-  // 🚀 Generate Author URL once to reuse in Schema and UI
   const authorProfileUrl = `${APP_URL}/profile/${collection.user?._id}`;
 
-  // 🚀 DUAL JSON-LD FOR MAXIMUM RICH SNIPPETS
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -114,7 +110,7 @@ export default async function PublicCollectionDetails({ params }) {
     "author": {
       "@type": "Person",
       "name": collection.user?.name,
-      "url": authorProfileUrl, // ✅ FIXED: Added profile URL to remove warning
+      "url": authorProfileUrl,
       "image": collection.user?.avatar
     },
     "mainEntity": {
@@ -124,16 +120,15 @@ export default async function PublicCollectionDetails({ params }) {
       "itemListElement": collection.notes?.map((note, index) => ({
         "@type": "ListItem",
         "position": index + 1,
-        "url": `${APP_URL}/notes/${note._id}`, // ✅ REQUIRED for valid Carousel/ItemList
+        "url": `${APP_URL}/notes/${note._id}`,
         "name": note.title
       }))
     }
   };
 
   return (
-    // 🚀 MICRODATA: Identifying the whole page as a semantic CollectionPage
     <main 
-      className="relative min-h-screen bg-background text-foreground overflow-hidden selection:bg-cyan-500/30"
+      className="min-h-screen text-foreground"
       itemScope 
       itemType="https://schema.org/CollectionPage"
     >
@@ -141,7 +136,7 @@ export default async function PublicCollectionDetails({ params }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
 
-      {/* 🚀 HIDDEN SEO SITEMAP: Direct anchor links to every note for 100% crawl coverage */}
+      {/* SEO SITEMAP */}
       <nav className="sr-only" aria-label="Collection Documents List">
         <h2>List of all study materials in {collection.name}</h2>
         <ul>
@@ -153,32 +148,19 @@ export default async function PublicCollectionDetails({ params }) {
         </ul>
       </nav>
 
-      {/* 🚀 REFINED BACKGROUND - Removed oversized blurs, added subtle noise and top grid */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-         <div className="absolute top-0 left-0 w-full h-[40vh] bg-[linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
-         <div className="absolute top-[-20%] left-[20%] w-[60vw] h-[30vw] bg-cyan-900/10 blur-[120px] rounded-full opacity-50" />
-         {/* Noise overlay */}
-         <div 
-          className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" 
-          style={{ 
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` 
-          }} 
-        />
-      </div>
-
       <div className="container relative z-10 max-w-5xl py-12 md:py-20 px-4 sm:px-6 mx-auto">
         
         {/* Navigation Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-10 sm:mb-16 animate-in fade-in slide-in-from-left-4 duration-500">
-           <Link 
+            <Link 
               href="/shared-collections" 
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-white/10 text-gray-300 hover:text-white hover:bg-white/[0.05] transition-all text-sm font-medium"
             >
               <ArrowLeft size={14} aria-hidden="true" /> Back to Archives
-           </Link>
+            </Link>
         </nav>
 
-        {/* 🚀 PREMIUM HEADER SECTION WITH MICRODATA */}
+        {/* HEADER SECTION */}
         <header className="flex flex-col items-start mb-16 sm:mb-20">
           <div className="p-3.5 bg-white/[0.03] border border-white/10 rounded-2xl text-cyan-400 mb-6 shadow-sm" aria-hidden="true">
             <FolderHeart size={28} strokeWidth={1.5} />
@@ -186,7 +168,7 @@ export default async function PublicCollectionDetails({ params }) {
 
           <h1 
             className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-5 max-w-4xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-300 leading-[1.1]"
-            itemProp="name headline" // 🚀 MICRODATA
+            itemProp="name headline"
           >
             {collection.name}
           </h1>
@@ -194,19 +176,18 @@ export default async function PublicCollectionDetails({ params }) {
           {collection.description && (
             <p 
               className="text-gray-300 text-base md:text-lg max-w-3xl mb-8 leading-relaxed font-normal"
-              itemProp="description" // 🚀 MICRODATA
+              itemProp="description"
             >
                 {collection.description}
             </p>
           )}
 
-          {/* Author & Stats Meta */}
           <div className="flex flex-wrap items-center gap-4">
             <Link 
               href={authorProfileUrl} 
               className="group flex items-center gap-3 bg-white/[0.02] hover:bg-white/[0.05] backdrop-blur-md px-4 py-2 rounded-full border border-white/10 transition-all duration-300"
               aria-label={`Curated by ${collection.user?.name}`}
-              itemProp="author" itemScope itemType="https://schema.org/Person" // 🚀 MICRODATA
+              itemProp="author" itemScope itemType="https://schema.org/Person"
             >
               <meta itemProp="url" content={authorProfileUrl} />
               <Avatar className="h-6 w-6 border border-white/20">
@@ -220,7 +201,7 @@ export default async function PublicCollectionDetails({ params }) {
               </span>
             </Link>
 
-            <div className="flex items-center gap-2 bg-white/[0.02] text-gray-200 px-4 py-2 rounded-full border border-white/10" aria-label={`Contains ${collection.notes?.length || 0} resources`}>
+            <div className="flex items-center gap-2 bg-white/[0.02] text-gray-200 px-4 py-2 rounded-full border border-white/10">
                <Library size={14} className="text-gray-300" aria-hidden="true" />
                <span className="text-sm font-medium tracking-wide">
                  {collection.notes?.length || 0} Resources
@@ -229,7 +210,7 @@ export default async function PublicCollectionDetails({ params }) {
           </div>
         </header>
 
-        {/* 🚀 GRID SECTION ENRICHED WITH ITEMLIST MICRODATA */}
+        {/* GRID SECTION */}
         <section aria-labelledby="collection-contents">
           <h2 id="collection-contents" className="sr-only">Documents in this collection</h2>
           
@@ -269,7 +250,7 @@ export default async function PublicCollectionDetails({ params }) {
           )}
         </section>
 
-        {/* 🚀 PROFESSIONAL FOOTER CTA */}
+        {/* FOOTER CTA */}
         <footer className="mt-24 sm:mt-32 pt-12 border-t border-white/10 flex flex-col items-center text-center gap-6">
             <div className="space-y-2">
                 <h3 className="text-xl font-bold tracking-tight text-white">Share the Knowledge</h3>
@@ -281,14 +262,14 @@ export default async function PublicCollectionDetails({ params }) {
             <ShareCollectionButton />
             
             <div className="flex flex-wrap justify-center gap-6 md:gap-8 text-[10px] font-bold uppercase tracking-widest text-gray-300 mt-4">
-                <span className="flex items-center gap-1.5" aria-label="High-Speed Download">
-                  <Zap size={14} className="text-yellow-400" aria-hidden="true" /> High-Speed
+                <span className="flex items-center gap-1.5">
+                  <Zap size={14} className="text-yellow-400" /> High-Speed
                 </span>
-                <span className="flex items-center gap-1.5" aria-label="Public Access Link">
-                  <Globe size={14} className="text-blue-400" aria-hidden="true" /> Public Link
+                <span className="flex items-center gap-1.5">
+                  <Globe size={14} className="text-blue-400" /> Public Link
                 </span>
-                <span className="flex items-center gap-1.5" aria-label="Verified Material">
-                  <ShieldCheck size={14} className="text-green-400" aria-hidden="true" /> Verified
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck size={14} className="text-green-400" /> Verified
                 </span>
             </div>
         </footer>

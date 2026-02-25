@@ -110,11 +110,11 @@ export default function RequestBoard({ initialRequests, currentUser, initialPage
             </div>
 
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogTrigger asChild>
-                    <Button className="rounded-xl font-bold bg-white text-black hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] w-full md:w-auto">
-                        <Plus size={18} className="mr-2" aria-hidden="true" /> Post a Request
-                    </Button>
-                </DialogTrigger>
+            <DialogTrigger asChild>
+  <Button className="rounded-xl font-bold bg-orange-500 text-black hover:bg-orange-600 transition-all shadow-[0_0_20px_rgba(249,115,22,0.4)] w-full md:w-auto border-0">
+    <Plus size={18} className="mr-2" aria-hidden="true" /> Post a Request
+  </Button>
+</DialogTrigger>
                 <DialogContent className="sm:max-w-lg bg-[#0c0c10] border-white/10 text-white">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-black text-orange-400">Post a Request</DialogTitle>

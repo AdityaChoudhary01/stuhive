@@ -99,7 +99,10 @@ export default function NoteFilter() {
           </div>
       </div>
 
-      <Button onClick={handleApply} className="w-full mt-2 font-bold bg-primary/90 hover:bg-primary">
+      <Button 
+        onClick={handleApply} 
+        className="w-full mt-4 h-11 rounded-full text-sm font-bold tracking-wide transition-all bg-cyan-500 text-black hover:bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+      >
         Apply Filters
       </Button>
     </div>

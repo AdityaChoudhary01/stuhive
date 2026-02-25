@@ -23,8 +23,8 @@ export default function NoteSortBar({ currentSort }) {
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <div className="flex items-center gap-2 text-white/30 text-[10px] font-black uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
-        <ListFilter size={12} className="text-primary" />
+      <div className="flex items-center gap-2 text-white/30 text-[10px] font-black uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-full border border-white/5">
+        <ListFilter size={12} className="text-cyan-400" />
         Sort By:
       </div>
       
@@ -33,10 +33,10 @@ export default function NoteSortBar({ currentSort }) {
           <button
             key={option.value}
             onClick={() => handleSortChange(option.value)}
-            className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all whitespace-nowrap border ${
+            className={`px-4 py-1.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider transition-all duration-300 whitespace-nowrap border ${
               currentSort === option.value
-                ? "bg-primary text-black border-primary shadow-[0_0_15px_rgba(34,211,238,0.3)]"
-                : "bg-white/5 text-white/40 border-white/5 hover:border-white/20 hover:text-white"
+                ? "bg-cyan-500 text-black border-cyan-500 hover:bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+                : "bg-white/5 text-gray-400 border-white/5 hover:border-white/20 hover:bg-white/10 hover:text-white"
             }`}
           >
             {option.label}
