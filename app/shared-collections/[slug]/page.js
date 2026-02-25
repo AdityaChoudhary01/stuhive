@@ -74,6 +74,7 @@ export async function generateMetadata({ params }) {
       modifiedTime: collection.updatedAt || collection.createdAt,
     },
     twitter: {
+      // 🚀 Changed from summary_large_image to summary so it crops avatars into nice squares next to the text
       card: "summary", 
       title,
       description,
@@ -87,6 +88,9 @@ export default async function PublicCollectionDetails({ params }) {
   const collection = await getCollectionBySlug(slug);
 
   if (!collection) return notFound();
+
+  // 🚀 Generate Author URL once to reuse in Schema and UI
+  const authorProfileUrl = `${APP_URL}/profile/${collection.user?._id}`;
 
   // 🚀 DUAL JSON-LD FOR MAXIMUM RICH SNIPPETS
   const breadcrumbJsonLd = {
@@ -110,7 +114,7 @@ export default async function PublicCollectionDetails({ params }) {
     "author": {
       "@type": "Person",
       "name": collection.user?.name,
-      "url": `${APP_URL}/profile/${collection.user?._id}`,
+      "url": authorProfileUrl, // ✅ FIXED: Added profile URL to remove warning
       "image": collection.user?.avatar
     },
     "mainEntity": {
@@ -120,23 +124,8 @@ export default async function PublicCollectionDetails({ params }) {
       "itemListElement": collection.notes?.map((note, index) => ({
         "@type": "ListItem",
         "position": index + 1,
-        "item": {
-          // 🚀 CRITICAL FIX: Ensures Google indexes the child notes as Courses for Star Ratings!
-          "@type": ["LearningResource", "Course", "CreativeWork"],
-          "name": note.title,
-          "url": `${APP_URL}/notes/${note._id}`,
-          "educationalLevel": "University",
-          "author": { "@type": "Person", "name": note.user?.name || collection.user?.name },
-          ...(note.rating > 0 && {
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": note.rating.toFixed(1),
-              "bestRating": "5",
-              "worstRating": "1",
-              "reviewCount": note.numReviews || 1
-            }
-          })
-        }
+        "url": `${APP_URL}/notes/${note._id}`, // ✅ REQUIRED for valid Carousel/ItemList
+        "name": note.title
       }))
     }
   };
@@ -164,10 +153,11 @@ export default async function PublicCollectionDetails({ params }) {
         </ul>
       </nav>
 
-      {/* 🚀 REFINED BACKGROUND */}
+      {/* 🚀 REFINED BACKGROUND - Removed oversized blurs, added subtle noise and top grid */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
          <div className="absolute top-0 left-0 w-full h-[40vh] bg-[linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
          <div className="absolute top-[-20%] left-[20%] w-[60vw] h-[30vw] bg-cyan-900/10 blur-[120px] rounded-full opacity-50" />
+         {/* Noise overlay */}
          <div 
           className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" 
           style={{ 
@@ -213,11 +203,12 @@ export default async function PublicCollectionDetails({ params }) {
           {/* Author & Stats Meta */}
           <div className="flex flex-wrap items-center gap-4">
             <Link 
-              href={`/profile/${collection.user?._id}`} 
+              href={authorProfileUrl} 
               className="group flex items-center gap-3 bg-white/[0.02] hover:bg-white/[0.05] backdrop-blur-md px-4 py-2 rounded-full border border-white/10 transition-all duration-300"
               aria-label={`Curated by ${collection.user?.name}`}
               itemProp="author" itemScope itemType="https://schema.org/Person" // 🚀 MICRODATA
             >
+              <meta itemProp="url" content={authorProfileUrl} />
               <Avatar className="h-6 w-6 border border-white/20">
                 <AvatarImage src={collection.user?.avatar} alt={`Avatar of ${collection.user?.name}`} itemProp="image" />
                 <AvatarFallback className="bg-cyan-900 text-cyan-100 font-bold text-[10px]">
@@ -258,6 +249,7 @@ export default async function PublicCollectionDetails({ params }) {
                   itemType="https://schema.org/ListItem"
                 >
                   <meta itemProp="position" content={index + 1} />
+                  <meta itemProp="url" content={`${APP_URL}/notes/${note._id}`} />
                   <div itemProp="item" itemScope itemType="https://schema.org/LearningResource" className="h-full">
                     <NoteCard note={note} priority={index < 3} />
                   </div>

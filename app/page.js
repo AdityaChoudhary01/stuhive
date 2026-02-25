@@ -82,6 +82,7 @@ export const metadata = {
 };
 
 export default async function HomePage() {
+  // 🚀 PARALLEL DATA FETCHING FOR MAXIMUM SPEED
   const [featuredNotesRes, allNotesRes, homeData, collectionsRes] = await Promise.all([
     getNotes({ limit: 3, sort: 'highestRated' }),
     getNotes({ page: 1, limit: 12 }),
@@ -93,7 +94,8 @@ export default async function HomePage() {
   const collections = collectionsRes?.collections || [];
   const featuredNotes = featuredNotesRes?.notes || [];
 
-  // 🚀 FIXED JSON-LD: Removed "Course" from the homepage summary to prevent mutually-exclusive property errors
+  // 🚀 BEYOND ULTRA: DYNAMIC KNOWLEDGE GRAPH INJECTION
+  // This maps the actual live data directly into Google's brain
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -138,7 +140,7 @@ export default async function HomePage() {
             "@type": "ListItem",
             "position": index + 1,
             "item": {
-              "@type": "CreativeWork", // 🚀 FIX: Reverted back to standard CreativeWork to clear the GSC error
+              "@type": ["LearningResource", "Course", "CreativeWork"],
               "name": note.title,
               "url": `${APP_URL}/notes/${note._id}`,
               "educationalLevel": "University"
@@ -171,8 +173,10 @@ export default async function HomePage() {
       itemScope 
       itemType="https://schema.org/WebPage"
     >
+      {/* INJECT KNOWLEDGE GRAPH */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
+      {/* 🚀 BOT-ONLY SEMANTIC HIERARCHY */}
       <div className="sr-only">
         <h1>StuHive: The Global Hub for Free Academic Notes, Study Materials & Peer Collections</h1>
         <p>Download free university PDFs, read student blogs, and join the Hall of Fame.</p>
@@ -180,6 +184,7 @@ export default async function HomePage() {
 
       <HeroSection />
 
+      {/* --- PLATFORM STATS --- */}
       <section className="relative z-20 -mt-16 sm:-mt-24 container max-w-7xl px-2 sm:px-6 pt-10" aria-label="StuHive Platform Statistics">
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-6">
           <div className={statCardClass} title="Total Academic Notes Available">
@@ -245,6 +250,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
+          {/* 🚀 SEO: ItemList Schema Embedded in HTML */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 relative z-10" itemScope itemType="https://schema.org/ItemList">
             {collections.map((col, index) => (
               <div key={col._id} itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem" className="h-full">
@@ -314,7 +320,7 @@ export default async function HomePage() {
           {featuredNotes?.map((note, idx) => (
             <article key={note._id} itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem" className="w-full transition-transform duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(250,204,21,0.15)] rounded-[28px]">
                 <meta itemProp="position" content={idx + 1} />
-                <div itemProp="item" itemScope itemType="https://schema.org/LearningResource"> {/* 🚀 FIX: Also reverted to basic LearningResource here */}
+                <div itemProp="item" itemScope itemType="https://schema.org/LearningResource">
                   <NoteCard note={note} priority={idx === 0} />
                 </div>
             </article>
@@ -445,9 +451,7 @@ export default async function HomePage() {
             {blogs && blogs.length > 0 ? blogs.slice(0, 2).map((blog, idx) => (
               <article key={blog._id} itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem" className="transition-transform duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.15)] rounded-[1.5rem]">
                 <meta itemProp="position" content={idx + 1} />
-                <div itemProp="item" itemScope itemType="https://schema.org/BlogPosting">
-                  <BlogCard blog={blog} />
-                </div>
+                <BlogCard blog={blog} />
               </article>
             )) : (
               <div className="col-span-2 flex flex-col items-center justify-center p-8 sm:p-20 border border-dashed border-white/10 rounded-[1.5rem] sm:rounded-[2rem] bg-white/[0.01]">
