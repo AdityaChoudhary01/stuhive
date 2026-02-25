@@ -95,12 +95,14 @@ export default function Navbar() {
 
   const isActive = (path) => pathname === path;
 
+  // 🚀 REMOVED: 'About' (better suited for Footer)
+  // 🚀 ADDED: 'Requests' (highly interactive community feature)
   const navLinks = [
     { path: '/search', label: 'Notes' },
     { path: '/shared-collections', label: 'Archives' }, 
     { path: '/feed', label: 'Feed' }, 
+    { path: '/requests', label: 'Requests' }, // ✅ Added Requests
     { path: '/blogs', label: 'Blogs' },
-    { path: '/about', label: 'About' },
     { path: '/donate', label: 'Donate' },
     { path: '/admin', label: 'Admin', adminOnly: true }
   ];
@@ -141,7 +143,7 @@ export default function Navbar() {
             />
           </Link>
 
-          {/* Desktop Links - 🚀 FIXED: Hides below 1085px */}
+          {/* Desktop Links */}
           <div className="max-[1085px]:hidden flex items-center justify-center flex-1 gap-0.5 lg:gap-1">
             {navLinks.map(link => {
               if (link.adminOnly && session?.user?.role !== 'admin') return null;
@@ -160,7 +162,7 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Desktop Search - 🚀 FIXED: Hides below 1085px */}
+          {/* Desktop Search */}
           <form onSubmit={handleSearch} className="max-[1085px]:hidden flex items-center bg-black/20 p-[3px] rounded-full border border-white/15 transition-all min-w-[200px] xl:min-w-[220px] shadow-inner">
             <input type="text" placeholder="Search..." aria-label="Search term" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="bg-transparent border-none text-white outline-none flex-1 text-[0.85rem] px-2.5 font-sans min-w-0" />
             <button type="submit" aria-label="Submit search" className="bg-gradient-to-br from-[#667eea] to-[#764ba2] border-none rounded-full w-[30px] h-[30px] flex items-center justify-center cursor-pointer text-white shadow-[0_2px_10px_rgba(102,126,234,0.4)] transition-transform hover:scale-105 shrink-0">
@@ -201,7 +203,7 @@ export default function Navbar() {
               </>
             )}
 
-            {/* Hamburger Button - 🚀 FIXED: Shows below 1085px */}
+            {/* Hamburger Button */}
             <button aria-label={menuOpen ? "Close menu" : "Open menu"} onClick={() => setMenuOpen(!menuOpen)} className="min-[1086px]:hidden flex items-center justify-center bg-transparent border-none text-white text-2xl cursor-pointer p-1 pl-2">
               {menuOpen ? <FaTimes aria-hidden="true" /> : <FaBars aria-hidden="true" />}
             </button>
@@ -212,7 +214,7 @@ export default function Navbar() {
       {/* Mobile Menu Backdrop */}
       <div className={`min-[1086px]:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] transition-opacity duration-300 ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setMenuOpen(false)} />
 
-      {/* Mobile Menu Slide-out Panel - 🚀 FIXED: Dynamic Viewport Height (dvh) avoids bottom bar clipping */}
+      {/* Mobile Menu Slide-out Panel */}
       <div className={`min-[1086px]:hidden fixed top-0 right-0 w-full max-w-[320px] h-[100dvh] bg-[#0c0c10]/95 backdrop-blur-xl p-6 z-[1001] flex flex-col transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
          
          <div className="flex justify-between items-center mb-6 shrink-0 pt-2">
@@ -231,7 +233,6 @@ export default function Navbar() {
           </form>
         </div>
 
-        {/* 🚀 FIXED: Scrollable area for links, ensures it doesn't get cut off on tiny screens */}
         <div className="flex flex-col gap-2 overflow-y-auto pb-6 flex-1 pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           <Link href="/notes/upload" onClick={() => setMenuOpen(false)} className="p-3.5 rounded-2xl text-[1.05rem] font-bold flex items-center gap-4 text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 hover:bg-cyan-400/20 transition-colors mb-2">
             + Upload Note

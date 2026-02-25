@@ -3,7 +3,7 @@ import connectDB from "@/lib/db";
 import Blog from "@/lib/models/Blog";
 import Note from "@/lib/models/Note";
 import User from "@/lib/models/User";
-import Collection from "@/lib/models/Collection"; // 🚀 ADDED COLLECTION MODEL
+import Collection from "@/lib/models/Collection"; 
 
 const BASE_URL = 'https://www.stuhive.in';
 
@@ -23,14 +23,13 @@ export async function GET() {
     const blogsPromise = Blog.find({}).select("slug updatedAt").lean();
     const notesPromise = Note.find({}).select("_id updatedAt").lean();
     const usersPromise = User.find({}).select("_id updatedAt").lean();
-    // 🚀 Only fetch collections that are marked as 'public'
     const collectionsPromise = Collection.find({ visibility: 'public' }).select("slug updatedAt").lean();
 
     const [blogs, notes, users, collections] = await Promise.all([
       blogsPromise,
       notesPromise,
       usersPromise,
-      collectionsPromise, // 🚀 ADDED TO PROMISE.ALL
+      collectionsPromise, 
     ]);
 
     // DEBUG: See what is actually being returned
@@ -40,16 +39,16 @@ export async function GET() {
       console.warn("[SITEMAP] WARNING: No blogs found in the database. Are they published?");
     }
 
-    // 🚀 ADDED "/shared-collections" TO STATIC ROUTES
+    // 🚀 ADDED "/requests" TO STATIC ROUTES
     const staticRoutes = [
-      "", "/about", "/contact", "/blogs", "/search", "/shared-collections",
+      "", "/about", "/contact", "/blogs", "/search", "/shared-collections", "/requests",
       "/login","/signup", 
       "/donate", "/supporters", "/terms", "/privacy", "/dmca"
     ].map(route => ({
       url: `${BASE_URL}${route}`,
       lastModified: new Date().toISOString(),
-      priority: route === "" ? "1.0" : "0.5",
-      changefreq: "monthly",
+      priority: route === "" ? "1.0" : route === "/requests" ? "0.9" : "0.5", // Boosted priority for requests board
+      changefreq: route === "/requests" ? "daily" : "monthly", // Requests board changes frequently
     }));
 
     // Filter out any blogs that somehow don't have a slug to prevent malformed URLs

@@ -35,6 +35,7 @@ export async function GET(request) {
       `${APP_URL}/login`,
       `${APP_URL}/register`,
       `${APP_URL}/shared-collections`, // 🚀 Added main collections hub
+      `${APP_URL}/requests`,
     ];
 
     // 2. Fetch all Dynamic Blogs

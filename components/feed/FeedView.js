@@ -11,7 +11,7 @@ import BlogCard from "@/components/blog/BlogCard";
 import Pagination from "@/components/common/Pagination";
 import { toggleFollow } from "@/actions/user.actions";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, HelpCircle } from "lucide-react"; // Added HelpCircle icon
 
 export default function FeedView({ initialContent, initialFollowing, currentUserId }) {
   const searchParams = useSearchParams();
@@ -21,7 +21,7 @@ export default function FeedView({ initialContent, initialFollowing, currentUser
   
   const [filter, setFilter] = useState('all');
   const [showFollowing, setShowFollowing] = useState(false);
-  const [loadingUnfollowId, setLoadingUnfollowId] = useState(null); // Add loading state
+  const [loadingUnfollowId, setLoadingUnfollowId] = useState(null); 
   
   const [unfollowedIds, setUnfollowedIds] = useState([]);
 
@@ -64,7 +64,6 @@ export default function FeedView({ initialContent, initialFollowing, currentUser
 
     if (res.success) {
         toast({ title: "Unfollowed user successfully" });
-        // 🚀 FORCE NEXT.JS TO RE-FETCH SERVER PROPS
         router.refresh(); 
     } else {
         setUnfollowedIds(prev => prev.filter(id => id !== targetId));
@@ -75,22 +74,35 @@ export default function FeedView({ initialContent, initialFollowing, currentUser
 
   if (initialContent.length === 0 && visibleFollowingUsers.length === 0) {
     return (
-      <div className="text-center py-20 bg-white/[0.02] border border-white/10 rounded-3xl border-dashed">
-        <h2 className="text-2xl font-bold mb-4">Your Feed is Quiet... 😴</h2>
-        <p className="text-gray-400 mb-8 max-w-md mx-auto">
-          You haven&apos;t followed any users yet.
+      <div className="text-center py-20 bg-white/[0.02] border border-white/10 rounded-[2rem] border-dashed shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-cyan-500/10 blur-[100px] rounded-full pointer-events-none" />
+        
+        <h2 className="text-2xl md:text-3xl font-black mb-4 text-white relative z-10">Your Feed is Quiet... 😴</h2>
+        <p className="text-gray-400 mb-8 max-w-md mx-auto relative z-10 font-medium">
+          You haven&apos;t followed any creators yet. Discover new authors or ask the community for specific materials.
         </p>
-        <Link href="/search">
-          <Button className="rounded-full gap-2 px-8 bg-cyan-500 text-black hover:bg-cyan-400 font-bold">
-            <FaSearch /> Discover Authors
-          </Button>
-        </Link>
+        
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
+            <Link href="/global-search">
+            <Button className="rounded-full gap-2 px-8 h-12 bg-cyan-500 text-black hover:bg-cyan-400 font-bold w-full sm:w-auto shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] transition-all">
+                <FaSearch /> Discover Authors
+            </Button>
+            </Link>
+            
+            {/* 🚀 NEW: Link to Requests Board */}
+            <Link href="/requests">
+                <Button variant="outline" className="rounded-full gap-2 px-8 h-12 bg-orange-500/10 text-orange-400 border-orange-500/30 hover:bg-orange-500/20 hover:text-orange-300 font-bold w-full sm:w-auto transition-all">
+                    <HelpCircle size={16} /> Community Wishlist
+                </Button>
+            </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="relative">
+      
       {/* Following Management Section */}
       {visibleFollowingUsers.length > 0 && (
           <div className="mb-8">
@@ -118,14 +130,14 @@ export default function FeedView({ initialContent, initialFollowing, currentUser
                               <Link href={`/profile/${user._id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity min-w-0">
                                   <Avatar className="h-10 w-10 border border-white/10 shrink-0">
                                       <AvatarImage src={user.avatar} />
-                                      <AvatarFallback className="bg-cyan-900 text-cyan-400">{user.name?.charAt(0)}</AvatarFallback>
+                                      <AvatarFallback className="bg-cyan-900 text-cyan-400 font-bold">{user.name?.charAt(0)}</AvatarFallback>
                                   </Avatar>
-                                  <span className="text-sm font-bold truncate">{user.name}</span>
+                                  <span className="text-sm font-bold truncate text-white/90">{user.name}</span>
                               </Link>
                               <Button 
                                 size="sm" 
                                 variant="ghost" 
-                                className="h-8 text-xs text-red-400 hover:bg-red-500/10 hover:text-red-500 rounded-full px-3 shrink-0 ml-2"
+                                className="h-8 text-xs font-bold text-red-400 hover:bg-red-500/10 hover:text-red-500 rounded-full px-3 shrink-0 ml-2"
                                 onClick={() => handleUnfollow(user._id)}
                                 disabled={loadingUnfollowId === user._id}
                               >
@@ -147,7 +159,7 @@ export default function FeedView({ initialContent, initialFollowing, currentUser
           size="sm"
           variant={filter === 'all' ? 'default' : 'ghost'} 
           onClick={() => handleFilterChange('all')} 
-          className={`rounded-full h-8 px-5 ${filter === 'all' ? 'bg-cyan-500 text-black hover:bg-cyan-400 font-bold' : 'text-gray-400 hover:text-white'}`}
+          className={`rounded-full h-8 px-5 ${filter === 'all' ? 'bg-cyan-500 text-black hover:bg-cyan-400 font-bold' : 'text-gray-400 hover:text-white font-medium'}`}
         >
           All
         </Button>
@@ -155,7 +167,7 @@ export default function FeedView({ initialContent, initialFollowing, currentUser
           size="sm"
           variant={filter === 'note' ? 'default' : 'ghost'} 
           onClick={() => handleFilterChange('note')} 
-          className={`rounded-full gap-2 h-8 px-5 ${filter === 'note' ? 'bg-cyan-500 text-black hover:bg-cyan-400 font-bold' : 'text-gray-400 hover:text-white'}`}
+          className={`rounded-full gap-2 h-8 px-5 ${filter === 'note' ? 'bg-cyan-500 text-black hover:bg-cyan-400 font-bold' : 'text-gray-400 hover:text-white font-medium'}`}
         >
           <FaBook className="w-3 h-3"/> Notes
         </Button>
@@ -163,7 +175,7 @@ export default function FeedView({ initialContent, initialFollowing, currentUser
           size="sm"
           variant={filter === 'blog' ? 'default' : 'ghost'} 
           onClick={() => handleFilterChange('blog')} 
-          className={`rounded-full gap-2 h-8 px-5 ${filter === 'blog' ? 'bg-cyan-500 text-black hover:bg-cyan-400 font-bold' : 'text-gray-400 hover:text-white'}`}
+          className={`rounded-full gap-2 h-8 px-5 ${filter === 'blog' ? 'bg-cyan-500 text-black hover:bg-cyan-400 font-bold' : 'text-gray-400 hover:text-white font-medium'}`}
         >
           <FaPenNib className="w-3 h-3"/> Blogs
         </Button>
@@ -192,7 +204,7 @@ export default function FeedView({ initialContent, initialFollowing, currentUser
       {filteredContent.length === 0 && (
         <div className="text-center py-20 bg-white/[0.01] rounded-3xl border border-dashed border-white/5 mt-6">
           <p className="text-gray-400 font-medium mb-4">No updates found for this filter.</p>
-          <Button variant="outline" onClick={() => handleFilterChange('all')} className="rounded-full border-white/10 hover:bg-white/5">
+          <Button variant="outline" onClick={() => handleFilterChange('all')} className="rounded-full border-white/10 hover:bg-white/5 text-white">
               Clear Filters
           </Button>
         </div>
@@ -207,6 +219,17 @@ export default function FeedView({ initialContent, initialFollowing, currentUser
           />
         </div>
       )}
+      
+      {/* 🚀 NEW: Floating Request Board Link for users who have feed content */}
+      <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <Link href="/requests" title="Can't find what you need? Ask the community!">
+              <div className="group flex items-center gap-3 bg-orange-500 hover:bg-orange-600 text-black px-5 h-14 rounded-full shadow-[0_10px_30px_rgba(249,115,22,0.4)] hover:shadow-[0_15px_40px_rgba(249,115,22,0.6)] hover:-translate-y-1 transition-all duration-300 border border-orange-400/50">
+                  <HelpCircle className="w-5 h-5" />
+                  <span className="font-black uppercase tracking-widest text-[11px] hidden sm:block">Ask Community</span>
+              </div>
+          </Link>
+      </div>
+
     </div>
   );
 }

@@ -3,8 +3,9 @@ import NoteCard from "@/components/notes/NoteCard";
 import BlogCard from "@/components/blog/BlogCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button"; 
 import Link from "next/link";
-import { FileText, Rss, Users, Search as SearchIcon, PenTool } from "lucide-react";
+import { FileText, Rss, Users, Search as SearchIcon, PenTool, HelpCircle } from "lucide-react"; // 🚀 CHANGED TO HelpCircle
 
 // 🚀 ENFORCED WWW DOMAIN
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.stuhive.in";
@@ -63,16 +64,45 @@ export default async function GlobalSearchPage({ searchParams }) {
         </p>
       </header>
 
+      {/* 🚀 SCENARIO 1: Absolutely zero results */}
       {totalResults === 0 ? (
-        <div className="text-center py-20 bg-secondary/10 rounded-3xl border-2 border-dashed border-white/10">
-          <p className="text-xl text-muted-foreground font-bold">No matches found for your search.</p>
-          <Link href="/" title="Return Home" className="text-primary hover:text-cyan-400 hover:underline mt-4 block font-black uppercase tracking-widest text-sm transition-colors">
-            Return Home
-          </Link>
+        <div className="text-center py-20 bg-secondary/10 rounded-[2.5rem] border-2 border-dashed border-white/10 px-4">
+          <p className="text-2xl text-white font-bold mb-3">No matches found.</p>
+          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+            We couldn&apos;t find anything matching &quot;{query}&quot;. Let the community know what you are looking for!
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/requests">
+              <Button size="lg" className="rounded-2xl font-bold bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/25">
+                <HelpCircle className="mr-2 w-5 h-5" /> Request these Notes
+              </Button>
+            </Link>
+            <Link href="/" title="Return Home" className="text-primary hover:text-cyan-400 hover:underline font-black uppercase tracking-widest text-sm transition-colors px-4">
+              Return Home
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="space-y-16">
           
+          {/* 🚀 SCENARIO 2: Has other results, but ZERO notes */}
+          {notes.length === 0 && query && (
+             <section className="p-8 rounded-[2rem] bg-orange-500/5 border border-orange-500/20 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+                 <div className="text-center md:text-left">
+                     <h3 className="text-xl font-bold text-orange-400 flex items-center justify-center md:justify-start gap-2 mb-2">
+                         <HelpCircle className="w-6 h-6" /> Zero notes found
+                     </h3>
+                     <p className="text-muted-foreground">The community hasn&apos;t uploaded notes for <strong className="text-white">&quot;{query}&quot;</strong> yet. Be the first to request it!</p>
+                 </div>
+                 <Link href="/requests">
+                     <Button size="lg" className="rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-bold whitespace-nowrap shadow-lg shadow-orange-500/20">
+                         Request Notes
+                     </Button>
+                 </Link>
+             </section>
+          )}
+
           {/* 1. NOTES RESULTS */}
           {notes.length > 0 && (
             <section aria-labelledby="notes-heading">
@@ -85,6 +115,21 @@ export default async function GlobalSearchPage({ searchParams }) {
                     <NoteCard note={note} />
                   </article>
                 ))}
+              </div>
+
+              {/* 🚀 SCENARIO 3: Notes found, but maybe not the exact ones */}
+              <div className="mt-8 p-6 rounded-2xl bg-orange-500/5 border border-orange-500/10 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:bg-orange-500/10">
+                 <div>
+                   <h3 className="font-bold text-orange-400 flex items-center gap-2 text-lg">
+                      <HelpCircle className="w-5 h-5" /> Didn&apos;t find the exact notes you need?
+                   </h3>
+                   <p className="text-sm text-muted-foreground mt-1">Ask the StuHive community to upload them for you.</p>
+                 </div>
+                 <Link href="/requests">
+                    <Button variant="outline" className="rounded-xl border-orange-500/30 text-orange-500 hover:bg-orange-500 hover:text-white transition-all whitespace-nowrap font-bold shadow-sm">
+                       Request Specific Notes
+                    </Button>
+                 </Link>
               </div>
             </section>
           )}
@@ -129,7 +174,6 @@ export default async function GlobalSearchPage({ searchParams }) {
                             <span className="capitalize text-gray-300">{user.role || 'Student'}</span>
                             <span className="w-1 h-1 rounded-full bg-white/20"></span>
                             
-                            {/* 🚀 FIXED: Displays both Notes and Blogs beautifully */}
                             <span className="flex items-center gap-1">
                                <FileText className="w-3 h-3 text-cyan-400" /> {user.noteCount || 0}
                             </span>
