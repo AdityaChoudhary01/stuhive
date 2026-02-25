@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image"; // ✅ Imported Next.js Image
+import Image from "next/image"; 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { incrementDownloadCount, getNoteDownloadUrl } from "@/actions/note.actions";
 import { toggleSaveNote } from "@/actions/user.actions"; 
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.stuhive.in";
+
 const FileIcon = ({ type, className }) => {
   if (type?.includes("pdf")) return <FileText className={className} aria-hidden="true" />;
   if (type?.includes("image")) return <ImageIcon className={className} aria-hidden="true" />;
@@ -23,7 +25,6 @@ const FileIcon = ({ type, className }) => {
   return <FileType className={className} aria-hidden="true" />;
 };
 
-// ✅ Added `priority` prop to receive the LCP instruction from the parent
 export default function NoteCard({ note, priority = false }) {
   const { data: session, update: updateSession } = useSession();
   const { toast } = useToast();
@@ -44,22 +45,20 @@ export default function NoteCard({ note, priority = false }) {
     ? `${r2PublicUrl}/${note.thumbnailKey}` 
     : (note.fileType?.startsWith("image/") ? `${r2PublicUrl}/${note.fileKey}` : null);
 
-  // 🚀 FIXED: GSC valid Schema for single note cards
+  // 🚀 FIXED: Removed "Course" to stop GSC strict validation errors
   const noteSchema = {
     "@context": "https://schema.org",
-    "@type": ["LearningResource", "CreativeWork"],
+    "@type": ["LearningResource", "CreativeWork"], 
     "name": note.title,
-    "description": note.description || "University study notes and exam prep material.",
+    "description": note.description || `Academic notes and study material for ${note.course}.`,
     "url": `${APP_URL}/notes/${note._id}`,
-
-    "educationalLevel": "University", // ✅ Set statically for GSC requirement
-    "teaches": note.course,           // ✅ Added 'teaches' property to support Course schema
+    "educationalLevel": "University", 
+    "educationalUse": "Study Material",
     "author": {
       "@type": "Person",
       "name": note.user?.name || "StuHive Contributor"
     },
     "datePublished": note.uploadDate,
-    "educationalUse": "Study Material",
     "image": thumbnailUrl,
     "provider": {
       "@type": "Organization",
@@ -132,7 +131,6 @@ export default function NoteCard({ note, priority = false }) {
       <div className="flex flex-col h-full bg-[#050505]">
         
         {/* --- TOP SECTION (IMAGE) --- */}
-        {/* ✅ FIXED FLICKER: Added -mb-[1px] to overlap seams */}
         <div className="relative h-48 sm:h-56 w-full shrink-0 transform-gpu overflow-hidden -mb-[1px] z-0">
           
           <button 
@@ -157,15 +155,14 @@ export default function NoteCard({ note, priority = false }) {
 
           <Link href={`/notes/${note._id}`} tabIndex={-1} aria-hidden="true" className="block w-full h-full relative z-10">
             {thumbnailUrl ? (
-              // ✅ FIXED LCP: Replaced <img> with Next.js <Image> + priority + unoptimized
               <Image 
                 src={thumbnailUrl} 
                 alt={`Preview of ${note.title}`} 
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                priority={priority} // Honors the priority prop passed from SearchPage
-                fetchPriority={priority ? "high" : "auto"} // Forces instant network request
-                unoptimized={true} // Bypasses Vercel's slow image optimization limit
+                priority={priority} 
+                fetchPriority={priority ? "high" : "auto"} 
+                unoptimized={true} 
                 className="object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-[1.08] opacity-85 group-hover:opacity-100 will-change-transform transform-gpu" 
               />
             ) : (
