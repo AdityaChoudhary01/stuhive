@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image"; // 🚀 IMPORTED NEXT/IMAGE
-import { useRouter } from "next/navigation";
+import Image from "next/image"; 
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { FaMapMarkerAlt, FaCalendarAlt, FaBook, FaRss, FaStar, FaUserPlus, FaUserCheck, FaUniversity, FaEnvelope } from 'react-icons/fa';
+import { ChevronDown } from "lucide-react"; // 🚀 Added for Load More
 import { Button } from "@/components/ui/button";
 import NoteCard from "@/components/notes/NoteCard";
 import BlogCard from "@/components/blog/BlogCard"; 
@@ -13,7 +14,6 @@ import { toggleFollow } from "@/actions/user.actions";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 
-// Dialog Components for Modals
 import {
   Dialog,
   DialogContent,
@@ -52,12 +52,46 @@ const UserList = ({ users, emptyMessage }) => {
 
 export default function PublicProfileView({ profile, notes, blogs, currentUser, isOwnProfile, initialIsFollowing }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { toast } = useToast();
   
-  const [activeTab, setActiveTab] = useState('notes');
+  // 🚀 SEO Routable Pagination State
+  const ITEMS_PER_PAGE = 6;
+  const initialTab = searchParams.get('tab') === 'blogs' ? 'blogs' : 'notes';
+  
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [notesPage, setNotesPage] = useState(Number(searchParams.get('nPage')) || 1);
+  const [blogsPage, setBlogsPage] = useState(Number(searchParams.get('bPage')) || 1);
+
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [followLoading, setFollowLoading] = useState(false);
   const [followerCount, setFollowerCount] = useState(profile.followers.length);
+
+  // Derived Grid Data
+  const currentNotes = notes.slice(0, notesPage * ITEMS_PER_PAGE);
+  const hasMoreNotes = notes.length > currentNotes.length;
+
+  const currentBlogs = blogs.slice(0, blogsPage * ITEMS_PER_PAGE);
+  const hasMoreBlogs = blogs.length > currentBlogs.length;
+
+  // Handles silent URL updates for SEO
+  const loadMoreNotes = () => {
+      const next = notesPage + 1;
+      setNotesPage(next);
+      window.history.replaceState(null, '', `${pathname}?tab=notes&nPage=${next}`);
+  };
+
+  const loadMoreBlogs = () => {
+      const next = blogsPage + 1;
+      setBlogsPage(next);
+      window.history.replaceState(null, '', `${pathname}?tab=blogs&bPage=${next}`);
+  };
+
+  const handleTabChange = (tab) => {
+      setActiveTab(tab);
+      window.history.replaceState(null, '', `${pathname}?tab=${tab}`);
+  };
 
   const handleFollow = async () => {
     if (!currentUser) {
@@ -86,15 +120,12 @@ export default function PublicProfileView({ profile, notes, blogs, currentUser, 
   };
 
   return (
-    <div className="animate-in fade-in duration-700 px-2 sm:px-0">
+    <div className="animate-in fade-in duration-700 px-2 sm:px-0" itemProp="mainEntity" itemScope itemType="https://schema.org/Person">
         {/* --- Header Card --- */}
-        {/* ✅ MOBILE FIX: Reduced p-8 to p-5 for smaller screens, removed mb-12 for tighter mobile spacing */}
         <div className="bg-secondary/10 border border-white/5 rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 mb-8 sm:mb-12 relative overflow-hidden shadow-2xl backdrop-blur-md">
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600"></div>
             
             <div className="flex flex-col md:flex-row gap-6 sm:gap-10 items-center md:items-start relative z-10">
-                
-                {/* Avatar */}
                 <div className="flex-shrink-0 group mt-2 sm:mt-0">
                     <div className="relative w-32 h-32 sm:w-44 sm:h-44">
                         <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-purple-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
@@ -103,28 +134,29 @@ export default function PublicProfileView({ profile, notes, blogs, currentUser, 
                               src={profile.avatar} 
                               alt={profile.name} 
                               fill
-                              unoptimized // Assuming you handle optimization externally for avatars too
+                              unoptimized 
                               className="rounded-full border-[4px] sm:border-[6px] border-background shadow-2xl object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                              itemProp="image"
                           />
                         ) : (
                           <img 
                               src={`https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=random&color=fff&size=256`} 
                               alt={profile.name} 
                               className="relative w-full h-full rounded-full border-[4px] sm:border-[6px] border-background shadow-2xl object-cover"
+                              itemProp="image"
                           />
                         )}
                     </div>
                 </div>
 
-                {/* Profile Information */}
                 <div className="flex-grow text-center md:text-left space-y-5 sm:space-y-6 w-full">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
                         <div className="space-y-1">
                             <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
-                                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter text-white">{profile.name}</h1>
+                                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter text-white" itemProp="name">{profile.name}</h2>
                                 <RoleBadge role={profile.role} />
                             </div>
-                            <p className="text-cyan-400 text-xs sm:text-sm font-black uppercase tracking-[0.2em]">Verified Contributor</p>
+                            <p className="text-cyan-400 text-xs sm:text-sm font-black uppercase tracking-[0.2em]" itemProp="jobTitle">Verified Contributor</p>
                         </div>
 
                         {!isOwnProfile && (
@@ -143,7 +175,6 @@ export default function PublicProfileView({ profile, notes, blogs, currentUser, 
                         )}
                     </div>
 
-                    {/* Badges */}
                     <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                         {profile.noteCount > 5 && (
                              <Badge variant="outline" className="gap-2 border-yellow-500/30 text-yellow-500 bg-yellow-500/5 px-4 py-1 font-bold">
@@ -153,38 +184,39 @@ export default function PublicProfileView({ profile, notes, blogs, currentUser, 
                     </div>
 
                     {profile.bio && (
-                        <p className="text-white/60 text-base sm:text-lg max-w-2xl mx-auto md:mx-0 leading-relaxed font-medium italic">
+                        <p className="text-white/60 text-base sm:text-lg max-w-2xl mx-auto md:mx-0 leading-relaxed font-medium italic" itemProp="description">
                             &quot;{profile.bio}&quot;
                         </p>
                     )}
 
-                    {/* Meta Info Grid */}
-                    {/* ✅ ACCESSIBILITY FIX: Changed text-white/40 to text-gray-300 to pass color contrast ratio */}
                     <div className="flex flex-wrap gap-4 sm:gap-6 text-xs sm:text-sm font-bold uppercase tracking-widest text-gray-300 justify-center md:justify-start">
-                        {profile.university && <span className="flex items-center gap-2"><FaUniversity className="text-cyan-400" /> {profile.university}</span>}
-                        {profile.location && <span className="flex items-center gap-2"><FaMapMarkerAlt className="text-purple-400" /> {profile.location}</span>}
+                        {profile.university && (
+                           <span className="flex items-center gap-2" itemProp="alumniOf" itemScope itemType="https://schema.org/CollegeOrUniversity">
+                              <FaUniversity className="text-cyan-400" /> <span itemProp="name">{profile.university}</span>
+                           </span>
+                        )}
+                        {profile.location && (
+                           <span className="flex items-center gap-2" itemProp="homeLocation" itemScope itemType="https://schema.org/Place">
+                              <FaMapMarkerAlt className="text-purple-400" /> <span itemProp="name">{profile.location}</span>
+                           </span>
+                        )}
                         <span className="flex items-center gap-2"><FaCalendarAlt /> Joined {new Date(profile.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}</span>
                     </div>
                     
-                    {/* Stats Section with Modals */}
                     <div className="flex justify-center md:justify-start gap-8 sm:gap-12 pt-6 border-t border-white/5">
                         <div className="text-center">
                             <span className="block text-2xl sm:text-3xl font-black text-white">{notes.length}</span>
-                            {/* ✅ ACCESSIBILITY FIX: Changed text-white/40 to text-gray-300 */}
                             <span className="text-[9px] sm:text-[10px] uppercase font-black tracking-widest text-gray-300">Notes</span>
                         </div>
                         <div className="text-center">
                             <span className="block text-2xl sm:text-3xl font-black text-white">{blogs.length}</span>
-                            {/* ✅ ACCESSIBILITY FIX: Changed text-white/40 to text-gray-300 */}
                             <span className="text-[9px] sm:text-[10px] uppercase font-black tracking-widest text-gray-300">Blogs</span>
                         </div>
 
                         <Dialog>
                             <DialogTrigger asChild>
-                                {/* ✅ ACCESSIBILITY FIX: Changed <div> to <button> since it triggers a modal */}
                                 <button className="text-center cursor-pointer group appearance-none bg-transparent border-none p-0 m-0">
                                     <span className="block text-2xl sm:text-3xl font-black text-white group-hover:text-cyan-400 transition-colors">{followerCount}</span>
-                                    {/* ✅ ACCESSIBILITY FIX: Changed text-white/40 to text-gray-300 */}
                                     <span className="text-[9px] sm:text-[10px] uppercase font-black tracking-widest text-gray-300 group-hover:text-cyan-400 transition-colors">Followers</span>
                                 </button>
                             </DialogTrigger>
@@ -198,10 +230,8 @@ export default function PublicProfileView({ profile, notes, blogs, currentUser, 
 
                         <Dialog>
                             <DialogTrigger asChild>
-                                {/* ✅ ACCESSIBILITY FIX: Changed <div> to <button> since it triggers a modal */}
                                 <button className="text-center cursor-pointer group appearance-none bg-transparent border-none p-0 m-0">
                                     <span className="block text-2xl sm:text-3xl font-black text-white group-hover:text-purple-400 transition-colors">{profile.following.length}</span>
-                                    {/* ✅ ACCESSIBILITY FIX: Changed text-white/40 to text-gray-300 */}
                                     <span className="text-[9px] sm:text-[10px] uppercase font-black tracking-widest text-gray-300 group-hover:text-purple-400 transition-colors">Following</span>
                                 </button>
                             </DialogTrigger>
@@ -220,16 +250,14 @@ export default function PublicProfileView({ profile, notes, blogs, currentUser, 
         {/* --- Content Tabs --- */}
         <div className="flex gap-6 sm:gap-8 mb-8 sm:mb-10 border-b border-white/5 overflow-x-auto hide-scrollbar px-1">
             <button 
-                onClick={() => setActiveTab('notes')} 
-                // ✅ ACCESSIBILITY FIX: Changed text-white/40 to text-gray-400
+                onClick={() => handleTabChange('notes')} 
                 className={`pb-4 px-2 text-xs sm:text-sm font-black uppercase tracking-[0.2em] flex items-center gap-2 sm:gap-3 transition-all relative ${activeTab === 'notes' ? 'text-cyan-400' : 'text-gray-400 hover:text-white'}`}
             >
                 <FaBook /> Notes
                 {activeTab === 'notes' && <div className="absolute bottom-0 left-0 w-full h-1 bg-cyan-400 rounded-t-full shadow-[0_0_10px_#22d3ee]"></div>}
             </button>
             <button 
-                onClick={() => setActiveTab('blogs')} 
-                // ✅ ACCESSIBILITY FIX: Changed text-white/40 to text-gray-400
+                onClick={() => handleTabChange('blogs')} 
                 className={`pb-4 px-2 text-xs sm:text-sm font-black uppercase tracking-[0.2em] flex items-center gap-2 sm:gap-3 transition-all relative ${activeTab === 'blogs' ? 'text-purple-400' : 'text-gray-400 hover:text-white'}`}
             >
                 <FaRss /> Blogs
@@ -238,23 +266,70 @@ export default function PublicProfileView({ profile, notes, blogs, currentUser, 
         </div>
 
         {/* --- Content Grid --- */}
-        {/* ✅ ACCESSIBILITY FIX: Wrapped in an aria-labelledby section with a hidden H2 to fix the H3 sequence in NoteCards */}
         <section aria-labelledby="portfolio-heading" className="min-h-[400px] animate-in slide-in-from-bottom-4 duration-500 pb-12">
             <h2 id="portfolio-heading" className="sr-only">{activeTab === 'notes' ? 'Notes Portfolio' : 'Blog Portfolio'}</h2>
             
             {activeTab === 'notes' ? (
                 notes.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                        {notes.map(note => <NoteCard key={note._id} note={{...note, user: profile}} />)}
-                    </div>
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8" itemScope itemType="https://schema.org/ItemList">
+                          {currentNotes.map((note, idx) => (
+                              <div key={note._id} itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem" className="h-full">
+                                  <meta itemProp="position" content={idx + 1} />
+                                  <div itemProp="item" itemScope itemType="https://schema.org/LearningResource" className="h-full">
+                                     <NoteCard note={{...note, user: profile}} />
+                                  </div>
+                              </div>
+                          ))}
+                      </div>
+                      
+                      {/* 🚀 SEO Routable Load More for Notes */}
+                      {hasMoreNotes && (
+                         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-12 relative">
+                             <Button onClick={loadMoreNotes} size="lg" className="w-full sm:w-auto h-12 rounded-full px-8 bg-white/[0.03] border border-white/10 hover:bg-white/[0.08] hover:border-cyan-500/50 text-white font-black uppercase tracking-widest text-[11px] transition-all hover:shadow-[0_0_20px_rgba(34,211,238,0.15)] group">
+                                 <ChevronDown aria-hidden="true" className="w-4 h-4 mr-2 text-cyan-400 group-hover:translate-y-1 transition-transform" />
+                                 Load More Notes
+                             </Button>
+                             <noscript>
+                                 <Link href={`?tab=notes&nPage=${notesPage + 1}`} title="Next page of notes" className="text-[10px] text-cyan-400 underline">
+                                     Browse page {notesPage + 1} of notes
+                                 </Link>
+                             </noscript>
+                         </div>
+                      )}
+                    </>
                 ) : (
                     <EmptyState msg="No notes shared yet." />
                 )
             ) : (
                 blogs.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                        {blogs.map(blog => <BlogCard key={blog._id} blog={{...blog, author: profile}} />)}
-                    </div>
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8" itemScope itemType="https://schema.org/ItemList">
+                          {currentBlogs.map((blog, idx) => (
+                              <div key={blog._id} itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem" className="h-full">
+                                  <meta itemProp="position" content={idx + 1} />
+                                  <div itemProp="item" itemScope itemType="https://schema.org/BlogPosting" className="h-full">
+                                     <BlogCard blog={{...blog, author: profile}} />
+                                  </div>
+                              </div>
+                          ))}
+                      </div>
+                      
+                      {/* 🚀 SEO Routable Load More for Blogs */}
+                      {hasMoreBlogs && (
+                         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-12 relative">
+                             <Button onClick={loadMoreBlogs} size="lg" className="w-full sm:w-auto h-12 rounded-full px-8 bg-white/[0.03] border border-white/10 hover:bg-white/[0.08] hover:border-purple-500/50 text-white font-black uppercase tracking-widest text-[11px] transition-all hover:shadow-[0_0_20px_rgba(168,85,247,0.15)] group">
+                                 <ChevronDown aria-hidden="true" className="w-4 h-4 mr-2 text-purple-400 group-hover:translate-y-1 transition-transform" />
+                                 Load More Blogs
+                             </Button>
+                             <noscript>
+                                 <Link href={`?tab=blogs&bPage=${blogsPage + 1}`} title="Next page of blogs" className="text-[10px] text-purple-400 underline">
+                                     Browse page {blogsPage + 1} of blogs
+                                 </Link>
+                             </noscript>
+                         </div>
+                      )}
+                    </>
                 ) : (
                     <EmptyState msg="No blog posts yet." />
                 )

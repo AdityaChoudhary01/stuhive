@@ -21,7 +21,11 @@ export async function generateMetadata() {
       "handwritten notes collection", 
       "shared academic archives", 
       "StuHive study bundles",
-      "free college notes"
+      "free college notes",
+      "semester study guide",
+      "previous year question papers",
+      "BTech note bundles",
+      "exam preparation collections"
     ],
     alternates: { canonical: `${APP_URL}/shared-collections` },
     robots: {
@@ -40,7 +44,7 @@ export async function generateMetadata() {
       description: `Unlock access to ${totalCount}+ verified student bundles. One link to your entire semester's resources.`,
       url: `${APP_URL}/shared-collections`,
       siteName: "StuHive",
-      images: [{ url: `${APP_URL}/og-shared-archives.png`, width: 1200, height: 630 }],
+      images: [{ url: `${APP_URL}/og-shared-archives.png`, width: 1200, height: 630, alt: "StuHive Shared Study Bundles" }],
       type: "website",
     },
     twitter: {
@@ -48,7 +52,8 @@ export async function generateMetadata() {
       title: "StuHive Study Bundles | Community Archives",
       description: `Access ${totalCount}+ verified student note bundles for free.`,
       images: [`${APP_URL}/og-shared-archives.png`],
-    }
+    },
+    applicationName: "StuHive"
   };
 }
 
@@ -90,7 +95,8 @@ export default async function BrowseCollectionsPage({ searchParams }) {
   ];
 
   return (
-    <main className="relative min-h-screen bg-background text-foreground overflow-hidden selection:bg-cyan-500/30">
+    // 🚀 MICRODATA: Identifying the whole page as a semantic WebPage / CollectionPage directory
+    <main className="relative min-h-screen bg-background text-foreground overflow-hidden selection:bg-cyan-500/30" itemScope itemType="https://schema.org/CollectionPage">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -119,12 +125,12 @@ export default async function BrowseCollectionsPage({ searchParams }) {
             <span className="text-xs font-bold tracking-wide">Community Archives</span>
           </div>
           
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6 text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6 text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400" itemProp="headline">
             Discover Curated <br className="hidden sm:block" />
             Study Bundles.
           </h1>
           
-          <p className="text-gray-400 text-lg md:text-xl font-medium leading-relaxed mb-10 max-w-2xl">
+          <p className="text-gray-400 text-lg md:text-xl font-medium leading-relaxed mb-10 max-w-2xl" itemProp="description">
             Access the hive mind of high-quality handwritten notes, previous year question papers, and comprehensive resources organized by top students globally.
           </p>
 
@@ -149,7 +155,7 @@ export default async function BrowseCollectionsPage({ searchParams }) {
         </header>
 
         <section aria-labelledby="collections-heading">
-          <h2 id="collections-heading" className="sr-only">Verified University Note Bundles</h2>
+          <h2 id="collections-heading" className="sr-only">Verified University Note Bundles Grid</h2>
           
           {/* 🚀 CLIENT COMPONENT: Handles the Tabs & Grid */}
           <CollectionGrid 
@@ -161,18 +167,20 @@ export default async function BrowseCollectionsPage({ searchParams }) {
         </section>
 
         {/* 🚀 DYNAMIC SEO CLUSTER (Hidden - For Search Engines Only) */}
+        {/* Gives extreme context density to the page without cluttering the UI */}
         <div className="sr-only">
-          <h2>Popular Study Folders & Categories</h2>
+          <h2>Popular Study Folders, Course Bundles & Categories</h2>
           <ul>
             {collections.slice(0, 5).map(c => <li key={c._id}>{c.name} handwritten notes collection</li>)}
             <li>B.Tech Computer Science All Semesters Materials</li>
             <li>Engineering Physics and Mathematics Question Bank</li>
             <li>University Semester PDF Note Bundles</li>
+            <li>Download free complete syllabus archives</li>
           </ul>
         </div>
 
         {/* 🚀 MODERN PROFESSIONAL CTA SECTION */}
-        <section className="mt-32 md:mt-40 relative group">
+        <section className="mt-32 md:mt-40 relative group" aria-label="Call to Action">
           <div className="relative p-10 md:p-16 rounded-[2rem] bg-gradient-to-br from-white/[0.05] to-transparent border border-white/10 text-center flex flex-col items-center shadow-xl overflow-hidden">
             
             <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
@@ -184,6 +192,7 @@ export default async function BrowseCollectionsPage({ searchParams }) {
             
             <Link 
                 href="/profile"
+                title="Create your own study bundle"
                 className="inline-flex items-center justify-center gap-3 bg-cyan-500 text-black font-bold text-sm md:text-base px-8 py-4 rounded-full hover:bg-cyan-400 transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(6,182,212,0.3)]"
             >
                 Create a Bundle <FolderHeart size={18} aria-hidden="true" />

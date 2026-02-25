@@ -59,11 +59,17 @@ export const metadata = {
   }
 };
 
-export default async function RequestsPage() {
+export default async function RequestsPage({ searchParams }) {
   const session = await getServerSession(authOptions);
   
-  // Fetch data
-  const { requests = [], totalCount = 0 } = await getRequests({ limit: 20 });
+  // 🚀 SEO: Allow page queries for Googlebot crawling
+  const sp = await searchParams;
+  const currentPage = parseInt(sp?.page) || 1;
+  const limit = 20;
+
+  // Fetch paginated data
+  const { requests = [], totalCount = 0 } = await getRequests({ page: currentPage, limit });
+  const totalPages = Math.ceil(totalCount / limit);
 
   // 🚀 QAPage JSON-LD: Tells Google this is a Question & Answer/Fulfillment board
   const jsonLd = {
@@ -119,17 +125,19 @@ export default async function RequestsPage() {
            </h1>
            
            <h2 className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-medium">
-             Can&apos;t find a specific resource? Ask the community. 
-             <br className="hidden md:block" />
-             Earn reputation points by fulfilling open requests.
+              Can&apos;t find a specific resource? Ask the community. 
+              <br className="hidden md:block" />
+              Earn reputation points by fulfilling open requests.
            </h2>
         </header>
 
         {/* Client Side Board */}
         <section aria-label="Student Material Requests">
             <RequestBoard 
-            initialRequests={requests || []} 
-            currentUser={session?.user || null} 
+              initialRequests={requests || []} 
+              currentUser={session?.user || null} 
+              initialPage={currentPage}
+              totalPages={totalPages}
             />
         </section>
 

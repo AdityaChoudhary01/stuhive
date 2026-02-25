@@ -2,29 +2,56 @@
 
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { createRequest, fulfillRequest } from "@/actions/request.actions";
+import { createRequest, fulfillRequest, getRequests } from "@/actions/request.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea"; 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"; 
 import { Badge } from "@/components/ui/badge"; 
-import { CheckCircle2, Clock, Plus, ArrowRight, Link as LinkIcon } from "lucide-react";
+import { CheckCircle2, Clock, Plus, ArrowRight, Link as LinkIcon, Loader2, ChevronDown } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
-export default function RequestBoard({ initialRequests, currentUser }) {
+export default function RequestBoard({ initialRequests, currentUser, initialPage = 1, totalPages = 1 }) {
   const [requests, setRequests] = useState(initialRequests || []);
+  const [page, setPage] = useState(initialPage);
+  const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("all"); 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const { toast } = useToast();
   const router = useRouter();
+  const pathname = usePathname();
 
   const filteredRequests = requests.filter(req => {
     if (filter === "all") return true;
     return req.status === filter;
   });
+
+  const hasMore = page < totalPages;
+
+  // 🚀 HYBRID LOAD MORE FOR SEO & UX
+  const loadMore = async (e) => {
+    e.preventDefault(); // Stop normal link navigation for humans
+    if (loading || !hasMore) return;
+    setLoading(true);
+    
+    try {
+      const nextPage = page + 1;
+      const res = await getRequests({ page: nextPage, limit: 20 });
+      
+      setRequests((prev) => [...prev, ...res.requests]);
+      setPage(nextPage);
+      
+      // Update the URL without reloading the page so sharing works
+      window.history.replaceState(null, "", `${pathname}?page=${nextPage}`);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to load older requests.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
@@ -137,6 +164,37 @@ export default function RequestBoard({ initialRequests, currentUser }) {
                  <p className="text-muted-foreground font-medium">No requests found in this category.</p>
              </div>
         )}
+
+        {/* 🚀 SEO Routable Load More Button */}
+        {hasMore && filter === "all" && (
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-8 relative">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              onClick={loadMore} 
+              disabled={loading}
+              className="w-full sm:w-auto h-12 rounded-full px-8 bg-white/[0.03] border border-white/10 hover:bg-white/[0.08] hover:border-orange-500/50 text-white font-black uppercase tracking-widest text-[11px] transition-all hover:shadow-[0_0_20px_rgba(249,115,22,0.15)] group"
+            >
+              {loading ? (
+                <Loader2 aria-hidden="true" className="w-4 h-4 mr-2 animate-spin text-orange-400" />
+              ) : (
+                <ChevronDown aria-hidden="true" className="w-4 h-4 mr-2 text-orange-400 group-hover:translate-y-1 transition-transform" />
+              )}
+              {loading ? "Loading..." : "Load Older Requests"}
+            </Button>
+
+            {/* 🚀 SEO BOT TRAP: Hidden anchor tag ensures Googlebot crawls pagination */}
+            <noscript>
+              <Link 
+                href={`?page=${page + 1}`} 
+                title="Next page of requests"
+                className="text-[10px] text-orange-400 underline"
+              >
+                Browse page {page + 1}
+              </Link>
+            </noscript>
+          </div>
+        )}
     </div>
   );
 }
@@ -200,7 +258,7 @@ function RequestCard({ req, currentUser, onFulfill, index }) {
                      {/* 🚀 SEO: Person Schema for Author */}
                      <div className="flex items-center gap-2 min-w-0" itemProp="author" itemScope itemType="https://schema.org/Person">
                         <Avatar className="h-5 w-5 sm:h-7 sm:w-7 border border-white/10 shrink-0">
-                            <AvatarImage src={req.requester?.avatar} />
+                            <AvatarImage src={req.requester?.avatar} itemProp="image"/>
                             <AvatarFallback className="bg-white/10 text-[8px] sm:text-xs">{req.requester?.name?.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <span className="text-[10px] sm:text-xs font-bold text-gray-300 truncate" itemProp="name">{req.requester?.name || "Student"}</span>

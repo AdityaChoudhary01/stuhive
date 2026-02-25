@@ -37,7 +37,8 @@ export async function generateMetadata({ params }) {
       "university resources", 
       "exam preparation",
       "free study materials",
-      "StuHive collections"
+      "StuHive collections",
+      "curated study guide"
     ],
     authors: [{ name: collection.user?.name, url: `${APP_URL}/profile/${collection.user?._id}` }],
     category: "Education",
@@ -68,11 +69,11 @@ export async function generateMetadata({ params }) {
           alt: `${collection.name} curated by ${collection.user?.name}`
         }
       ],
-      type: "article",
+      type: "article", // Treated as a curated article/directory
       publishedTime: collection.createdAt,
+      modifiedTime: collection.updatedAt || collection.createdAt,
     },
     twitter: {
-      // 🚀 Changed from summary_large_image to summary so it crops avatars into nice squares next to the text
       card: "summary", 
       title,
       description,
@@ -104,6 +105,8 @@ export default async function PublicCollectionDetails({ params }) {
     "name": collection.name,
     "description": collection.description || `Curated academic bundle by ${collection.user?.name}`,
     "url": `${APP_URL}/shared-collections/${slug}`,
+    "datePublished": collection.createdAt,
+    "dateModified": collection.updatedAt || collection.createdAt,
     "author": {
       "@type": "Person",
       "name": collection.user?.name,
@@ -112,31 +115,59 @@ export default async function PublicCollectionDetails({ params }) {
     },
     "mainEntity": {
       "@type": "ItemList",
+      "name": `Documents in ${collection.name}`,
       "numberOfItems": collection.notes?.length || 0,
       "itemListElement": collection.notes?.map((note, index) => ({
         "@type": "ListItem",
         "position": index + 1,
         "item": {
-          "@type": "CreativeWork",
+          // 🚀 CRITICAL FIX: Ensures Google indexes the child notes as Courses for Star Ratings!
+          "@type": ["LearningResource", "Course", "CreativeWork"],
           "name": note.title,
           "url": `${APP_URL}/notes/${note._id}`,
-          "author": { "@type": "Person", "name": note.user?.name }
+          "educationalLevel": "University",
+          "author": { "@type": "Person", "name": note.user?.name || collection.user?.name },
+          ...(note.rating > 0 && {
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": note.rating.toFixed(1),
+              "bestRating": "5",
+              "worstRating": "1",
+              "reviewCount": note.numReviews || 1
+            }
+          })
         }
       }))
     }
   };
 
   return (
-    <main className="relative min-h-screen bg-background text-foreground overflow-hidden selection:bg-cyan-500/30">
+    // 🚀 MICRODATA: Identifying the whole page as a semantic CollectionPage
+    <main 
+      className="relative min-h-screen bg-background text-foreground overflow-hidden selection:bg-cyan-500/30"
+      itemScope 
+      itemType="https://schema.org/CollectionPage"
+    >
       {/* JSON-LD Injection */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
 
-      {/* 🚀 REFINED BACKGROUND - Removed oversized blurs, added subtle noise and top grid */}
+      {/* 🚀 HIDDEN SEO SITEMAP: Direct anchor links to every note for 100% crawl coverage */}
+      <nav className="sr-only" aria-label="Collection Documents List">
+        <h2>List of all study materials in {collection.name}</h2>
+        <ul>
+          {collection.notes?.map(note => (
+            <li key={`seo-${note._id}`}>
+              <a href={`${APP_URL}/notes/${note._id}`}>{note.title}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      {/* 🚀 REFINED BACKGROUND */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
          <div className="absolute top-0 left-0 w-full h-[40vh] bg-[linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
          <div className="absolute top-[-20%] left-[20%] w-[60vw] h-[30vw] bg-cyan-900/10 blur-[120px] rounded-full opacity-50" />
-         {/* Noise overlay */}
          <div 
           className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" 
           style={{ 
@@ -157,18 +188,24 @@ export default async function PublicCollectionDetails({ params }) {
            </Link>
         </nav>
 
-        {/* 🚀 PREMIUM HEADER SECTION */}
+        {/* 🚀 PREMIUM HEADER SECTION WITH MICRODATA */}
         <header className="flex flex-col items-start mb-16 sm:mb-20">
           <div className="p-3.5 bg-white/[0.03] border border-white/10 rounded-2xl text-cyan-400 mb-6 shadow-sm" aria-hidden="true">
             <FolderHeart size={28} strokeWidth={1.5} />
           </div>
 
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-5 max-w-4xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-300 leading-[1.1]">
+          <h1 
+            className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-5 max-w-4xl text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-300 leading-[1.1]"
+            itemProp="name headline" // 🚀 MICRODATA
+          >
             {collection.name}
           </h1>
 
           {collection.description && (
-            <p className="text-gray-300 text-base md:text-lg max-w-3xl mb-8 leading-relaxed font-normal">
+            <p 
+              className="text-gray-300 text-base md:text-lg max-w-3xl mb-8 leading-relaxed font-normal"
+              itemProp="description" // 🚀 MICRODATA
+            >
                 {collection.description}
             </p>
           )}
@@ -179,14 +216,15 @@ export default async function PublicCollectionDetails({ params }) {
               href={`/profile/${collection.user?._id}`} 
               className="group flex items-center gap-3 bg-white/[0.02] hover:bg-white/[0.05] backdrop-blur-md px-4 py-2 rounded-full border border-white/10 transition-all duration-300"
               aria-label={`Curated by ${collection.user?.name}`}
+              itemProp="author" itemScope itemType="https://schema.org/Person" // 🚀 MICRODATA
             >
               <Avatar className="h-6 w-6 border border-white/20">
-                <AvatarImage src={collection.user?.avatar} alt={`Avatar of ${collection.user?.name}`} />
+                <AvatarImage src={collection.user?.avatar} alt={`Avatar of ${collection.user?.name}`} itemProp="image" />
                 <AvatarFallback className="bg-cyan-900 text-cyan-100 font-bold text-[10px]">
                   {collection.user?.name?.charAt(0)}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors">
+              <span className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors" itemProp="name">
                 Curated by {collection.user?.name}
               </span>
             </Link>
@@ -200,19 +238,30 @@ export default async function PublicCollectionDetails({ params }) {
           </div>
         </header>
 
-        {/* 🚀 GRID SECTION */}
+        {/* 🚀 GRID SECTION ENRICHED WITH ITEMLIST MICRODATA */}
         <section aria-labelledby="collection-contents">
           <h2 id="collection-contents" className="sr-only">Documents in this collection</h2>
           
           {collection.notes && collection.notes.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-700"
+              itemProp="mainEntity" 
+              itemScope 
+              itemType="https://schema.org/ItemList"
+            >
               {collection.notes.map((note, index) => (
-                <article 
+                <div 
                   key={note._id} 
                   className="h-full transition-transform duration-300 hover:-translate-y-1"
+                  itemProp="itemListElement" 
+                  itemScope 
+                  itemType="https://schema.org/ListItem"
                 >
-                  <NoteCard note={note} priority={index < 3} />
-                </article>
+                  <meta itemProp="position" content={index + 1} />
+                  <div itemProp="item" itemScope itemType="https://schema.org/LearningResource" className="h-full">
+                    <NoteCard note={note} priority={index < 3} />
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
@@ -239,7 +288,6 @@ export default async function PublicCollectionDetails({ params }) {
             
             <ShareCollectionButton />
             
-            {/* 🚀 ACCESSIBILITY FIX: Improved contrast from text-gray-500 to text-gray-300 */}
             <div className="flex flex-wrap justify-center gap-6 md:gap-8 text-[10px] font-bold uppercase tracking-widest text-gray-300 mt-4">
                 <span className="flex items-center gap-1.5" aria-label="High-Speed Download">
                   <Zap size={14} className="text-yellow-400" aria-hidden="true" /> High-Speed
