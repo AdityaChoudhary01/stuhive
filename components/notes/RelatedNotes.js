@@ -37,9 +37,10 @@ export default function RelatedNotes({ notes }) {
             "position": index + 1,
             "item": {
                 // ✅ FIX: Multiple types ensure Google reads the Star Rating safely
-                "@type": ["LearningResource", "Course", "CreativeWork"], 
+                "@type": ["LearningResource", "CreativeWork"], 
                 "name": note.title,
                 "url": `${APP_URL}/notes/${note._id}`,
+                "description": note.description || `Academic notes and study material for ${note.course}.`,
                 "image": thumbnailUrl || undefined,
                 "educationalLevel": "University",
                 "learningResourceType": "Study Guide",
