@@ -23,8 +23,7 @@ export default function RelatedNotes({ notes }) {
   const r2PublicUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "";
   const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.stuhive.in";
 
-  // 🚀 FIXED: Changed "@type" from "LearningResource" to "CreativeWork"
-  // Google GSC rejects 'aggregateRating' on 'LearningResource', but accepts it on 'CreativeWork'.
+  // 🚀 FIXED: GSC valid aggregateRating for Course & LearningResource
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -37,7 +36,8 @@ export default function RelatedNotes({ notes }) {
             "@type": "ListItem",
             "position": index + 1,
             "item": {
-                "@type": "CreativeWork", // <--- CHANGED THIS LINE
+                // ✅ FIX: Multiple types ensure Google reads the Star Rating safely
+                "@type": ["LearningResource", "Course", "CreativeWork"], 
                 "name": note.title,
                 "url": `${APP_URL}/notes/${note._id}`,
                 "image": thumbnailUrl || undefined,
