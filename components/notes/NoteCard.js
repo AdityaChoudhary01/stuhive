@@ -129,6 +129,7 @@ export default function NoteCard({ note, priority = false }) {
       <div className="flex flex-col h-full bg-[#050505]">
         
         {/* --- TOP SECTION (IMAGE) --- */}
+        {/* ✅ FIXED FLICKER: Added -mb-[1px] to overlap seams */}
         <div className="relative h-48 sm:h-56 w-full shrink-0 transform-gpu overflow-hidden -mb-[1px] z-0">
           
           <button 
@@ -153,14 +154,15 @@ export default function NoteCard({ note, priority = false }) {
 
           <Link href={`/notes/${note._id}`} tabIndex={-1} aria-hidden="true" className="block w-full h-full relative z-10">
             {thumbnailUrl ? (
+              // ✅ FIXED LCP: Replaced <img> with Next.js <Image> + priority + unoptimized
               <Image 
                 src={thumbnailUrl} 
                 alt={`Preview of ${note.title}`} 
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                priority={priority} 
-                fetchPriority={priority ? "high" : "auto"} 
-                unoptimized={true} 
+                priority={priority} // Honors the priority prop passed from SearchPage
+                fetchPriority={priority ? "high" : "auto"} // Forces instant network request
+                unoptimized={true} // Bypasses Vercel's slow image optimization limit
                 className="object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-[1.08] opacity-85 group-hover:opacity-100 will-change-transform transform-gpu" 
               />
             ) : (
