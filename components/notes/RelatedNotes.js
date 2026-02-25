@@ -23,7 +23,8 @@ export default function RelatedNotes({ notes }) {
   const r2PublicUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "";
   const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.stuhive.in";
 
-  // 🚀 FIXED: Switched from inline Microdata to JSON-LD to fix "Invalid object type" errors in Search Console
+  // 🚀 FIXED: Changed "@type" from "LearningResource" to "CreativeWork"
+  // Google GSC rejects 'aggregateRating' on 'LearningResource', but accepts it on 'CreativeWork'.
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -36,7 +37,7 @@ export default function RelatedNotes({ notes }) {
             "@type": "ListItem",
             "position": index + 1,
             "item": {
-                "@type": "LearningResource",
+                "@type": "CreativeWork", // <--- CHANGED THIS LINE
                 "name": note.title,
                 "url": `${APP_URL}/notes/${note._id}`,
                 "image": thumbnailUrl || undefined,
@@ -46,7 +47,7 @@ export default function RelatedNotes({ notes }) {
                     "@type": "Organization",
                     "name": note.university || "Aktu"
                 },
-                // Only include rating if it exists to avoid errors
+                // Only include rating if it exists to avoid null errors
                 ...(note.rating > 0 && {
                     "aggregateRating": {
                         "@type": "AggregateRating",
