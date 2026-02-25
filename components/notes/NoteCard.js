@@ -44,23 +44,24 @@ export default function NoteCard({ note, priority = false }) {
     ? `${r2PublicUrl}/${note.thumbnailKey}` 
     : (note.fileType?.startsWith("image/") ? `${r2PublicUrl}/${note.fileKey}` : null);
 
-  // 🚀 FIXED: GSC valid Schema for single note cards
+  // 🚀 FIXED: GSC valid Schema for note cards inside lists. 
+  // Reverted to a clean CreativeWork to prevent mutually exclusive properties.
   const noteSchema = {
     "@context": "https://schema.org",
-    "@type": ["LearningResource", "Course", "CreativeWork"], // ✅ Fixed Array
+    "@type": "CreativeWork", // ✅ Fixed: Removed the ["LearningResource", "Course"] array
     "name": note.title,
-    "educationalLevel": "University", // ✅ Set statically for GSC requirement
-    "teaches": note.course,           // ✅ Added 'teaches' property to support Course schema
+    "description": note.description || `Study material for ${note.course} at ${note.university}`, // ✅ Added required description fallback
+    "educationalLevel": "University", 
     "author": {
       "@type": "Person",
       "name": note.user?.name || "StuHive Contributor"
     },
     "datePublished": note.uploadDate,
     "educationalUse": "Study Material",
-    "image": thumbnailUrl,
-    "provider": {
+    "image": thumbnailUrl || "https://www.stuhive.in/default-thumb.webp",
+    "provider": { // ✅ Added provider block to satisfy strict schema checks
       "@type": "Organization",
-      "name": "StuHive"
+      "name": note.university || "StuHive"
     },
     "interactionStatistic": [
       {

@@ -6,23 +6,29 @@ import { Calendar, Clock, ArrowRight, Star, Eye, ShieldCheck } from "lucide-reac
 import { formatDate } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.stuhive.in";
+
 export default function BlogCard({ blog, priority = false }) {
   const readTime = blog.readTime || 3; 
   const rating = blog.rating || 0;
   const views = blog.viewCount || 0;
   const isAdmin = blog.author?.role === 'admin';
+  
+  // 🚀 Construct the absolute author URL to fix the GSC warning
+  const authorProfileUrl = `${APP_URL}/profile/${blog.author?._id || ''}`;
 
-  // 🚀 SUPERCHARGED JSON-LD: Added interaction statistics for Google's Knowledge Graph
+  // 🚀 SUPERCHARGED JSON-LD
   const blogSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     "headline": blog.title,
-    "image": blog.coverImage || "https://www.stuhive.in/default-blog.png",
+    "image": blog.coverImage || `${APP_URL}/default-blog.png`,
     "datePublished": blog.createdAt,
-    "dateModified": blog.updatedAt || blog.createdAt, // Freshness signal
+    "dateModified": blog.updatedAt || blog.createdAt,
     "author": {
       "@type": "Person",
       "name": blog.author?.name || "StuHive Contributor",
+      "url": authorProfileUrl, // ✅ FIXED: Added absolute URL to remove GSC warning
       "jobTitle": isAdmin ? "Admin" : "Contributor"
     },
     "publisher": {
@@ -30,7 +36,7 @@ export default function BlogCard({ blog, priority = false }) {
       "name": "StuHive",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://www.stuhive.in/logo512.png"
+        "url": `${APP_URL}/logo512.png`
       }
     },
     "description": blog.summary || blog.excerpt || `Read this academic article about ${blog.tags?.[0] || 'education'}.`,
@@ -43,11 +49,9 @@ export default function BlogCard({ blog, priority = false }) {
     ]
   };
 
-  // Safe date parsing for the <time> element's machine-readable attribute
   const machineReadableDate = blog.createdAt ? new Date(blog.createdAt).toISOString() : new Date().toISOString();
 
   return (
-    // 🚀 MICRODATA: Identifies this specific wrapper as a BlogPosting
     <article className="h-full" itemScope itemType="https://schema.org/BlogPosting"> 
       <script
         type="application/ld+json"
@@ -68,7 +72,7 @@ export default function BlogCard({ blog, priority = false }) {
                 fetchPriority={priority ? "high" : "auto"} 
                 unoptimized={true}
                 className="object-cover transition-transform duration-500 group-hover:scale-105 will-change-transform transform-gpu"
-                itemProp="image" // 🚀 MICRODATA: Image explicit tagging
+                itemProp="image"
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-secondary/5">
@@ -79,7 +83,7 @@ export default function BlogCard({ blog, priority = false }) {
             <div className="absolute top-3 left-3 flex flex-wrap gap-2 z-10" aria-label="Blog Categories">
               {blog.tags?.slice(0, 2).map((tag) => (
                 <Badge key={tag} variant="secondary" className="bg-black/80 text-white backdrop-blur-md border border-white/20 text-[9px] uppercase font-bold px-2 py-0.5">
-                  <span itemProp="keywords">{tag}</span> {/* 🚀 MICRODATA: Tag tracking */}
+                  <span itemProp="keywords">{tag}</span>
                 </Badge>
               ))}
             </div>
@@ -88,7 +92,6 @@ export default function BlogCard({ blog, priority = false }) {
 
           <CardContent className="flex flex-col flex-grow p-4 sm:p-5 relative z-10 bg-[#0a0a0a]">
             <div className="flex items-center gap-x-3 text-[10px] font-bold uppercase tracking-wider text-gray-300 mb-2">
-              {/* 🚀 SEMANTIC HTML: Replaced span with <time> for accurate date parsing */}
               <time dateTime={machineReadableDate} itemProp="datePublished" className="flex items-center gap-1" title={`Published on ${formatDate(blog.createdAt)}`}>
                 <Calendar className="w-3 h-3 text-cyan-400" aria-hidden="true" /> {formatDate(blog.createdAt)}
               </time>
@@ -100,10 +103,7 @@ export default function BlogCard({ blog, priority = false }) {
               </span>
             </div>
 
-            <h3 
-              className="text-lg font-extrabold tracking-tight leading-snug mb-2 line-clamp-2 text-white group-hover:text-cyan-400 transition-colors duration-300"
-              itemProp="headline" // 🚀 MICRODATA: Headline explicit tagging
-            >
+            <h3 className="text-lg font-extrabold tracking-tight leading-snug mb-2 line-clamp-2 text-white group-hover:text-cyan-400 transition-colors duration-300" itemProp="headline">
               {blog.title}
             </h3>
             
@@ -121,17 +121,17 @@ export default function BlogCard({ blog, priority = false }) {
               </span>
             </div>
             
-            <p 
-              className="text-gray-300 text-xs leading-relaxed line-clamp-2 mb-4 flex-grow font-medium"
-              itemProp="description" // 🚀 MICRODATA: Description explicit tagging
-            >
+            <p className="text-gray-300 text-xs leading-relaxed line-clamp-2 mb-4 flex-grow font-medium" itemProp="description">
               {blog.summary || blog.excerpt || "Click to read the full article on StuHive..."}
             </p>
 
             <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/10">
               
-              {/* 🚀 MICRODATA: Person & Author hierarchy */}
+              {/* ✅ FIXED: Added author URL microdata attribute to the address wrapper */}
               <div className="flex items-center gap-2.5" itemProp="author" itemScope itemType="https://schema.org/Person">
+                {/* Microdata Link for Author URL */}
+                <meta itemProp="url" content={authorProfileUrl} />
+                
                 <div className="relative">
                   <Avatar className="w-8 h-8 border border-white/20 shrink-0">
                     <AvatarImage src={blog.author?.avatar} alt={`${blog.author?.name} avatar`} className="object-cover" />
