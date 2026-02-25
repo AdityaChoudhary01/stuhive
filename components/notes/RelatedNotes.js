@@ -21,11 +21,55 @@ export default function RelatedNotes({ notes }) {
   }
 
   const r2PublicUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "";
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.stuhive.in";
+
+  // 🚀 FIXED: Switched from inline Microdata to JSON-LD to fix "Invalid object type" errors in Search Console
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": notes.map((note, index) => {
+        const thumbnailUrl = note.thumbnailKey 
+            ? `${r2PublicUrl}/${note.thumbnailKey}` 
+            : (note.fileType?.startsWith("image/") && note.fileKey ? `${r2PublicUrl}/${note.fileKey}` : null);
+            
+        return {
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+                "@type": "LearningResource",
+                "name": note.title,
+                "url": `${APP_URL}/notes/${note._id}`,
+                "image": thumbnailUrl || undefined,
+                "educationalLevel": "University",
+                "learningResourceType": "Study Guide",
+                "provider": {
+                    "@type": "Organization",
+                    "name": note.university || "Aktu"
+                },
+                // Only include rating if it exists to avoid errors
+                ...(note.rating > 0 && {
+                    "aggregateRating": {
+                        "@type": "AggregateRating",
+                        "ratingValue": note.rating.toFixed(1),
+                        "bestRating": "5",
+                        "worstRating": "1",
+                        "reviewCount": note.numReviews || 1
+                    }
+                })
+            }
+        };
+    })
+  };
 
   return (
-    // 🚀 SEO: ItemList Schema
-    <div className="flex flex-col gap-3.5" itemScope itemType="https://schema.org/ItemList">
-      {notes.map((note, index) => {
+    <div className="flex flex-col gap-3.5">
+      {/* 🚀 Inject Schema Here */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
+      
+      {notes.map((note) => {
         // Construct Thumbnail
         const thumbnailUrl = note.thumbnailKey 
           ? `${r2PublicUrl}/${note.thumbnailKey}` 
@@ -33,22 +77,15 @@ export default function RelatedNotes({ notes }) {
 
         // Safe Ratings Calculation
         const rating = note.rating || 0;
-        const reviewCount = note.numReviews || (note.reviews?.length) || 0;
-
+        
         return (
-          // 🚀 SEO: ListItem Schema
-          <div key={note._id} itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-            <meta itemProp="position" content={index + 1} />
+          <div key={note._id}>
             <Link 
               href={`/notes/${note._id}`} 
               className="group block outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 rounded-2xl"
             >
               <article 
                 className="flex items-center gap-4 p-3 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-cyan-500/30 transition-all duration-300"
-                // 🚀 SEO: LearningResource Schema
-                itemProp="item" 
-                itemScope 
-                itemType="https://schema.org/LearningResource"
               >
                 {/* --- THUMBNAIL SECTION --- */}
                 <div className="relative w-14 h-16 sm:w-16 sm:h-20 shrink-0 rounded-xl overflow-hidden bg-black/40 border border-white/10 group-hover:border-cyan-500/50 transition-colors transform-gpu">
@@ -59,7 +96,6 @@ export default function RelatedNotes({ notes }) {
                       fill
                       sizes="64px"
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      itemProp="image"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-600 group-hover:text-cyan-400 transition-colors">
@@ -75,26 +111,17 @@ export default function RelatedNotes({ notes }) {
                   <div>
                     <h4 
                       className="font-bold text-sm text-white/90 line-clamp-2 group-hover:text-cyan-400 transition-colors leading-snug tracking-tight"
-                      itemProp="name"
                     >
                       {note.title}
                     </h4>
-                    
-                    {/* 🚀 SEO: Hidden Semantic Meta Tags for Search Engines */}
-                    <meta itemProp="educationalLevel" content="University" />
-                    <meta itemProp="learningResourceType" content="Study Guide" />
-                    {note.description && <meta itemProp="description" content={note.description.substring(0, 150)} />}
                   </div>
                   
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <span 
-                        className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-widest truncate max-w-[60%]"
-                        itemProp="provider" 
-                        itemScope 
-                        itemType="https://schema.org/Organization"
+                      className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-widest truncate max-w-[60%]"
                     >
                       <FileText className="w-3 h-3 shrink-0" aria-hidden="true" /> 
-                      <span className="truncate" itemProp="name">{note.university || "University Notes"}</span>
+                      <span className="truncate">{note.university || "University Notes"}</span>
                     </span>
                     
                     <div className="flex items-center gap-3 text-[10px] sm:text-xs font-bold text-gray-500">
@@ -107,14 +134,7 @@ export default function RelatedNotes({ notes }) {
                         <span 
                             className="flex items-center gap-1 text-yellow-500" 
                             title={`Rated ${rating.toFixed(1)} stars out of 5`}
-                            // 🚀 SEO: AggregateRating Schema
-                            itemProp="aggregateRating" 
-                            itemScope 
-                            itemType="https://schema.org/AggregateRating"
                         >
-                          <meta itemProp="ratingValue" content={rating.toFixed(1)} />
-                          <meta itemProp="bestRating" content="5" />
-                          <meta itemProp="reviewCount" content={reviewCount.toString()} />
                           <Star className="w-3 h-3 fill-current drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]" aria-hidden="true" /> 
                           {rating.toFixed(1)}
                         </span>
