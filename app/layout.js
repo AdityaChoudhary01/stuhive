@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import AuthProvider from "@/components/providers/AuthProvider";
 import AblyProvider from "@/components/providers/AblyProvider";
 import PWARegister from "@/components/common/PWARegister";
+import PageTracker from "@/components/common/PageTracker"; // 🚀 ADDED: Admin Analytics Tracker
 
 // Replace the current Inter font import line near the top with this:
 const inter = Inter({ subsets: ["latin"], display: "swap" });
@@ -71,6 +72,9 @@ export default function RootLayout({ children }) {
       </head>
       
       <body className={`${inter.className} min-h-screen flex flex-col bg-background text-foreground antialiased`}>
+        {/* 🚀 ADMIN TRACKER: Silently logs page views for your analytics dashboard */}
+        <PageTracker />
+
         {/* ✅ AUTH PROVIDER: Supplies session context to useSession() across the app */}
         <AuthProvider>
           {/* ✅ ABLY PROVIDER: Nested inside Auth so it can access the authenticated user ID */}

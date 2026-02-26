@@ -22,6 +22,7 @@ export default function AddToCollectionModal({ noteId }) {
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [newColName, setNewColName] = useState("");
   const [newColDesc, setNewColDesc] = useState("");
+  const [newColUniversity, setNewColUniversity] = useState(""); // 🚀 ADDED: University State
   const [newColVisibility, setNewColVisibility] = useState("private");
   const [creating, setCreating] = useState(false);
 
@@ -49,12 +50,16 @@ export default function AddToCollectionModal({ noteId }) {
     const res = await createCollection(newColName, session.user.id);
     
     if (res.success) {
-      // 2. Immediately update it with Description & Visibility if they changed the defaults
+      // 2. Immediately update it with Description, Visibility & University if they changed the defaults
       let finalCollection = res.collection;
-      if (newColDesc.trim() || newColVisibility === 'public') {
+      if (newColDesc.trim() || newColVisibility === 'public' || newColUniversity.trim()) {
          const updateRes = await updateCollection(
             res.collection._id, 
-            { description: newColDesc, visibility: newColVisibility }, 
+            { 
+              description: newColDesc, 
+              visibility: newColVisibility,
+              university: newColUniversity // 🚀 ADDED: Pass University to update
+            }, 
             session.user.id
          );
          if (updateRes.success) finalCollection = updateRes.collection;
@@ -70,6 +75,7 @@ export default function AddToCollectionModal({ noteId }) {
       // Reset State
       setNewColName("");
       setNewColDesc("");
+      setNewColUniversity(""); // 🚀 ADDED: Reset University State
       setNewColVisibility("private");
       setIsCreatingNew(false);
       setOpen(false);
@@ -143,6 +149,9 @@ export default function AddToCollectionModal({ noteId }) {
                                             </div>
                                             {isAdded ? <Check className="w-4 h-4 text-green-500" /> : <Plus className="w-4 h-4 text-gray-400" />}
                                         </div>
+                                        {col.university && (
+                                            <p className="text-[9px] font-bold uppercase tracking-widest text-cyan-500 mt-1">{col.university}</p>
+                                        )}
                                         {col.description && (
                                             <p className="text-[10px] text-gray-500 mt-1 line-clamp-1">{col.description}</p>
                                         )}
@@ -162,6 +171,17 @@ export default function AddToCollectionModal({ noteId }) {
                             onChange={(e) => setNewColName(e.target.value)}
                             className="bg-black/40 border-white/10 focus-visible:ring-cyan-500"
                             autoFocus
+                        />
+                    </div>
+
+                    {/* 🚀 ADDED: University Input Field */}
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">University (Optional)</label>
+                        <Input 
+                            placeholder="e.g. Mumbai University" 
+                            value={newColUniversity}
+                            onChange={(e) => setNewColUniversity(e.target.value)}
+                            className="bg-black/40 border-white/10 focus-visible:ring-cyan-500"
                         />
                     </div>
 

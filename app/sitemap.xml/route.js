@@ -19,31 +19,41 @@ export async function GET() {
   try {
     await connectDB();
 
-    // 🚀 Fetch all models in parallel for maximum speed
+    // 🚀 Fetch all models and aggregations in parallel for maximum speed
     const blogsPromise = Blog.find({}).select("slug updatedAt").lean();
     const notesPromise = Note.find({}).select("_id updatedAt").lean();
     const usersPromise = User.find({}).select("_id updatedAt").lean();
     const collectionsPromise = Collection.find({ visibility: 'public' }).select("slug updatedAt").lean();
+    
+    // 🚀 ADDED: Get all unique universities and their latest update time directly from Notes
+    const universitiesPromise = Note.aggregate([
+      { $match: { university: { $ne: null, $ne: "" } } },
+      { $group: { 
+          _id: "$university", 
+          updatedAt: { $max: "$updatedAt" } 
+      }}
+    ]);
 
-    const [blogs, notes, users, collections] = await Promise.all([
+    const [blogs, notes, users, collections, universities] = await Promise.all([
       blogsPromise,
       notesPromise,
       usersPromise,
-      collectionsPromise, 
+      collectionsPromise,
+      universitiesPromise 
     ]);
 
     // DEBUG: See what is actually being returned
-    console.log(`[SITEMAP] Found ${blogs.length} blogs, ${notes.length} notes, ${users.length} users, ${collections.length} collections.`);
+    console.log(`[SITEMAP] Found ${blogs.length} blogs, ${notes.length} notes, ${users.length} users, ${collections.length} collections, ${universities.length} universities.`);
     
     if (blogs.length === 0) {
       console.warn("[SITEMAP] WARNING: No blogs found in the database. Are they published?");
     }
 
-    // 🚀 ADDED "/requests" TO STATIC ROUTES
+    // 🚀 STATIC ROUTES (Added /hive-points here)
     const staticRoutes = [
       "", "/about", "/contact", "/blogs", "/search", "/shared-collections", "/requests",
       "/login","/signup", 
-      "/donate", "/supporters", "/terms", "/privacy", "/dmca"
+      "/donate", "/supporters", "/terms", "/privacy", "/dmca", "/hive-points"
     ].map(route => ({
       url: `${BASE_URL}${route}`,
       lastModified: new Date().toISOString(),
@@ -85,8 +95,19 @@ export async function GET() {
         changefreq: "weekly",
       }));
 
+    // 🚀 NEW: DYNAMICALLY GENERATE UNIVERSITY HUB PAGES
+    const universityPages = universities.map(univ => {
+      const slug = univ._id.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      return {
+        url: `${BASE_URL}/univ/${slug}`,
+        lastModified: formatDate(univ.updatedAt), // Uses the time of the most recently uploaded note for this univ!
+        priority: "0.9", // High priority because these are major landing pages
+        changefreq: "daily",
+      };
+    });
+
     // 🚀 MERGE EVERYTHING TOGETHER
-    const allPages = [...staticRoutes, ...blogPages, ...notePages, ...profilePages, ...collectionPages];
+    const allPages = [...staticRoutes, ...universityPages, ...blogPages, ...notePages, ...profilePages, ...collectionPages];
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

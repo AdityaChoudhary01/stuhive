@@ -16,6 +16,7 @@ export default function EditCollectionModal({ collection }) {
   
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(collection.name || "");
+  const [university, setUniversity] = useState(collection.university || ""); // 🚀 ADDED: University State
   const [description, setDescription] = useState(collection.description || "");
   const [visibility, setVisibility] = useState(collection.visibility || "private");
   const [loading, setLoading] = useState(false);
@@ -27,7 +28,7 @@ export default function EditCollectionModal({ collection }) {
     setLoading(true);
     const res = await updateCollection(
         collection._id, 
-        { name, description, visibility }, 
+        { name, university, description, visibility }, // 🚀 ADDED: Pass University to update payload
         session.user.id
     );
     
@@ -59,6 +60,17 @@ export default function EditCollectionModal({ collection }) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Engineering Mathematics II"
+                    className="bg-black/40 border-white/10 focus-visible:ring-cyan-500 font-medium"
+                />
+            </div>
+
+            {/* 🚀 ADDED: University Input Field */}
+            <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-widest text-cyan-400">University</label>
+                <Input 
+                    value={university}
+                    onChange={(e) => setUniversity(e.target.value)}
+                    placeholder="e.g. Mumbai University"
                     className="bg-black/40 border-white/10 focus-visible:ring-cyan-500 font-medium"
                 />
             </div>

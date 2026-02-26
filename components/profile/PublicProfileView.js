@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image"; 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { FaMapMarkerAlt, FaCalendarAlt, FaBook, FaRss, FaStar, FaUserPlus, FaUserCheck, FaUniversity, FaEnvelope } from 'react-icons/fa';
-import { ChevronDown } from "lucide-react"; // 🚀 Added for Load More
+import { ChevronDown } from "lucide-react"; 
 import { Button } from "@/components/ui/button";
 import NoteCard from "@/components/notes/NoteCard";
 import BlogCard from "@/components/blog/BlogCard"; 
@@ -203,7 +203,19 @@ export default function PublicProfileView({ profile, notes, blogs, currentUser, 
                         <span className="flex items-center gap-2"><FaCalendarAlt /> Joined {new Date(profile.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}</span>
                     </div>
                     
-                    <div className="flex justify-center md:justify-start gap-8 sm:gap-12 pt-6 border-t border-white/5">
+                    {/* 🚀 STATS SECTION INCLUDING HIVE POINTS */}
+                    <div className="flex flex-wrap justify-center md:justify-start gap-8 sm:gap-12 pt-6 border-t border-white/5">
+                        
+                        {/* 🚀 NEW: Hive Points Stat Block */}
+                        <Link href="/hive-points" className="text-center cursor-pointer group appearance-none bg-transparent border-none p-0 m-0">
+                            <span className="block text-2xl sm:text-3xl font-black text-amber-400 group-hover:text-amber-300 transition-colors drop-shadow-md">
+                                {profile.hivePoints || 0}
+                            </span>
+                            <span className="text-[9px] sm:text-[10px] uppercase font-black tracking-widest text-amber-500/70 group-hover:text-amber-400 transition-colors flex items-center justify-center gap-1">
+                                <FaStar className="w-2.5 h-2.5" /> Points
+                            </span>
+                        </Link>
+
                         <div className="text-center">
                             <span className="block text-2xl sm:text-3xl font-black text-white">{notes.length}</span>
                             <span className="text-[9px] sm:text-[10px] uppercase font-black tracking-widest text-gray-300">Notes</span>

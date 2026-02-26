@@ -11,7 +11,8 @@ import { deleteFileFromR2 } from "@/lib/r2";
 import { generateReadUrl } from "@/lib/r2";
 import { indexNewContent, removeContentFromIndex } from "@/lib/googleIndexing";
 import { pingIndexNow } from "@/lib/indexnow"; // 🚀 ADDED: IndexNow Integration
-
+import { awardHivePoints } from "@/actions/leaderboard.actions";
+import { trackCreatorEvent } from "@/actions/analytics.actions";
 const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in"; // 🚀 ADDED: Base URL for IndexNow
 
 /**
@@ -191,7 +192,7 @@ export async function getRelatedNotes(noteId) {
 }
 
 /**
- * CREATE NOTE
+ * CREATE NOTE & AWARD POINTS
  */
 export async function createNote({ title, description, university, course, subject, year, fileData, userId }) {
   await connectDB();
@@ -205,7 +206,7 @@ export async function createNote({ title, description, university, course, subje
       subject,
       year: Number(year),
       fileName: fileData.fileName,
-      fileKey: fileData.fileKey,           
+      fileKey: fileData.fileKey,          
       thumbnailKey: fileData.thumbnailKey, 
       fileType: fileData.fileType,
       fileSize: fileData.fileSize,
@@ -217,6 +218,9 @@ export async function createNote({ title, description, university, course, subje
     // Increment User Note Count
     await User.findByIdAndUpdate(userId, { $inc: { noteCount: 1 } });
 
+    // 🏆 GAMIFICATION: Reward the author 10 points for uploading study material!
+    await awardHivePoints(userId, 10);
+
     // ✅ SEO: Ping Google
     const seoStatus = await indexNewContent(newNote._id.toString(), 'note');
     
@@ -225,6 +229,7 @@ export async function createNote({ title, description, university, course, subje
 
     console.warn("\n=============================================");
     console.warn(`🚀 SEO STATUS: Google Indexing Ping was ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
+    console.warn(`🏆 GAMIFICATION: Awarded 10 Hive Points to User ID ${userId}`);
     console.warn(`📝 NOTE ID: ${newNote._id.toString()}`);
     console.warn("=============================================\n");
     
@@ -336,27 +341,56 @@ export async function deleteNote(noteId, userId) {
 }
 
 /**
- * INCREMENT DOWNLOAD COUNT
+ * INCREMENT DOWNLOAD COUNT, AWARD POINTS & TRACK ANALYTICS
  */
 export async function incrementDownloadCount(noteId) {
   await connectDB();
   try {
-    await Note.findByIdAndUpdate(noteId, { $inc: { downloadCount: 1 } });
+    // 1. Increment the download count and return the updated document
+    const note = await Note.findByIdAndUpdate(
+      noteId, 
+      { $inc: { downloadCount: 1 } },
+      { new: true } 
+    );
+
+    // 2. 🏆 GAMIFICATION & 📈 ANALYTICS
+    if (note && note.user) {
+      // Awards 2 Hive Points per download. You can change this number!
+      await awardHivePoints(note.user, 2);
+      
+      // Log this download on the creator's analytics graph!
+      await trackCreatorEvent(note.user, 'downloads');
+    }
+
     return { success: true };
   } catch (error) {
+    console.error("Error incrementing download count:", error);
     return { success: false };
   }
 }
 
 /**
- * INCREMENT VIEW COUNT
+ * INCREMENT VIEW COUNT & TRACK ANALYTICS
  */
 export async function incrementViewCount(noteId) {
   await connectDB();
   try {
-    await Note.findByIdAndUpdate(noteId, { $inc: { viewCount: 1 } });
+    // 1. Increment the view count and return the updated document
+    const note = await Note.findByIdAndUpdate(
+      noteId, 
+      { $inc: { viewCount: 1 } },
+      { new: true } // 🚀 FIXED: Added { new: true } so we can get the note's author ID!
+    );
+
+    // 2. 📈 ANALYTICS
+    if (note && note.user) {
+      // Log this view on the creator's analytics graph!
+      await trackCreatorEvent(note.user, 'views');
+    }
+
     return { success: true };
   } catch (error) {
+    console.error("Error incrementing view count:", error);
     return { success: false };
   }
 }

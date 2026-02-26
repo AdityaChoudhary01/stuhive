@@ -5,6 +5,7 @@ import User from "@/lib/models/User";
 import Note from "@/lib/models/Note";
 import Blog from "@/lib/models/Blog";
 import Collection from "@/lib/models/Collection";
+import SiteAnalytics from "@/lib/models/SiteAnalytics"; // 🚀 ADDED: Analytics Model
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -14,6 +15,83 @@ import { deleteFileFromR2 } from "@/lib/r2"; // ✅ Imported R2 Helper
 async function isAdmin() {
   const session = await getServerSession(authOptions);
   return session?.user?.role === "admin";
+}
+
+/**
+ * 🚀 NEW: FETCH MACRO DASHBOARD ANALYTICS
+ */
+export async function getAdminDashboardData() {
+  await connectDB();
+
+  // 🛡️ Security Check
+  if (!(await isAdmin())) {
+    throw new Error("Unauthorized Access");
+  }
+
+  try {
+    // 30 Days Ago Limit for Time-Series
+    const pastDate = new Date();
+    pastDate.setDate(pastDate.getDate() - 30);
+    const dateLimit = pastDate.toISOString().split('T')[0];
+
+    // 🚀 BLAZING FAST PARALLEL AGGREGATION
+    const [
+      noteStats,
+      blogStats,
+      topViewedNotes,
+      topDownloadedNotes,
+      topBlogs,
+      pageViewsOverTime,
+      topPages
+    ] = await Promise.all([
+      // 1. Global Note Stats
+      Note.aggregate([{ $group: { _id: null, totalViews: { $sum: "$viewCount" }, totalDownloads: { $sum: "$downloadCount" } } }]),
+      
+      // 2. Global Blog Stats
+      Blog.aggregate([{ $group: { _id: null, totalViews: { $sum: "$viewCount" } } }]),
+
+      // 3. Top Growing Notes (Views)
+      Note.find().sort({ viewCount: -1 }).limit(5).select('title viewCount user').populate('user', 'name').lean(),
+
+      // 4. Top Downloaded Notes
+      Note.find().sort({ downloadCount: -1 }).limit(5).select('title downloadCount user').populate('user', 'name').lean(),
+
+      // 5. Top Growing Blogs
+      Blog.find().sort({ viewCount: -1 }).limit(5).select('title viewCount author').populate('author', 'name').lean(),
+
+      // 6. Site Traffic Over Last 30 Days
+      SiteAnalytics.aggregate([
+        { $match: { date: { $gte: dateLimit } } },
+        { $group: { _id: "$date", views: { $sum: "$views" } } },
+        { $sort: { _id: 1 } }
+      ]),
+
+      // 7. Most Visited Pages (Hubs, Search, etc.)
+      SiteAnalytics.aggregate([
+        { $group: { _id: "$path", totalViews: { $sum: "$views" } } },
+        { $sort: { totalViews: -1 } },
+        { $limit: 10 }
+      ])
+    ]);
+
+    return {
+      totals: {
+        noteViews: noteStats[0]?.totalViews || 0,
+        noteDownloads: noteStats[0]?.totalDownloads || 0,
+        blogViews: blogStats[0]?.totalViews || 0,
+        totalSiteVisits: pageViewsOverTime.reduce((acc, curr) => acc + curr.views, 0)
+      },
+      topViewedNotes: JSON.parse(JSON.stringify(topViewedNotes)),
+      topDownloadedNotes: JSON.parse(JSON.stringify(topDownloadedNotes)),
+      topBlogs: JSON.parse(JSON.stringify(topBlogs)),
+      pageViewsOverTime: pageViewsOverTime.map(item => ({ date: item._id, views: item.views })),
+      topPages: topPages.map(item => ({ path: item._id, views: item.totalViews }))
+    };
+
+  } catch (error) {
+    console.error("Admin Dashboard Fetch Error:", error);
+    return null;
+  }
 }
 
 /**
@@ -33,46 +111,59 @@ export async function getAdminStats() {
   }
 }
 
-export async function getAllUsers() {
+/**
+ * 🚀 UPDATED: GET ALL USERS WITH PAGINATION
+ */
+export async function getAllUsers(page = 1, limit = 20) {
   await connectDB();
   if (!(await isAdmin())) return { error: "Unauthorized" };
   
+  const skip = (page - 1) * limit;
+
   // Use aggregation to get exact, real-time counts from Note and Blog collections
-  const users = await User.aggregate([
-    {
-      $lookup: {
-        from: "notes", 
-        localField: "_id",
-        foreignField: "user",
-        as: "userNotes"
+  const [users, total] = await Promise.all([
+    User.aggregate([
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: "notes", 
+          localField: "_id",
+          foreignField: "user",
+          as: "userNotes"
+        }
+      },
+      {
+        $lookup: {
+          from: "blogs", 
+          localField: "_id",
+          foreignField: "author",
+          as: "userBlogs"
+        }
+      },
+      {
+        $addFields: {
+          exactNoteCount: { $size: "$userNotes" },
+          exactBlogCount: { $size: "$userBlogs" }
+        }
+      },
+      {
+        $project: {
+          password: 0,
+          userNotes: 0, 
+          userBlogs: 0  
+        }
       }
-    },
-    {
-      $lookup: {
-        from: "blogs", 
-        localField: "_id",
-        foreignField: "author",
-        as: "userBlogs"
-      }
-    },
-    {
-      $addFields: {
-        exactNoteCount: { $size: "$userNotes" },
-        exactBlogCount: { $size: "$userBlogs" }
-      }
-    },
-    {
-      $project: {
-        password: 0,
-        userNotes: 0, 
-        userBlogs: 0  
-      }
-    },
-    { $sort: { createdAt: -1 } }
+    ]),
+    User.countDocuments()
   ]);
   
-  // Safe Serialization
-  return JSON.parse(JSON.stringify(users));
+  return {
+    users: JSON.parse(JSON.stringify(users)),
+    total,
+    totalPages: Math.ceil(total / limit)
+  };
 }
 
 /**

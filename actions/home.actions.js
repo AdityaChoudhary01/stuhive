@@ -14,7 +14,6 @@ export async function getHomeData() {
       totalNotes,
       totalUsers,
       totalDownloadsRes,
-      contributors,
       blogs
     ] = await Promise.all([
       // 1. Fetch Stats
@@ -22,23 +21,15 @@ export async function getHomeData() {
       User.countDocuments(),
       Note.aggregate([{ $group: { _id: null, total: { $sum: "$downloadCount" } } }]),
 
-      // 2. Fetch Top Contributors
-      // 🚀 THE FIX: Added blogCount to .select() and allowed users with either notes OR blogs
-      User.find({ $or: [{ noteCount: { $gt: 0 } }, { blogCount: { $gt: 0 } }] })
-        .sort({ noteCount: -1, blogCount: -1 }) // Sorts by notes first, then blogs
-        .limit(5)
-        .select("name avatar image role noteCount blogCount") // <--- Fix is here
-        .lean(),
-
-      // 3. Fetch Featured Blogs (Latest 3)
+      // 2. Fetch Featured Blogs (Latest 3)
       Blog.find({}) 
-        .populate("author", "name avatar image role") // Added 'role' for the Admin Badge check
+        .populate("author", "name avatar image role")
         .sort({ createdAt: -1 }) 
         .limit(3)
         .lean()
         .catch(e => {
             console.error("Error fetching blogs for homepage:", e);
-            return []; // Fallback to empty array if blog fetch fails, preventing whole page crash
+            return []; // Fallback to empty array if blog fetch fails
         })
     ]);
 
@@ -46,22 +37,13 @@ export async function getHomeData() {
 
     return {
       stats: { totalNotes, totalUsers, totalDownloads },
-      
-      // Serialize Contributors
-      contributors: contributors.map(c => ({ 
-          ...c, 
-          _id: c._id.toString(),
-          noteCount: c.noteCount || 0,
-          blogCount: c.blogCount || 0 // 🚀 Ensures undefined doesn't break UI
-      })),
-      
       // Serialize Blogs strictly for Client Components
       blogs: blogs.map(b => ({
         ...b,
         _id: b._id.toString(),
         author: b.author ? { ...b.author, _id: b.author._id.toString() } : null,
         summary: b.summary || b.excerpt || "",
-        coverImage: b.coverImage || null, // Cloudflare R2 Public URL
+        coverImage: b.coverImage || null,
         tags: b.tags ? Array.from(b.tags) : [],
         rating: b.rating || 0,
         numReviews: b.numReviews || 0,
@@ -74,7 +56,6 @@ export async function getHomeData() {
     console.error("Failed to fetch home data:", error);
     return { 
         stats: { totalNotes: 0, totalUsers: 0, totalDownloads: 0 }, 
-        contributors: [], 
         blogs: [] 
     };
   }

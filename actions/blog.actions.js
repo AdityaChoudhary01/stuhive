@@ -10,7 +10,8 @@ import { deleteFileFromR2 } from "@/lib/r2";
 import { indexNewContent, removeContentFromIndex } from "@/lib/googleIndexing"; 
 import { pingIndexNow } from "@/lib/indexnow"; // 🚀 ADDED: IndexNow Integration
 import { cache } from "react"; 
-
+import { awardHivePoints } from "@/actions/leaderboard.actions";
+import { trackCreatorEvent } from "@/actions/analytics.actions";
 const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in"; // 🚀 ADDED: Base URL for IndexNow
 
 /**
@@ -40,7 +41,8 @@ export const getBlogs = cache(async ({ page = 1, limit = 9, search = "", tag = "
     const blogs = await Blog.find(query)
       .select("-content -reviews") // 🚀 MASSIVE SPEED BOOST
       .populate('author', 'name avatar role email')
-      .sort({ createdAt: -1 })
+      // 🚀 FIXED: Sorts by Featured status first, then by newest date
+      .sort({ isFeatured: -1, createdAt: -1 }) 
       .skip(skip)
       .limit(limit)
       .lean();
@@ -121,12 +123,24 @@ export const getBlogBySlug = cache(async (slug) => {
 });
 
 /**
- * INCREMENT BLOG VIEWS (Non-blocking)
+ * INCREMENT BLOG VIEWS & TRACK ANALYTICS (Non-blocking)
  */
 export async function incrementBlogViews(blogId) {
   try {
     await connectDB();
-    await Blog.findByIdAndUpdate(blogId, { $inc: { viewCount: 1 } });
+    
+    // 1. Increment the view count and return the updated document
+    const blog = await Blog.findByIdAndUpdate(
+      blogId, 
+      { $inc: { viewCount: 1 } },
+      { new: true } // 🚀 FIXED: Required to get the author's ID
+    );
+
+    // 2. 📈 ANALYTICS: Log this view on the creator's dashboard
+    if (blog && blog.author) {
+      await trackCreatorEvent(blog.author, 'views');
+    }
+
     return true;
   } catch (error) {
     console.error("Failed to increment blog views:", error);
@@ -208,7 +222,7 @@ export async function updateBlog(blogId, updateData, userId) {
 }
 
 /**
- * CREATE BLOG
+ * CREATE BLOG & AWARD POINTS
  */
 export async function createBlog({ title, content, summary, tags, coverImage, coverImageKey, userId }) {
   await connectDB();
@@ -230,20 +244,28 @@ export async function createBlog({ title, content, summary, tags, coverImage, co
     });
 
     await newBlog.save();
+    
+    // Increment User Blog Count
     await User.findByIdAndUpdate(userId, { $inc: { blogCount: 1 } });
+
+    // 🏆 GAMIFICATION: Reward the author 20 points for publishing an article!
+    await awardHivePoints(userId, 20);
 
     // 🚀 SEO & INDEXING (Google + IndexNow)
     const seoStatus = await indexNewContent(newBlog.slug, 'blog');
     console.log(`[ACTION LOG] Blog created. Google Indexing ping: ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
+    console.log(`🏆 GAMIFICATION: Awarded 20 Hive Points to User ID ${userId}`);
 
     // 🔥 INSTANT INDEXNOW PING
     await pingIndexNow([`${APP_URL}/blogs/${newBlog.slug}`]);
 
     revalidatePath('/blogs');
     return { success: true, slug: newBlog.slug };
-  } catch (error) { return { success: false, error: error.message }; }
+  } catch (error) { 
+    console.error("Create Blog Error:", error);
+    return { success: false, error: error.message }; 
+  }
 }
-
 /**
  * DELETE BLOG 
  */

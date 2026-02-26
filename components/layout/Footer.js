@@ -1,19 +1,33 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-// IMPORT FIXED: Now correctly pointing to the newsletter action
 import { subscribeToNewsletter } from '@/actions/newsletter.actions'; 
+import { getTopUniversities } from '@/actions/university.actions'; // 🚀 Added import for University Hubs
 import { 
   FaLinkedin, FaGithub, FaYoutube, FaInstagram, 
-  FaHeart, FaRocket, FaEnvelope, FaSpinner, FaCheckCircle 
+  FaHeart, FaRocket, FaEnvelope, FaSpinner, FaCheckCircle, FaGraduationCap
 } from 'react-icons/fa';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState({ loading: false, success: false, error: null });
+  const [universities, setUniversities] = useState([]); // 🚀 State for dynamic SEO links
 
   const currentYear = new Date().getFullYear();
+
+  // 🚀 Fetch dynamic university hubs on mount
+  useEffect(() => {
+    async function loadUniversities() {
+      try {
+        const topUnivs = await getTopUniversities();
+        setUniversities(topUnivs || []);
+      } catch (error) {
+        console.error("Failed to load university hubs", error);
+      }
+    }
+    loadUniversities();
+  }, []);
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -22,7 +36,6 @@ export default function Footer() {
     setStatus({ loading: true, success: false, error: null });
 
     try {
-      // Call your Brevo-powered Server Action specifically built for newsletters
       const res = await subscribeToNewsletter(email);
 
       if (res.success) {
@@ -57,7 +70,8 @@ export default function Footer() {
       <div className="absolute -top-[200px] left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/20 rounded-full blur-[80px] pointer-events-none animate-pulse-slow" />
       
       <div className="container relative z-10 py-20 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+        {/* 🚀 Changed grid to 5 columns to accommodate the new University Hubs section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 mb-12">
           
           {/* Brand Section */}
           <div className="flex flex-col gap-4 lg:col-span-1">
@@ -103,6 +117,27 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* 🚀 NEW: Top University Hubs SEO Column */}
+          <div className="flex flex-col gap-4">
+            <h3 className="text-lg font-bold bg-gradient-to-r from-[#f093fb] to-[#4facfe] bg-clip-text text-transparent">Top Hubs</h3>
+            <ul className="flex flex-col gap-3">
+              {universities.slice(0, 5).map(univ => (
+                <li key={univ.slug}>
+                  <Link 
+                    href={`/univ/${univ.slug}`} 
+                    title={`${univ.name} Study Materials`}
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-cyan-400 hover:translate-x-1 transition-all duration-300 w-fit"
+                  >
+                    <FaGraduationCap className="text-[10px] opacity-50" /> {univ.name}
+                  </Link>
+                </li>
+              ))}
+              {universities.length === 0 && (
+                <li className="text-sm text-muted-foreground animate-pulse">Loading hubs...</li>
+              )}
+            </ul>
+          </div>
+
           {/* Legal & Help */}
           <div className="flex flex-col gap-4">
             <h3 className="text-lg font-bold bg-gradient-to-r from-[#f093fb] to-[#4facfe] bg-clip-text text-transparent">Legal & Help</h3>
@@ -138,7 +173,7 @@ export default function Footer() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email..."
-                  className="flex-1 px-4 py-3 bg-secondary/20 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  className="flex-1 px-4 py-3 bg-secondary/20 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all min-w-[120px]"
                 />
                 <button 
                   type="submit"

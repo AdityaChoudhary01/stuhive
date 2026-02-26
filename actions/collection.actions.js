@@ -5,7 +5,7 @@ import Collection from "@/lib/models/Collection";
 import Note from "@/lib/models/Note"; 
 import User from "@/lib/models/User"; 
 import { revalidatePath } from "next/cache";
-
+import { awardHivePoints } from "@/actions/leaderboard.actions";
 // 🚀 IMPORT GOOGLE & INDEXNOW HELPERS
 import { indexNewContent, removeContentFromIndex } from "@/lib/googleIndexing"; 
 import { pingIndexNow } from "@/lib/indexnow";
@@ -122,7 +122,7 @@ export async function getPublicCollections({ page = 1, limit = 12 } = {}) {
 }
 
 /**
- * 5. CREATE COLLECTION
+ * 5. CREATE COLLECTION & AWARD POINTS
  */
 export async function createCollection(name, userId) {
   await connectDB();
@@ -132,8 +132,14 @@ export async function createCollection(name, userId) {
       user: userId,
       notes: [],
       visibility: 'private', // Defaults to private, no indexing needed yet.
-      description: "" 
+      description: "",
+      university: "" // 🚀 ADDED: Initialize empty university field
     });
+
+    // 🏆 GAMIFICATION: Reward the user 15 points for organizing study materials into a bundle!
+    await awardHivePoints(userId, 15);
+    
+    console.log(`🏆 GAMIFICATION: Awarded 15 Hive Points to User ID ${userId} for creating a bundle.`);
 
     revalidatePath('/profile');
     return { 
@@ -141,12 +147,13 @@ export async function createCollection(name, userId) {
       collection: JSON.parse(JSON.stringify(newCollection)) 
     };
   } catch (error) {
+    console.error("Create Collection Error:", error);
     return { success: false, error: error.message };
   }
 }
 
 /**
- * 6. UPDATE COLLECTION (Handles Rename, Visibility, and Description)
+ * 6. UPDATE COLLECTION (Handles Rename, Visibility, Description, and University)
  */
 export async function updateCollection(collectionId, data, userId) {
   await connectDB();
@@ -158,6 +165,7 @@ export async function updateCollection(collectionId, data, userId) {
     if (data.name !== undefined) collection.name = data.name;
     if (data.visibility !== undefined) collection.visibility = data.visibility;
     if (data.description !== undefined) collection.description = data.description;
+    if (data.university !== undefined) collection.university = data.university; // 🚀 ADDED: Update university
 
     await collection.save(); // Pre-save hooks handle slug generation
 
@@ -179,6 +187,12 @@ export async function updateCollection(collectionId, data, userId) {
     revalidatePath('/shared-collections'); 
     revalidatePath(`/collections/${collectionId}`);
     if (collection.slug) revalidatePath(`/shared-collections/${collection.slug}`);
+    
+    // 🚀 CACHE BUSTING: Dynamically bust the new university hub if applicable
+    if (collection.university) {
+      const uniSlug = collection.university.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      revalidatePath(`/univ/${uniSlug}`);
+    }
     
     return { 
       success: true, 
@@ -214,6 +228,13 @@ export async function deleteCollection(collectionId, userId) {
 
     revalidatePath('/profile');
     revalidatePath('/shared-collections');
+    
+    // 🚀 CACHE BUSTING: Update the university hub if the deleted collection belonged there
+    if (collection.university) {
+      const uniSlug = collection.university.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      revalidatePath(`/univ/${uniSlug}`);
+    }
+
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -244,6 +265,7 @@ export async function addNoteToCollection(collectionId, noteId, userId) {
     // 🚀 CACHE BUSTING: Updates note count on the main page
     revalidatePath('/profile');
     revalidatePath('/shared-collections'); 
+    revalidatePath(`/collections/${collectionId}`); // Update private page
     if (collection.slug) revalidatePath(`/shared-collections/${collection.slug}`);
     
     return { success: true };
@@ -276,6 +298,7 @@ export async function removeNoteFromCollection(collectionId, noteId, userId) {
     // 🚀 CACHE BUSTING: Updates note count on the main page
     revalidatePath('/profile');
     revalidatePath('/shared-collections'); 
+    revalidatePath(`/collections/${collectionId}`); // Update private page
     if (collection.slug) revalidatePath(`/shared-collections/${collection.slug}`);
     
     return { success: true };

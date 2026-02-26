@@ -5,14 +5,19 @@ import { Share2, Check } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-export default function ShareCollectionButton() {
+export default function ShareCollectionButton({ collection }) {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
   const handleShare = async () => {
+    // 🚀 DYNAMIC SHARE TEXT: Uses university name if available to drive hyper-local sharing
+    const shareText = collection?.university 
+        ? `Check out this ${collection.university} study bundle on StuHive!`
+        : "Check out this curated study bundle on StuHive!";
+
     const shareData = {
       title: document.title,
-      text: "Check out this curated study bundle on StuHive!",
+      text: shareText,
       url: window.location.href,
     };
 

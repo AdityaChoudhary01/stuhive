@@ -16,7 +16,7 @@ import { deleteBlog } from "@/actions/blog.actions";
 import { deleteNote } from "@/actions/note.actions"; 
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from "next-auth/react";
-import { Trash2, Loader2, MoreVertical, Search, Check } from "lucide-react"; 
+import { Trash2, Loader2, MoreVertical, Search, Check, TrendingUp, Sparkles } from "lucide-react"; // 🚀 Added TrendingUp and Sparkles
 import ProfileImageUpload from "@/components/profile/ProfileImageUpload";
 import EditBio from "@/components/profile/EditBio"; 
 import {
@@ -44,11 +44,13 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
   const [editingColId, setEditingColId] = useState(null);
   const [editColName, setEditColName] = useState("");
   const [editColDescription, setEditColDescription] = useState(""); 
+  const [editColUniversity, setEditColUniversity] = useState(""); // 🚀 ADDED: Edit University State
   
   // 🚀 EXPANDED: Create Collection State
   const [isCreatingCollection, setIsCreatingCollection] = useState(false);
   const [newColName, setNewColName] = useState("");
   const [newColDesc, setNewColDesc] = useState("");
+  const [newColUniversity, setNewColUniversity] = useState(""); // 🚀 ADDED: New University State
   const [newColVisibility, setNewColVisibility] = useState("private");
   const [isCreatingLoader, setIsCreatingLoader] = useState(false);
 
@@ -105,12 +107,16 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
     const res = await createCollection(newColName, user._id);
     
     if (res.success) {
-      // 2. Apply Description and Visibility updates immediately
+      // 2. Apply Description, Visibility, and University updates immediately
       let finalCollection = res.collection;
-      if (newColDesc.trim() || newColVisibility === 'public') {
+      if (newColDesc.trim() || newColVisibility === 'public' || newColUniversity.trim()) {
           const updateRes = await updateCollection(
               res.collection._id, 
-              { description: newColDesc, visibility: newColVisibility }, 
+              { 
+                description: newColDesc, 
+                visibility: newColVisibility,
+                university: newColUniversity // 🚀 ADDED
+              }, 
               user._id
           );
           if (updateRes.success) finalCollection = updateRes.collection;
@@ -121,6 +127,7 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
       // Reset State
       setNewColName("");
       setNewColDesc("");
+      setNewColUniversity(""); // 🚀 ADDED
       setNewColVisibility("private");
       setIsCreatingCollection(false);
       toast({ title: "Collection Created", description: "Your new bundle is ready." });
@@ -144,9 +151,10 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
 
   const handleSaveDetails = async (id) => {
     if (!editColName.trim()) return toast({ title: "Name cannot be empty", variant: "destructive" });
-    const res = await updateCollection(id, { name: editColName, description: editColDescription }, user._id);
+    // 🚀 ADDED: Included university in update payload
+    const res = await updateCollection(id, { name: editColName, description: editColDescription, university: editColUniversity }, user._id);
     if (res.success) {
-      setCollections(prev => prev.map(c => c._id === id ? { ...c, name: editColName, description: editColDescription, slug: res.collection.slug } : c));
+      setCollections(prev => prev.map(c => c._id === id ? { ...c, name: editColName, description: editColDescription, university: editColUniversity, slug: res.collection.slug } : c));
       setEditingColId(null);
       toast({ title: "Bundle Details Updated" });
     } else {
@@ -240,11 +248,21 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
                 <EditBio user={user} />
             </div>
 
-            <Link href="/feed" className="relative z-10">
-                <Button className="rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 border-0 shadow-lg hover:shadow-xl transition-all font-bold">
-                    <FaRss className="mr-2" /> My Personalized Feed
-                </Button>
-            </Link>
+            <div className="relative z-10 flex flex-wrap justify-center gap-4">
+                <Link href="/feed">
+                    <Button className="rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold transition-all">
+                        <FaRss className="mr-2" /> My Personalized Feed
+                    </Button>
+                </Link>
+
+                {/* 🚀 ADDED: Creator Analytics Button */}
+                <Link href="/dashboard/analytics">
+                    <Button className="rounded-full gap-2 px-6 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black uppercase tracking-widest shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-all hover:scale-105">
+                        <TrendingUp className="w-4 h-4" />
+                        My Analytics <Sparkles className="w-3 h-3 text-yellow-300" />
+                    </Button>
+                </Link>
+            </div>
         </div>
 
         <div className="flex flex-wrap justify-center gap-2 mb-8">
@@ -355,6 +373,17 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
                                 />
                             </div>
 
+                            {/* 🚀 ADDED: University Input Field */}
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">University (Optional)</label>
+                                <Input 
+                                    placeholder="e.g. Mumbai University" 
+                                    value={newColUniversity}
+                                    onChange={(e) => setNewColUniversity(e.target.value)}
+                                    className="bg-black/40 border-white/10 focus-visible:ring-cyan-500"
+                                />
+                            </div>
+
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Description (Optional)</label>
                                 <Textarea 
@@ -424,6 +453,18 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
                                             autoFocus 
                                         />
                                     </div>
+
+                                    {/* 🚀 ADDED: University Field in Edit Form */}
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">University</label>
+                                        <Input 
+                                            value={editColUniversity} 
+                                            onChange={(e) => setEditColUniversity(e.target.value)} 
+                                            className="h-10 flex-1 bg-black/40 border-white/10 focus-visible:ring-cyan-500" 
+                                            placeholder="e.g., Mumbai University"
+                                        />
+                                    </div>
+
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Short Description (SEO)</label>
                                         <textarea 
@@ -451,7 +492,11 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
                                               {col.name}
                                               {col.visibility === 'public' ? <FaGlobe className="text-cyan-400 w-3 h-3 shrink-0" /> : <FaLock className="text-gray-500 w-3 h-3 shrink-0" />}
                                             </h3>
-                                            <p className="text-xs text-gray-400 mt-0.5">{col.notes?.length || 0} notes • <span className="capitalize">{col.visibility || 'private'}</span></p>
+                                            <p className="text-xs text-gray-400 mt-0.5">
+                                                {col.notes?.length || 0} notes • <span className="capitalize">{col.visibility || 'private'}</span>
+                                                {/* 🚀 ADDED: Display University if it exists */}
+                                                {col.university && <span className="text-cyan-400/80"> • {col.university}</span>}
+                                            </p>
                                         </div>
                                     </Link>
                                     <div className="flex items-center gap-1 shrink-0">
@@ -471,6 +516,7 @@ export default function ProfileDashboard({ user, initialMyNotes, initialSavedNot
                                             setEditingColId(col._id); 
                                             setEditColName(col.name); 
                                             setEditColDescription(col.description || ""); 
+                                            setEditColUniversity(col.university || ""); // 🚀 ADDED
                                           }} 
                                           className="text-gray-400 hover:text-cyan-400 hover:bg-cyan-400/10"
                                         >
