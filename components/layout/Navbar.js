@@ -11,6 +11,9 @@ import { useChannel, usePresence, ChannelProvider } from "ably/react";
 // 👇 Server Action
 import { getUnreadCount } from "@/services/chat.service";
 
+// 🚀 ADDED: Notification Bell Component
+import NotificationBell from "@/components/layout/NotificationBell"; 
+
 /**
  * 1. AblyLogic Component
  */
@@ -95,13 +98,11 @@ export default function Navbar() {
 
   const isActive = (path) => pathname === path;
 
-  // 🚀 REMOVED: 'About' (better suited for Footer)
-  // 🚀 ADDED: 'Requests' (highly interactive community feature)
   const navLinks = [
     { path: '/search', label: 'Notes' },
     { path: '/shared-collections', label: 'Archives' }, 
     { path: '/feed', label: 'Feed' }, 
-    { path: '/requests', label: 'Requests' }, // ✅ Added Requests
+    { path: '/requests', label: 'Requests' }, 
     { path: '/blogs', label: 'Blogs' },
     { path: '/donate', label: 'Donate' },
     { path: '/admin', label: 'Admin', adminOnly: true }
@@ -119,7 +120,7 @@ export default function Navbar() {
 
       <div className={`fixed top-0 left-0 right-0 z-[1000] transition-all duration-300 ${scrolled ? 'py-2' : 'py-3'}`}>
         <div 
-          className="mx-4 md:mx-auto max-w-[1400px] rounded-[50px] transition-all duration-300 px-6 py-1.5 flex items-center justify-between gap-2 h-[46px]"
+          className="mx-4 md:mx-auto max-w-[1400px] rounded-[50px] transition-all duration-300 px-4 sm:px-6 py-1.5 flex items-center justify-between gap-2 h-[46px]"
           style={{
             background: scrolled ? 'rgba(10, 1, 24, 0.90)' : 'rgba(10, 1, 24, 0.6)', 
             backdropFilter: 'blur(20px) saturate(180%)', 
@@ -129,7 +130,7 @@ export default function Navbar() {
           }}
         >
             
-          <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center shrink-0">
+          <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center shrink-0 pr-2">
             <Image 
               src={LOGO_URL} 
               alt="StuHive Logo" 
@@ -138,13 +139,13 @@ export default function Navbar() {
               unoptimized={true} 
               fetchPriority="high"
               className="object-contain drop-shadow-[0_0_15px_rgba(102,126,234,0.6)] transition-all duration-300"
-              style={{ width: scrolled ? '120px' : '140px', height: scrolled ? '38px' : '44px' }}
+              style={{ width: scrolled ? '110px' : '130px', height: scrolled ? '34px' : '40px' }}
               priority
             />
           </Link>
 
-          {/* Desktop Links */}
-          <div className="max-[1085px]:hidden flex items-center justify-center flex-1 gap-0.5 lg:gap-1">
+          {/* 🚀 STAGE 1 COLLAPSE: Hide NavLinks < 1200px */}
+          <div className="max-[1199px]:hidden flex items-center justify-center flex-1 gap-0.5 lg:gap-1">
             {navLinks.map(link => {
               if (link.adminOnly && session?.user?.role !== 'admin') return null;
               return (
@@ -162,28 +163,37 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Desktop Search */}
-          <form onSubmit={handleSearch} className="max-[1085px]:hidden flex items-center bg-black/20 p-[3px] rounded-full border border-white/15 transition-all min-w-[200px] xl:min-w-[220px] shadow-inner">
+          {/* 🚀 STAGE 2 COLLAPSE: Hide Search < 900px */}
+          <form onSubmit={handleSearch} className="max-[899px]:hidden flex items-center bg-black/20 p-[3px] rounded-full border border-white/15 transition-all flex-1 max-w-[240px] xl:max-w-[300px] shadow-inner mx-4">
             <input type="text" placeholder="Search..." aria-label="Search term" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="bg-transparent border-none text-white outline-none flex-1 text-[0.85rem] px-2.5 font-sans min-w-0" />
             <button type="submit" aria-label="Submit search" className="bg-gradient-to-br from-[#667eea] to-[#764ba2] border-none rounded-full w-[30px] h-[30px] flex items-center justify-center cursor-pointer text-white shadow-[0_2px_10px_rgba(102,126,234,0.4)] transition-transform hover:scale-105 shrink-0">
               <FaSearch aria-hidden="true" size={14} />
             </button>
           </form>
 
-          {/* User Controls */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* 🚀 UNIFIED USER CONTROLS */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {status === "loading" ? (
               <div className="w-[38px] h-[38px] rounded-full bg-white/10 animate-pulse" />
             ) : status === "authenticated" && session ? (
               <>
-                <Link href="/notes/upload" className="max-[1085px]:hidden flex px-4 py-1.5 text-white font-bold text-[0.8rem] rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors mr-1">
+                {/* STAGE 3 COLLAPSE: Hide Upload < 640px */}
+                <Link href="/notes/upload" className="max-[639px]:hidden flex px-4 py-1.5 text-white font-bold text-[0.8rem] rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors mr-1">
                   Upload
                 </Link>
-                <Link href="/chat" aria-label="Messages" className="max-[1085px]:hidden relative w-[38px] h-[38px] rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-colors">
+
+                {/* ALWAYS VISIBLE: Chat & Bell */}
+                <Link href="/chat" aria-label="Messages" className="relative w-[36px] h-[36px] sm:w-[38px] sm:h-[38px] rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-colors">
                   <FaPaperPlane aria-hidden="true" size={14} />
-                  {unreadTotal > 0 && <span className="absolute -top-1 -right-1 bg-[#ff3b30] text-white text-[10px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-[#0a0118] shadow-[0_0_10px_rgba(255,59,48,0.4)]">{unreadTotal}</span>}
+                  {unreadTotal > 0 && <span className="absolute -top-1 -right-1 bg-[#ff3b30] text-white text-[10px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-[#0a0118] shadow-[0_0_10px_rgba(255,59,48,0.4)]">{unreadTotal > 9 ? '9+' : unreadTotal}</span>}
                 </Link>
-                <Link href="/profile" aria-label="View Profile" className="max-[1085px]:hidden">
+
+                <div className="flex items-center justify-center">
+                  <NotificationBell />
+                </div>
+
+                {/* STAGE 3 COLLAPSE: Hide Profile & Logout < 640px */}
+                <Link href="/profile" aria-label="View Profile" className="max-[639px]:hidden">
                   <Image 
                     src={session.user.image || session.user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.user.name)}&size=80`} 
                     alt={`${session.user.name}'s Profile`} 
@@ -192,19 +202,20 @@ export default function Navbar() {
                     className="w-[38px] h-[38px] rounded-full border-2 border-[#667eea]/50 object-cover shadow-[0_0_15px_rgba(102,126,234,0.2)]"
                   />
                 </Link>
-                <button onClick={handleLogout} aria-label="Logout" className="max-[1085px]:hidden flex w-[38px] h-[38px] rounded-full bg-[#ff3b30]/10 border border-[#ff3b30]/30 text-[#ff3b30] items-center justify-center hover:bg-[#ff3b30]/20 transition-colors cursor-pointer">
+
+                <button onClick={handleLogout} aria-label="Logout" className="max-[639px]:hidden flex w-[38px] h-[38px] rounded-full bg-[#ff3b30]/10 border border-[#ff3b30]/30 text-[#ff3b30] items-center justify-center hover:bg-[#ff3b30]/20 transition-colors cursor-pointer">
                   <FaSignOutAlt aria-hidden="true" size={14} />
                 </button>
               </>
             ) : (
               <>
-                <Link href="/login" className="max-[1085px]:hidden block px-4 py-2 text-[#e0e0e0] font-medium text-[0.9rem] hover:text-white transition-colors">Login</Link>
-                <Link href="/signup" className="max-[1085px]:hidden block px-4 py-2 text-white font-medium text-[0.9rem] rounded-full bg-gradient-to-br from-[#667eea] to-[#764ba2] shadow-[0_4px_15px_rgba(102,126,234,0.4)] transition-transform hover:scale-105">Sign Up</Link>
+                <Link href="/login" className="max-[639px]:hidden block px-4 py-2 text-[#e0e0e0] font-medium text-[0.9rem] hover:text-white transition-colors">Login</Link>
+                <Link href="/signup" className="max-[639px]:hidden block px-4 py-2 text-white font-medium text-[0.9rem] rounded-full bg-gradient-to-br from-[#667eea] to-[#764ba2] shadow-[0_4px_15px_rgba(102,126,234,0.4)] transition-transform hover:scale-105">Sign Up</Link>
               </>
             )}
 
-            {/* Hamburger Button */}
-            <button aria-label={menuOpen ? "Close menu" : "Open menu"} onClick={() => setMenuOpen(!menuOpen)} className="min-[1086px]:hidden flex items-center justify-center bg-transparent border-none text-white text-2xl cursor-pointer p-1 pl-2">
+            {/* HAMBURGER TRIGGER: Visible < 1200px */}
+            <button aria-label={menuOpen ? "Close menu" : "Open menu"} onClick={() => setMenuOpen(!menuOpen)} className="min-[1200px]:hidden flex items-center justify-center bg-transparent border-none text-white text-xl sm:text-2xl cursor-pointer p-1.5 sm:p-2 hover:bg-white/5 rounded-full transition-colors ml-0.5">
               {menuOpen ? <FaTimes aria-hidden="true" /> : <FaBars aria-hidden="true" />}
             </button>
           </div>
@@ -212,10 +223,10 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Menu Backdrop */}
-      <div className={`min-[1086px]:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] transition-opacity duration-300 ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setMenuOpen(false)} />
+      <div className={`min-[1200px]:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] transition-opacity duration-300 ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setMenuOpen(false)} />
 
       {/* Mobile Menu Slide-out Panel */}
-      <div className={`min-[1086px]:hidden fixed top-0 right-0 w-full max-w-[320px] h-[100dvh] bg-[#0c0c10]/95 backdrop-blur-xl p-6 z-[1001] flex flex-col transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`min-[1200px]:hidden fixed top-0 right-0 w-full max-w-[320px] h-[100dvh] bg-[#0c0c10]/95 backdrop-blur-xl p-6 z-[1001] flex flex-col transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
          
          <div className="flex justify-between items-center mb-6 shrink-0 pt-2">
             <span className="text-white font-bold text-xl">Menu</span>
@@ -224,7 +235,8 @@ export default function Navbar() {
             </button>
          </div>
          
-        <div className="mb-6 shrink-0">
+        {/* Mobile Search: Only visible < 900px */}
+        <div className="mb-6 shrink-0 min-[900px]:hidden">
           <form onSubmit={handleSearch} className="flex items-center w-full bg-black/20 p-2 rounded-full border border-white/15">
             <input type="text" placeholder="Search..." aria-label="Search term" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="bg-transparent border-none text-white outline-none flex-1 text-[0.9rem] px-2 font-sans" />
             <button type="submit" aria-label="Submit search" className="bg-gradient-to-br from-[#667eea] to-[#764ba2] border-none rounded-full w-[30px] h-[30px] flex items-center justify-center text-white shrink-0 cursor-pointer">
@@ -234,10 +246,15 @@ export default function Navbar() {
         </div>
 
         <div className="flex flex-col gap-2 overflow-y-auto pb-6 flex-1 pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-          <Link href="/notes/upload" onClick={() => setMenuOpen(false)} className="p-3.5 rounded-2xl text-[1.05rem] font-bold flex items-center gap-4 text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 hover:bg-cyan-400/20 transition-colors mb-2">
-            + Upload Note
-          </Link>
+          
+          {/* Mobile Upload: Only visible < 640px */}
+          {status === "authenticated" && session && (
+            <Link href="/notes/upload" onClick={() => setMenuOpen(false)} className="min-[640px]:hidden p-3.5 rounded-2xl text-[1.05rem] font-bold flex items-center gap-4 text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 hover:bg-cyan-400/20 transition-colors mb-2">
+              + Upload Note
+            </Link>
+          )}
 
+          {/* NavLinks: Always visible inside the Menu */}
           {navLinks.map(link => {
             if (link.adminOnly && session?.user?.role !== 'admin') return null;
             return (
@@ -247,27 +264,22 @@ export default function Navbar() {
             );
           })}
           
-          <div className="h-[1px] bg-white/10 my-4 shrink-0" />
+          <div className="h-[1px] bg-white/10 my-4 shrink-0 min-[640px]:hidden" />
           
+          {/* Mobile Profile & Logout: Only visible < 640px */}
           {session ? (
-            <>
-              <Link href="/chat" onClick={() => setMenuOpen(false)} className="p-3.5 text-white rounded-2xl text-[1.05rem] font-medium flex items-center gap-4 hover:bg-white/5 transition-colors">
-                  <div className="flex items-center gap-3 w-full">
-                    <FaPaperPlane aria-hidden="true" color="#667eea"/> Messages 
-                    {unreadTotal > 0 && <span className="ml-auto bg-[#ff3b30] text-white text-[10px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center">{unreadTotal}</span>}
-                  </div>
-              </Link>
+            <div className="min-[640px]:hidden flex flex-col gap-2">
               <Link href="/profile" onClick={() => setMenuOpen(false)} className="p-3.5 text-white rounded-2xl text-[1.05rem] font-medium flex items-center gap-4 hover:bg-white/5 transition-colors">
                 <div className="relative w-6 h-6 overflow-hidden rounded-full shrink-0">
                   <Image src={session.user.image || session.user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.user.name)}`} alt={`${session.user.name}'s Profile`} fill className="object-cover" />
                 </div> Profile
               </Link>
-              <button onClick={handleLogout} className="mt-4 p-3.5 rounded-2xl text-[1.05rem] font-medium flex items-center justify-center gap-2 text-[#ff3b30] bg-[#ff3b30]/5 hover:bg-[#ff3b30]/10 w-full transition-colors cursor-pointer shrink-0">
+              <button onClick={handleLogout} className="mt-2 p-3.5 rounded-2xl text-[1.05rem] font-medium flex items-center justify-center gap-2 text-[#ff3b30] bg-[#ff3b30]/5 hover:bg-[#ff3b30]/10 w-full transition-colors cursor-pointer shrink-0">
                 <FaSignOutAlt aria-hidden="true" /> Logout
               </button>
-            </>
+            </div>
           ) : (
-            <div className="mt-auto shrink-0 space-y-2 pt-4">
+            <div className="mt-auto shrink-0 space-y-2 pt-4 min-[640px]:hidden">
               <Link href="/login" onClick={() => setMenuOpen(false)} className="p-3.5 text-white rounded-2xl text-[1.05rem] font-medium flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors">Login</Link>
               <Link href="/signup" onClick={() => setMenuOpen(false)} className="p-3.5 text-white rounded-2xl text-[1.05rem] font-medium flex items-center justify-center bg-gradient-to-br from-[#667eea] to-[#764ba2] hover:opacity-90 transition-opacity">Sign Up</Link>
             </div>

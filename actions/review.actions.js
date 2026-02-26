@@ -4,6 +4,9 @@ import connectDB from "@/lib/db";
 import Note from "@/lib/models/Note";
 import { revalidatePath } from "next/cache";
 
+// 🚀 IMPORT THE NOTIFICATION SYSTEM
+import { createNotification } from "@/actions/notification.actions";
+
 export async function addReview({ noteId, rating, comment, userId, parentReviewId = null }) {
   await connectDB();
   
@@ -45,10 +48,57 @@ export async function addReview({ noteId, rating, comment, userId, parentReviewI
 
     await note.save();
     
-    // 4. Clear the cache for this specific note page
+    // 4. 🚀 TRIGGER NOTIFICATIONS
+    const noteOwnerId = note.user.toString();
+    const actionUserId = userId.toString();
+
+    if (parentReviewId) {
+      // Find the original comment the user is replying to
+      const parentReview = note.reviews.find(r => r._id.toString() === parentReviewId.toString());
+      
+      if (parentReview) {
+        const parentCommenterId = parentReview.user.toString();
+
+        // A. Notify the original commenter (if they aren't replying to themselves)
+        if (parentCommenterId !== actionUserId) {
+          await createNotification({
+            recipientId: parentCommenterId,
+            actorId: userId,
+            type: 'SYSTEM',
+            message: `Someone replied to your comment on "${note.title}".`,
+            link: `/notes/${noteId}#reviews` 
+          });
+        }
+
+        // B. 🚀 NEW: Notify the Note Owner about activity on their post
+        // Only notify if the owner isn't the one replying AND the owner isn't the parent commenter (prevents duplicate notifs)
+        if (noteOwnerId !== actionUserId && noteOwnerId !== parentCommenterId) {
+          await createNotification({
+            recipientId: noteOwnerId,
+            actorId: userId,
+            type: 'SYSTEM',
+            message: `New discussion on your note "${note.title}".`,
+            link: `/notes/${noteId}#reviews`
+          });
+        }
+      }
+    } else {
+      // It's a BRAND NEW review -> Notify the note owner
+      if (noteOwnerId !== actionUserId) {
+        await createNotification({
+          recipientId: noteOwnerId,
+          actorId: userId,
+          type: 'SYSTEM',
+          message: `Someone just left a ${rating}-star review on your note "${note.title}".`,
+          link: `/notes/${noteId}#reviews`
+        });
+      }
+    }
+
+    // 5. Clear the cache for this specific note page
     revalidatePath(`/notes/${noteId}`);
 
-    // 5. Fetch and serialize the new reviews so the frontend can update instantly without a refresh
+    // 6. Fetch and serialize the new reviews so the frontend can update instantly without a refresh
     const updatedNote = await Note.findById(noteId).populate("reviews.user", "name avatar").lean();
     
     const safeReviews = updatedNote.reviews.map(r => ({

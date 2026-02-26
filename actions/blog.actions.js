@@ -12,6 +12,7 @@ import { pingIndexNow } from "@/lib/indexnow"; // 🚀 ADDED: IndexNow Integrati
 import { cache } from "react"; 
 import { awardHivePoints } from "@/actions/leaderboard.actions";
 import { trackCreatorEvent } from "@/actions/analytics.actions";
+import { createNotification } from "@/actions/notification.actions";
 const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in"; // 🚀 ADDED: Base URL for IndexNow
 
 /**
@@ -306,6 +307,17 @@ export async function addBlogReview(blogId, userId, rating, comment, parentRevie
     const blog = await Blog.findById(blogId);
     if (!blog) return { success: false, error: "Blog not found" };
 
+    // 1. Prevent duplicate reviews (ONLY check for main reviews, allow multiple replies)
+    if (!parentReviewId) {
+        const alreadyReviewed = blog.reviews.find(
+          (r) => r.user.toString() === userId.toString() && !r.parentReviewId
+        );
+
+        if (alreadyReviewed) {
+          return { success: false, error: "You have already reviewed this article." };
+        }
+    }
+
     const newReview = {
       user: userId,
       rating: parentReviewId ? 0 : Number(rating),
@@ -322,6 +334,54 @@ export async function addBlogReview(blogId, userId, rating, comment, parentRevie
     blog.numReviews = topLevelReviews.length;
 
     await blog.save();
+
+    // ==========================================
+    // 🚀 TRIGGER NOTIFICATIONS
+    // ==========================================
+    const blogOwnerId = blog.author.toString(); // Blogs use 'author', not 'user'
+    const actionUserId = userId.toString();
+
+    if (parentReviewId) {
+      // Find the original comment the user is replying to
+      const parentReview = blog.reviews.find(r => r._id.toString() === parentReviewId.toString());
+      
+      if (parentReview) {
+        const parentCommenterId = parentReview.user.toString();
+
+        // A. Notify the original commenter (if they aren't replying to themselves)
+        if (parentCommenterId !== actionUserId) {
+          await createNotification({
+            recipientId: parentCommenterId,
+            actorId: userId,
+            type: 'SYSTEM',
+            message: `Someone replied to your comment on "${blog.title}".`,
+            link: `/blogs/${blog.slug}#reviews` // Blogs use 'slug' for URLs
+          });
+        }
+
+        // B. Notify the Blog Author about activity on their post
+        if (blogOwnerId !== actionUserId && blogOwnerId !== parentCommenterId) {
+          await createNotification({
+            recipientId: blogOwnerId,
+            actorId: userId,
+            type: 'SYSTEM',
+            message: `New discussion on your article "${blog.title}".`,
+            link: `/blogs/${blog.slug}#reviews`
+          });
+        }
+      }
+    } else {
+      // It's a BRAND NEW review -> Notify the blog author
+      if (blogOwnerId !== actionUserId) {
+        await createNotification({
+          recipientId: blogOwnerId,
+          actorId: userId,
+          type: 'SYSTEM',
+          message: `Someone just left a ${rating}-star review on your article "${blog.title}".`,
+          link: `/blogs/${blog.slug}#reviews`
+        });
+      }
+    }
 
     const updatedBlog = await Blog.findById(blogId).populate("reviews.user", "name avatar").lean();
     

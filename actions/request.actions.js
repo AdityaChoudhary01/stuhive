@@ -4,7 +4,7 @@ import connectDB from "@/lib/db";
 import Request from "@/lib/models/Request";
 import Note from "@/lib/models/Note";
 import { revalidatePath } from "next/cache";
-
+import { createNotification } from "@/actions/notification.actions";
 /**
  * 1. CREATE A REQUEST
  */
@@ -58,7 +58,7 @@ export async function getRequests({ page = 1, limit = 12, filter = "all" } = {})
 
 /**
  * 3. FULFILL A REQUEST
- * Links an existing Note ID to the Request
+ * Links an existing Note ID to the Request and notifies the requester
  */
 export async function fulfillRequest(requestId, noteUrlOrId, userId) {
   await connectDB();
@@ -85,9 +85,22 @@ export async function fulfillRequest(requestId, noteUrlOrId, userId) {
       { new: true }
     );
 
+    // 3. 🚀 TRIGGER NOTIFICATION TO THE ORIGINAL REQUESTER
+    // (Check to ensure we don't notify a user if they somehow fulfill their own request)
+    if (request && request.requester.toString() !== userId.toString()) {
+      await createNotification({
+        recipientId: request.requester,
+        actorId: userId,
+        type: 'REQUEST_FULFILLED',
+        message: `Good news! Your community request "${request.title}" has been fulfilled!`,
+        link: `/notes/${note._id}` // Clicking the notification takes them straight to the note
+      });
+    }
+
     revalidatePath("/requests");
     return { success: true };
   } catch (error) {
+    console.error("Fulfill Request Error:", error);
     return { success: false, error: "Invalid Note ID or URL" };
   }
 }

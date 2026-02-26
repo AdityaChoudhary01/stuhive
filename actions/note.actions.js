@@ -13,6 +13,7 @@ import { indexNewContent, removeContentFromIndex } from "@/lib/googleIndexing";
 import { pingIndexNow } from "@/lib/indexnow"; // 🚀 ADDED: IndexNow Integration
 import { awardHivePoints } from "@/actions/leaderboard.actions";
 import { trackCreatorEvent } from "@/actions/analytics.actions";
+import { createNotification } from "@/actions/notification.actions";
 const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in"; // 🚀 ADDED: Base URL for IndexNow
 
 /**
@@ -404,9 +405,20 @@ export async function addReview(noteId, userId, rating, comment, parentReviewId 
     const note = await Note.findById(noteId);
     if (!note) return { success: false, error: "Note not found" };
 
+    // 1. Prevent duplicate reviews (ONLY check for main reviews, allow multiple replies)
+    if (!parentReviewId) {
+        const alreadyReviewed = note.reviews.find(
+          (r) => r.user.toString() === userId.toString() && !r.parentReviewId
+        );
+
+        if (alreadyReviewed) {
+          return { success: false, error: "You have already reviewed this note." };
+        }
+    }
+
     const review = {
       user: userId,
-      rating: parentReviewId ? 0 : rating,
+      rating: parentReviewId ? 0 : Number(rating),
       comment,
       parentReviewId, 
     };
@@ -417,10 +429,60 @@ export async function addReview(noteId, userId, rating, comment, parentReviewId 
     const ratedReviews = note.reviews.filter(r => r.rating > 0);
     if (ratedReviews.length > 0) {
       note.rating = ratedReviews.reduce((acc, item) => item.rating + acc, 0) / ratedReviews.length;
+    } else {
+      note.rating = 0;
     }
     note.numReviews = note.reviews.filter(r => !r.parentReviewId).length;
     
     await note.save();
+
+    // ==========================================
+    // 🚀 TRIGGER NOTIFICATIONS
+    // ==========================================
+    const noteOwnerId = note.user.toString();
+    const actionUserId = userId.toString();
+
+    if (parentReviewId) {
+      // Find the original comment the user is replying to
+      const parentReview = note.reviews.find(r => r._id.toString() === parentReviewId.toString());
+      
+      if (parentReview) {
+        const parentCommenterId = parentReview.user.toString();
+
+        // A. Notify the original commenter (if they aren't replying to themselves)
+        if (parentCommenterId !== actionUserId) {
+          await createNotification({
+            recipientId: parentCommenterId,
+            actorId: userId,
+            type: 'SYSTEM',
+            message: `Someone replied to your comment on "${note.title}".`,
+            link: `/notes/${noteId}#reviews` 
+          });
+        }
+
+        // B. Notify the Note Owner about activity on their post
+        if (noteOwnerId !== actionUserId && noteOwnerId !== parentCommenterId) {
+          await createNotification({
+            recipientId: noteOwnerId,
+            actorId: userId,
+            type: 'SYSTEM',
+            message: `New discussion on your note "${note.title}".`,
+            link: `/notes/${noteId}#reviews`
+          });
+        }
+      }
+    } else {
+      // It's a BRAND NEW review -> Notify the note owner
+      if (noteOwnerId !== actionUserId) {
+        await createNotification({
+          recipientId: noteOwnerId,
+          actorId: userId,
+          type: 'SYSTEM',
+          message: `Someone just left a ${rating}-star review on your note "${note.title}".`,
+          link: `/notes/${noteId}#reviews`
+        });
+      }
+    }
 
     // TRIGGER REVALIDATION
     revalidatePath(`/notes/${noteId}`);
@@ -440,7 +502,6 @@ export async function addReview(noteId, userId, rating, comment, parentReviewId 
     return { success: false, error: error.message };
   }
 }
-
 /**
  * GET USER NOTES
  */

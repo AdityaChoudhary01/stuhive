@@ -10,7 +10,7 @@ import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { deleteFileFromR2 } from "@/lib/r2"; // ✅ Imported R2 Helper
-
+import { createNotification } from "@/actions/notification.actions";
 // Helper to check admin status
 async function isAdmin() {
   const session = await getServerSession(authOptions);
@@ -282,7 +282,23 @@ export async function toggleNoteFeatured(noteId, currentState) {
   await connectDB();
   if (!(await isAdmin())) return { error: "Unauthorized" };
   
-  await Note.findByIdAndUpdate(noteId, { isFeatured: !currentState });
+  const newState = !currentState;
+  const updatedNote = await Note.findByIdAndUpdate(
+    noteId, 
+    { isFeatured: newState }, 
+    { new: true }
+  );
+
+  // 🚀 TRIGGER NOTIFICATION IF THE NOTE WAS JUST FEATURED
+  if (newState && updatedNote?.user) {
+    await createNotification({
+      recipientId: updatedNote.user,
+      type: 'FEATURED',
+      message: `Congratulations! Your note "${updatedNote.title}" was featured by an Admin.`,
+      link: `/notes/${updatedNote._id}`
+    });
+  }
+
   revalidatePath("/admin");
   revalidatePath("/"); 
   return { success: true };
@@ -366,7 +382,23 @@ export async function toggleBlogFeatured(blogId, currentState) {
   await connectDB();
   if (!(await isAdmin())) return { error: "Unauthorized" };
   
-  await Blog.findByIdAndUpdate(blogId, { isFeatured: !currentState });
+  const newState = !currentState;
+  const updatedBlog = await Blog.findByIdAndUpdate(
+    blogId, 
+    { isFeatured: newState }, 
+    { new: true }
+  );
+
+  // 🚀 TRIGGER NOTIFICATION IF THE BLOG WAS JUST FEATURED
+  if (newState && updatedBlog?.author) {
+    await createNotification({
+      recipientId: updatedBlog.author,
+      type: 'FEATURED',
+      message: `Congratulations! Your article "${updatedBlog.title}" was featured by an Admin.`,
+      link: `/blogs/${updatedBlog.slug}` // Blogs route using their slug
+    });
+  }
+
   revalidatePath("/admin");
   revalidatePath("/blogs");
   return { success: true };
