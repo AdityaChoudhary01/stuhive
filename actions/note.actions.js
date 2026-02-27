@@ -5,6 +5,7 @@ import connectDB from "@/lib/db";
 import Note from "@/lib/models/Note";
 import User from "@/lib/models/User";
 import Collection from "@/lib/models/Collection";
+import mongoose from "mongoose"; // 🚀 Added for ID validation
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { deleteFileFromR2 } from "@/lib/r2"; 
@@ -14,6 +15,7 @@ import { pingIndexNow } from "@/lib/indexnow";
 import { awardHivePoints } from "@/actions/leaderboard.actions";
 import { trackCreatorEvent } from "@/actions/analytics.actions";
 import { createNotification } from "@/actions/notification.actions";
+
 const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in"; 
 
 /**
@@ -95,12 +97,21 @@ export async function getNotes({ page = 1, limit = 12, search, university, cours
 }
 
 /**
- * 🚀 GET SINGLE NOTE BY SLUG (New SEO Function)
+ * 🚀 GET SINGLE NOTE BY SLUG OR ID (Bulletproof Fallback)
+ * This handles old indexed links using IDs and redirects them to slugs.
  */
-export async function getNoteBySlug(slug) {
+export async function getNoteBySlug(identifier) {
   await connectDB();
   try {
-    const note = await Note.findOne({ slug })
+    let query = { slug: identifier };
+
+    // 🚀 FALLBACK: If the identifier is a valid MongoDB ID, allow searching by _id too
+    // This prevents 404s for pages already indexed by Google using the old ID format.
+    if (mongoose.Types.ObjectId.isValid(identifier)) {
+      query = { $or: [{ slug: identifier }, { _id: identifier }] };
+    }
+
+    const note = await Note.findOne(query)
       .populate('user', 'name avatar role email')
       .populate({
         path: 'reviews.user',
@@ -126,13 +137,13 @@ export async function getNoteBySlug(slug) {
       updatedAt: note.updatedAt ? note.updatedAt.toISOString() : new Date().toISOString(),
     };
   } catch (error) {
-    console.error(`Error fetching note by slug ${slug}:`, error);
+    console.error(`Error fetching note by slug/id ${identifier}:`, error);
     return null;
   }
 }
 
 /**
- * GET SINGLE NOTE BY ID (Legacy / Internal Fallback)
+ * GET SINGLE NOTE BY ID (Internal Fallback)
  */
 export async function getNoteById(id) {
   await connectDB();
@@ -202,7 +213,7 @@ export async function getRelatedNotes(noteId) {
       _id: { $ne: noteId }, 
       $or: orConditions
     })
-    .select('title slug university course subject year rating numReviews downloadCount uploadDate fileType fileName isFeatured fileKey thumbnailKey') // 🚀 Added slug selection
+    .select('title slug university course subject year rating numReviews downloadCount uploadDate fileType fileName isFeatured fileKey thumbnailKey') 
     .populate('user', 'name avatar role')
     .limit(4)
     .sort({ rating: -1, downloadCount: -1 })
@@ -225,7 +236,6 @@ export async function getRelatedNotes(noteId) {
  */
 export async function createNote({ title, description, university, course, subject, year, fileData, userId }) {
   await connectDB();
-  console.log("🚀 Server Action Triggered: createNote was just called!"); 
   try {
     const newNote = new Note({
       title,
@@ -247,22 +257,15 @@ export async function createNote({ title, description, university, course, subje
     await User.findByIdAndUpdate(userId, { $inc: { noteCount: 1 } });
     await awardHivePoints(userId, 10);
 
-    const seoStatus = await indexNewContent(newNote.slug || newNote._id.toString(), 'note');
+    const seoStatus = await indexNewContent(newNote.slug, 'note');
     
-    // 🚀 Ping IndexNow with the new SLUG instead of the ID
-    const urlToPing = newNote.slug ? `${APP_URL}/notes/${newNote.slug}` : `${APP_URL}/notes/${newNote._id.toString()}`;
+    // 🚀 IndexNow Ping
+    const urlToPing = `${APP_URL}/notes/${newNote.slug}`;
     await pingIndexNow([urlToPing]);
-
-    console.warn("\n=============================================");
-    console.warn(`🚀 SEO STATUS: Google Indexing Ping was ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
-    console.warn(`🏆 GAMIFICATION: Awarded 10 Hive Points to User ID ${userId}`);
-    console.warn(`📝 NOTE URL: ${urlToPing}`);
-    console.warn("=============================================\n");
     
     revalidatePath('/'); 
     revalidatePath('/search');
     
-    // 🚀 Return the slug so the client can redirect to the SEO friendly URL
     return { success: true, noteSlug: newNote.slug, noteId: newNote._id.toString() };
   } catch (error) {
     console.error("Create Note Error:", error);
@@ -286,7 +289,6 @@ export async function updateNote(noteId, data, userId) {
       return { success: false, error: "Unauthorized" };
     }
 
-    // 🚀 If title changes, the slug will regenerate (handled in pre-save hook)
     note.title = data.title || note.title;
     note.description = data.description || note.description;
     note.university = data.university || note.university;
@@ -294,20 +296,30 @@ export async function updateNote(noteId, data, userId) {
     note.subject = data.subject || note.subject;
     note.year = data.year || note.year;
 
+    // Optional file data update
+    if (data.fileData) {
+      // Delete old files from R2 first
+      if (note.fileKey) await deleteFileFromR2(note.fileKey);
+      if (note.thumbnailKey) await deleteFileFromR2(note.thumbnailKey);
+
+      note.fileName = data.fileData.fileName;
+      note.fileKey = data.fileData.fileKey;
+      note.thumbnailKey = data.fileData.thumbnailKey;
+      note.fileType = data.fileData.fileType;
+      note.fileSize = data.fileData.fileSize;
+    }
+
     await note.save();
 
-    const urlToPing = note.slug ? `${APP_URL}/notes/${note.slug}` : `${APP_URL}/notes/${noteId}`;
-    const seoStatus = await indexNewContent(note.slug || noteId, 'note');
-    console.log(`[ACTION LOG] Note updated. Google Indexing ping: ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
-
-    // 🔥 INSTANT INDEXNOW PING
+    const urlToPing = `${APP_URL}/notes/${note.slug}`;
+    await indexNewContent(note.slug, 'note');
     await pingIndexNow([urlToPing]);
 
-    revalidatePath(`/notes/${note.slug || noteId}`);
+    revalidatePath(`/notes/${note.slug}`);
     revalidatePath('/profile');
     revalidatePath('/search');
     
-    return { success: true, note: JSON.parse(JSON.stringify(note.toObject())) };
+    return { success: true, noteSlug: note.slug };
   } catch (error) {
     return { success: false, error: error.message };
   }
@@ -330,12 +342,8 @@ export async function deleteNote(noteId, userId) {
       return { success: false, error: "Unauthorized" };
     }
 
-    if (note.fileKey) {
-        await deleteFileFromR2(note.fileKey);
-    }
-    if (note.thumbnailKey) {
-        await deleteFileFromR2(note.thumbnailKey);
-    }
+    if (note.fileKey) await deleteFileFromR2(note.fileKey);
+    if (note.thumbnailKey) await deleteFileFromR2(note.thumbnailKey);
 
     await Promise.all([
       Note.findByIdAndDelete(noteId),
@@ -344,12 +352,7 @@ export async function deleteNote(noteId, userId) {
       Collection.updateMany({ notes: noteId }, { $pull: { notes: noteId } })
     ]);
 
-    const urlToRemove = note.slug ? `${APP_URL}/notes/${note.slug}` : `${APP_URL}/notes/${noteId}`;
-    const seoStatus = await removeContentFromIndex(note.slug || noteId, 'note');
-    console.log(`[ACTION LOG] Note deleted. Google Removal ping: ${seoStatus ? 'DELIVERED' : 'FAILED'}`);
-
-    // 🔥 INSTANT INDEXNOW PING
-    await pingIndexNow([urlToRemove]);
+    await removeContentFromIndex(note.slug, 'note');
 
     revalidatePath('/');
     revalidatePath('/search');
@@ -449,14 +452,12 @@ export async function addReview(noteId, userId, rating, comment, parentReviewId 
 
     const noteOwnerId = note.user.toString();
     const actionUserId = userId.toString();
-    const notificationLink = `/notes/${note.slug || noteId}#reviews`; // 🚀 Using slug for notification link
+    const notificationLink = `/notes/${note.slug}#reviews`; 
 
     if (parentReviewId) {
       const parentReview = note.reviews.find(r => r._id.toString() === parentReviewId.toString());
-      
       if (parentReview) {
         const parentCommenterId = parentReview.user.toString();
-
         if (parentCommenterId !== actionUserId) {
           await createNotification({
             recipientId: parentCommenterId,
@@ -466,7 +467,6 @@ export async function addReview(noteId, userId, rating, comment, parentReviewId 
             link: notificationLink
           });
         }
-
         if (noteOwnerId !== actionUserId && noteOwnerId !== parentCommenterId) {
           await createNotification({
             recipientId: noteOwnerId,
@@ -489,10 +489,9 @@ export async function addReview(noteId, userId, rating, comment, parentReviewId 
       }
     }
 
-    revalidatePath(`/notes/${note.slug || noteId}`);
+    revalidatePath(`/notes/${note.slug}`);
 
     const updatedNote = await Note.findById(noteId).populate("reviews.user", "name avatar").lean();
-    
     const safeReviews = updatedNote.reviews.map(r => ({
        ...r,
        _id: r._id.toString(),
