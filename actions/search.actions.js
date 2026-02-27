@@ -15,15 +15,15 @@ export async function performGlobalSearch(query) {
     const safeSearch = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const searchRegex = { $regex: safeSearch, $options: 'i' };
 
-    // Run all 3 queries at the same time
+    // Run all 3 queries at the same time for performance
     const [notes, blogs, users] = await Promise.all([
       
       // 1. Search Notes
       Note.find({
         $or: [{ title: searchRegex }, { subject: searchRegex }, { course: searchRegex }]
       })
-      // 🚀 THE FIX: Added uploadDate, numReviews, viewCount, and downloadCount
-      .select('title subject course fileType thumbnailKey fileKey rating numReviews uploadDate viewCount downloadCount')
+      // 🚀 FIXED: Added 'slug' to the select list so links use SEO URLs
+      .select('title slug subject course fileType thumbnailKey fileKey rating numReviews uploadDate viewCount downloadCount')
       .populate('user', 'name avatar role')
       .limit(6)
       .lean(),
@@ -32,7 +32,6 @@ export async function performGlobalSearch(query) {
       Blog.find({
         $or: [{ title: searchRegex }, { summary: searchRegex }, { tags: searchRegex }]
       })
-      // 🚀 THE FIX: Added createdAt, numReviews, viewCount, and readTime
       .select('title slug summary coverImage tags rating numReviews createdAt viewCount readTime')
       .populate('author', 'name avatar role')
       .limit(6)
@@ -40,20 +39,19 @@ export async function performGlobalSearch(query) {
 
       // 3. Search Users
       User.find({
-        $or: [{ name: searchRegex }, { role: searchRegex }] // ✅ PRIVACY: Removed email search
+        $or: [{ name: searchRegex }, { role: searchRegex }] 
       })
       .select('name avatar role noteCount blogCount')
       .limit(6)
       .lean()
     ]);
 
-    // Serialize data so Next.js doesn't throw Client Component errors
+    // Serialize data to prevent Next.js "Plain Object" errors in Client Components
     return {
       notes: notes.map(n => ({
         ...n, 
         _id: n._id.toString(),
         user: n.user ? { ...n.user, _id: n.user._id.toString() } : null,
-        // 🚀 THE FIX: Safely serialize the Date object to an ISO string
         uploadDate: n.uploadDate ? n.uploadDate.toISOString() : new Date().toISOString()
       })),
       
@@ -62,7 +60,6 @@ export async function performGlobalSearch(query) {
         _id: b._id.toString(),
         author: b.author ? { ...b.author, _id: b.author._id.toString() } : null,
         tags: b.tags ? Array.from(b.tags) : [], 
-        // 🚀 THE FIX: Safely serialize the Date object to an ISO string
         createdAt: b.createdAt ? b.createdAt.toISOString() : new Date().toISOString()
       })),
       
