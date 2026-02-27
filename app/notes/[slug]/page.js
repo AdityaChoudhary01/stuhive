@@ -1,7 +1,7 @@
-import { getNoteBySlug, getRelatedNotes } from "@/actions/note.actions"; // 🚀 Changed to getNoteBySlug
+import { getNoteBySlug, getRelatedNotes } from "@/actions/note.actions"; 
 import { getServerSession } from "next-auth"; 
 import { authOptions } from "@/lib/auth";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation"; // 🚀 Added redirect
 import Link from "next/link";
 
 // Components
@@ -31,10 +31,10 @@ export const revalidate = 86400;
 const APP_URL = process.env.NEXTAUTH_URL || "https://www.stuhive.in";
 const R2_PUBLIC_URL = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "";
 
-// 🚀 1. ULTRA HYPER SEO METADATA ENGINE (NOW SLUG BASED)
+// 🚀 1. ULTRA HYPER SEO METADATA ENGINE
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  const note = await getNoteBySlug(resolvedParams.slug); // 🚀 Fetch by slug
+  const note = await getNoteBySlug(resolvedParams.slug); 
   if (!note) return { title: "Note Not Found | StuHive", robots: "noindex, nofollow" };
 
   const ogImage = note.thumbnailKey 
@@ -65,7 +65,7 @@ export async function generateMetadata({ params }) {
     category: "Academic Resources",
     applicationName: "StuHive",
     alternates: {
-        canonical: `${APP_URL}/notes/${note.slug || resolvedParams.slug}`, // 🚀 Uses Slug
+        canonical: `${APP_URL}/notes/${note.slug || resolvedParams.slug}`, 
     },
     robots: {
       index: true,
@@ -81,7 +81,7 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title,
       description,
-      url: `${APP_URL}/notes/${note.slug || resolvedParams.slug}`, // 🚀 Uses Slug
+      url: `${APP_URL}/notes/${note.slug || resolvedParams.slug}`, 
       siteName: "StuHive",
       type: "article",
       publishedTime: note.uploadDate || new Date().toISOString(),
@@ -101,19 +101,24 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ViewNotePage({ params }) {
-  const resolvedParams = await params;
+  const { slug } = await params;
   
   const [session, note] = await Promise.all([
     getServerSession(authOptions),
-    getNoteBySlug(resolvedParams.slug) // 🚀 Fetch by slug
+    getNoteBySlug(slug) 
   ]);
   
   if (!note) notFound();
 
+  // 🚀 301 REDIRECT FOR ALREADY INDEXED PAGES
+  // If the user visits using the old MongoDB ID, redirect them to the new SEO Slug URL
+  if (slug === note._id.toString() && note.slug) {
+    redirect(`/notes/${note.slug}`);
+  }
+
   const isOwner = session?.user?.id === (note.user?._id?.toString() || note.user?.toString());
   const canEdit = isOwner || session?.user?.role === 'admin';
 
-  // 🚀 Keep ID for internal fetching like related notes!
   const [relatedNotes, signedUrl] = await Promise.all([
     getRelatedNotes(note._id),
     generateReadUrl(note.fileKey, note.fileName)
@@ -128,7 +133,7 @@ export default async function ViewNotePage({ params }) {
     ? `${R2_PUBLIC_URL}/${note.thumbnailKey}` 
     : `${APP_URL}/og-shared-archives.png`;
 
-  // 🚀 2. HYPER-OPTIMIZED JSON-LD (COURSE & PRODUCT SCHEMA MIX)
+  // 🚀 HYPER-OPTIMIZED JSON-LD
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -137,7 +142,7 @@ export default async function ViewNotePage({ params }) {
       { "@type": "ListItem", "position": 2, "name": "Global Search", "item": `${APP_URL}/global-search` },
       { "@type": "ListItem", "position": 3, "name": note.university, "item": `${APP_URL}/global-search?q=${encodeURIComponent(note.university)}` },
       { "@type": "ListItem", "position": 4, "name": note.course, "item": `${APP_URL}/global-search?q=${encodeURIComponent(note.course)}` },
-      { "@type": "ListItem", "position": 5, "name": note.title, "item": `${APP_URL}/notes/${note.slug}` } // 🚀 Uses Slug
+      { "@type": "ListItem", "position": 5, "name": note.title, "item": `${APP_URL}/notes/${note.slug}` } 
     ]
   };
 
@@ -183,7 +188,7 @@ export default async function ViewNotePage({ params }) {
 
   const serializedNote = {
     ...note,
-    _id: note._id.toString(), // 🚀 Internal components still use this!
+    _id: note._id.toString(), 
     user: note.user ? { ...note.user, _id: note.user._id?.toString() || note.user.toString() } : null,
     reviews: note.reviews ? note.reviews.map(rev => ({
       ...rev,
@@ -196,14 +201,11 @@ export default async function ViewNotePage({ params }) {
 
   return (
     <main className="w-full px-3 md:px-8 mx-auto py-8 md:py-12 pt-24 md:pt-32 max-w-7xl relative" itemScope itemType="https://schema.org/CreativeWork">
-      {/* INJECT STRUCTURED DATA */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(resourceSchema) }} />
       
-      {/* 🚀 INTERNAL LOGIC STILL USES MongoDB ID */}
       <ViewCounter noteId={serializedNote._id} />
 
-      {/* Hidden SEO Content for Bots */}
       <div className="sr-only">
         <h2>{note.subject} handwritten notes for {note.university}</h2>
         <p>This resource covers {note.course} syllabus including topics like {note.description?.substring(0, 150)}</p>
@@ -304,7 +306,6 @@ export default async function ViewNotePage({ params }) {
             </p>
           </section>
 
-          {/* 🚀 SEO GAME CHANGER: TEXT TRANSCRIPT ACCORDION */}
           <section className="bg-secondary/10 border border-white/5 p-5 md:p-6 rounded-[1.5rem] group">
             <details className="cursor-pointer">
               <summary className="flex items-center justify-between text-sm font-bold uppercase tracking-widest text-muted-foreground list-none group-hover:text-cyan-400 transition-colors">
@@ -314,7 +315,6 @@ export default async function ViewNotePage({ params }) {
                  <ChevronDown className="w-4 h-4" />
               </summary>
               <div className="mt-6 pt-4 border-t border-white/5 text-xs md:text-sm text-gray-500 leading-loose text-justify italic">
-                 {/* 🚀 FIXED: Double quotes escaped for ESLint safety */}
                  The following is a digital representation of &quot;{note.title}&quot; study material for {note.subject}. 
                  This comprehensive resource includes key lecture summaries, exam-oriented diagrams, and technical definitions specifically curated for {note.university} students. 
                  By downloading this PDF, you will gain access to complete syllabus coverage for {note.course}, including semester-specific insights and academic research summaries. 
